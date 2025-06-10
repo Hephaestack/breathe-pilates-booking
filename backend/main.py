@@ -1,0 +1,94 @@
+from fastapi import Depends, FastAPI, HTTPException, status
+from sqlalchemy.orm import Session, joinedload
+from fastapi.middleware.cors import CORSMiddleware
+from uuid import UUID
+from typing import List
+
+from db.database import SessionLocal, engine, Base
+from db.models import user, booking, class_
+from db.schemas import UserOut, ClassOut, BookingCreate, BookingOut, UserSummary
+
+# Δημιουργία πινάκων αν δεν υπάρχουν
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI()
+
+# Αν επιτρέπεις frontend app π.χ. σε localhost:3000
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # άλλαξε αν χρειαστεί
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Dependency για βάση
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+@app.get("/users", response_model=List[UserSummary])
+def get_users(db: Session = Depends(get_db)):
+    return db.query(user.User).all()
+
+
+@app.get("/users/{user_id}", response_model=UserOut)
+def get_user(user_id: UUID, db: Session = Depends(get_db)):
+    user_obj = (
+        db.query(user.User)
+        .options(joinedload(user.User.bookings).joinedload(booking.Booking.class_))
+        .filter(user.User.id == user_id)
+        .first()
+    )
+
+    if not user_obj:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return user_obj
+
+
+@app.get("/classes", response_model=List[ClassOut])
+def get_class(db: Session = Depends(get_db)):
+    classes = (
+        db.query(class_.Class)
+        .options(joinedload(class_.Class.bookings).joinedload(booking.Booking.user))
+        .all()
+    )
+
+    for c in classes:
+        c.users = [b.user for b in c.bookings if b.user]
+        c.classes = len(c.users)
+
+    return classes
+
+
+@app.post("/bookings", response_model=BookingOut, status_code=status.HTTP_201_CREATED)
+def create_booking(booking_data: BookingCreate, db: Session = Depends(get_db)):
+    # checking for existing booking of user in same class
+    existing = (
+        db.query(booking.Booking)
+        .filter(
+            booking.Booking.user_id == booking_data.user_id,
+            booking.Booking.class_id == booking_data.class_id
+        )
+        .first()
+    )
+    if existing:
+        raise HTTPException(status_code=400, detail="Booking already exists")
+
+    # creates new booking
+    new_booking = booking.Booking(**booking_data.model_dump())
+    db.add(new_booking)
+    db.commit()
+    db.refresh(new_booking)
+
+    # joined class_
+    db.refresh(new_booking)
+    db.expunge(new_booking)
+    new_booking.class_ = db.query(class_.Class).get(new_booking.class_id)
+
+    return new_booking
