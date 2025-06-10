@@ -1,0 +1,32 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Environments
+.venv/
+venv/
+.env
+
+# Database
+*.db
+*.sqlite3
+app.db
+
+# IDE files
+.vscode/
+.idea/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Logs & test
+*.log
+*.coverage
+htmlcov/
+pytest_cache/
+
+# Alembic migrations (αν χρησιμοποιήσεις στο μέλλον)
+alembic/

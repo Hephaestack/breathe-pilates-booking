@@ -48,6 +48,13 @@ def get_user(user_id: UUID, db: Session = Depends(get_db)):
     if not user_obj:
         raise HTTPException(status_code=404, detail="User not found")
 
+    for b in user_obj.bookings:
+        if b.class_:
+            b.class_.current_participants = len([
+                bk for bk in b.class_.bookings
+                if bk.status == "confirmed"
+            ])
+
     return user_obj
 
 
@@ -61,7 +68,7 @@ def get_class(db: Session = Depends(get_db)):
 
     for c in classes:
         c.users = [b.user for b in c.bookings if b.user]
-        c.classes = len(c.users)
+        c.current_participants  = len(c.users)
 
     return classes
 
