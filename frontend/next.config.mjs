@@ -1,19 +1,6 @@
-
-import withPWA from 'next-pwa';
-
-const isDev = process.env.NODE_ENV === 'development';
-
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  experimental: {
-    serverActions: {},
-  },
 };
 
-export default withPWA({
-  dest: 'public',
-  register: true,
-  skipWaiting: true,
-  disable: isDev, // disable PWA caching in development
-})(nextConfig);
-
+export default nextConfig;
