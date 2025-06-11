@@ -28,7 +28,7 @@ A simple booking system backend for Pilates studio classes, built with FastAPI a
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-username/breathe-pilates-booking.git
+git clone https://github.com/zycon91/breathe-pilates-booking.git
 cd breathe-pilates-booking/backend
 ```
 
