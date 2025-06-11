@@ -3,6 +3,7 @@ from uuid import UUID
 from datetime import date
 from typing import List
 
+
 class ClassSummary(BaseModel):
     id: UUID
     class_name: str
@@ -14,14 +15,17 @@ class ClassSummary(BaseModel):
     class Config:
         orm_mode = True
 
+
 class ClassBase(BaseModel):
     class_name: str
     date: date
     time: str
     max_participants: int
 
+
 class ClassCreate(ClassBase):
     pass
+
 
 class ClassOut(ClassBase):
     id: UUID

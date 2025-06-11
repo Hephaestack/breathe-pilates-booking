@@ -5,7 +5,6 @@ from db.models.booking import Booking
 from uuid import uuid4
 from datetime import date
 
-# ➕ Δημιουργία πινάκων
 Base.metadata.create_all(bind=engine)
 
 db = SessionLocal()
@@ -14,6 +13,7 @@ user1 = User(
     id=uuid4(),
     name="Μαρία Παπαδοπούλου",
     phone="6941234567",
+    password=1,
     role=UserRole.client,
     subscription_model=SubscriptionModel.subscription_2,
     subscription_starts=date(2025, 6, 1),
@@ -25,6 +25,7 @@ user2 = User(
     id=uuid4(),
     name="Γιώργος Κωνσταντίνου",
     phone="6947654321",
+    password=2,
     role=UserRole.client,
     subscription_model=SubscriptionModel.package_10,
     subscription_starts=None,

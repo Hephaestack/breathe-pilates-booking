@@ -3,13 +3,16 @@ from uuid import UUID
 from datetime import datetime
 from typing import Optional
 
+
 class BookingBase(BaseModel):
     user_id: UUID
     class_id: UUID
     status: Optional[str] = "confirmed"
 
+
 class BookingCreate(BookingBase):
     pass
+
 
 class BookingOut(BookingBase):
     id: UUID
