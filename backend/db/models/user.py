@@ -17,6 +17,7 @@ class SubscriptionModel(str, enum.Enum):
     cadillac_package_10 = "πακέτο Cadillac 10"
     free = "ελεύθερη"
 
+
 class UserRole(str, enum.Enum):
     client = "client"
     instructor = "instructor"
@@ -27,6 +28,7 @@ class User(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     phone = Column(String, unique=True, nullable=False)
+    password = Column(Integer, nullable=False)
     name = Column(String, nullable=False)
     role = Column(Enum(UserRole), nullable=False)
     subscription_model = Column(Enum(SubscriptionModel), nullable=False)

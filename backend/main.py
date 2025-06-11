@@ -8,21 +8,18 @@ from db.database import SessionLocal, engine, Base
 from db.models import user, booking, class_
 from db.schemas import UserOut, ClassOut, BookingCreate, BookingOut, UserSummary
 
-# Δημιουργία πινάκων αν δεν υπάρχουν
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# Αν επιτρέπεις frontend app π.χ. σε localhost:3000
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # άλλαξε αν χρειαστεί
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Dependency για βάση
 def get_db():
     db = SessionLocal()
     try:
@@ -68,7 +65,7 @@ def get_class(db: Session = Depends(get_db)):
 
     for c in classes:
         c.users = [b.user for b in c.bookings if b.user]
-        c.current_participants  = len(c.users)
+        c.current_participants = len(c.users)
 
     return classes
 
