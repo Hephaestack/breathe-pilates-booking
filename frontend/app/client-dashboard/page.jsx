@@ -20,12 +20,12 @@ export default function Dashboard() {
   if (!user) return null;
 
  return (
-  <div className="min-h-screen w-full flex flex-col justify-center items-center px-4 py-8">
+  <div className="flex flex-col items-center justify-center w-full min-h-screen px-4 py-8">
     <motion.main
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
-      className="flex flex-col items-center w-full max-w-md flex-1 justify-center"
+      className="flex flex-col items-center justify-center flex-1 w-full max-w-md"
     >
       <div className="backdrop-blur-lg bg-white/80 rounded-3xl shadow-2xl px-8 py-10 w-full flex flex-col items-center border border-[#4A2C2A]/30 ">
         <h1 className="text-3xl font-extrabold text-[#4A2C2A] text-center mb-4 tracking-tight drop-shadow">
@@ -58,28 +58,24 @@ export default function Dashboard() {
   >
     My Subscriptions
   </button>
-  {user.role === 'instructor' && (
-    <button
-      className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] text-[#f5e9e0] shadow-[0_4px_32px_0_rgba(72,41,37,0.6)] hover:shadow-[0_0_16px_4px_rgba(72,41,37,0.25)] transition duration-300 ease-in-out border-none outline-none"
-      onClick={() => router.push('/class-cancellations')}
-    >
-      Class Cancellations
-    </button>
-  )}
+  <button
+    className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] text-[#f5e9e0] shadow-[0_4px_32px_0_rgba(72,41,37,0.6)] hover:shadow-[0_0_16px_4px_rgba(72,41,37,0.25)] transition duration-300 ease-in-out border-none outline-none"
+    onClick={() => router.push('/class-cancellations')}
+  >
+    Class Cancellations
+  </button>
   <button
     className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] text-[#f5e9e0] shadow-[0_4px_32px_0_rgba(72,41,37,0.6)] hover:shadow-[0_0_16px_4px_rgba(72,41,37,0.25)] transition duration-300 ease-in-out border-none outline-none"
     onClick={() => router.push('/bookings')}
   >
     My Bookings
   </button>
-  {user.role === 'instructor' && (
-    <button
-      className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] text-[#f5e9e0] shadow-[0_4px_32px_0_rgba(72,41,37,0.6)] hover:shadow-[0_0_16px_4px_rgba(72,41,37,0.25)] transition duration-300 ease-in-out border-none outline-none"
-      onClick={() => router.push('/all-bookings')}
-    >
-      All Bookings & Appointments
-    </button>
-  )}
+  <button
+    className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] text-[#f5e9e0] shadow-[0_4px_32px_0_rgba(72,41,37,0.6)] hover:shadow-[0_0_16px_4px_rgba(72,41,37,0.25)] transition duration-300 ease-in-out border-none outline-none"
+    onClick={() => router.push('/all-bookings')}
+  >
+    All Bookings & Appointments
+  </button>
   <button
     className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-[#fff] text-[#333] shadow hover:bg-[#ccc] transition duration-300"
     onClick={() => {
@@ -92,7 +88,7 @@ export default function Dashboard() {
 </motion.div>
       </div>
     </motion.main>
-    <div className="text-xs text-white mt-8 mb-5 text-center font-extrabold">
+    <div className="mt-8 mb-5 text-xs font-extrabold text-center text-white">
       © {new Date().getFullYear()} Pilates Space. All rights reserved.
     </div>
   </div>
