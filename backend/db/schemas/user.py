@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from uuid import UUID
-from typing import List
+from typing import List, Optional
+from datetime import date
 from db.models.user import UserRole, SubscriptionModel
 
 
@@ -17,8 +18,11 @@ class UserBase(BaseModel):
     password: int
     name: str
     role: UserRole
-    subscription_model: SubscriptionModel
-    package_total: int
+    subscription_model: Optional[SubscriptionModel] = None
+    package_total: Optional[int] = None
+    subscription_starts: Optional[date] = None
+    subscription_expires: Optional[date] = None
+    remaining_classes: Optional[int] = None
 
 class UserCreate(UserBase):
     pass
