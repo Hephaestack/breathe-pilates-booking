@@ -1,16 +1,19 @@
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, APIRouter, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 from fastapi.middleware.cors import CORSMiddleware
 from uuid import UUID
 from typing import List
+from auth import create_access_token
 
 from db.database import SessionLocal, engine, Base
 from db.models import user, booking, class_
 from db.schemas import UserOut, UserCreate, ClassOut, BookingCreate, BookingOut, UserSummary
+from db.schemas.token import Token, LoginRequest
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+router = APIRouter()
 
 app.add_middleware(
     CORSMiddleware,
@@ -26,6 +29,16 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+@router.post("/login", response_model=Token)
+def login(data: LoginRequest, db: Session = Depends(get_db)):
+    db_user = db.query(user.User).filter(user.User.phone == data.phone).first()
+    if not db_user or db_user.password != data.password:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    token = create_access_token(data={"sub": str(db_user.id), "role": db_user.role.name})
+    return {"access_token": token, "token_type": "bearer"}
 
 
 @app.get("/users", response_model=List[UserSummary])
@@ -123,3 +136,6 @@ def create_booking(booking_data: BookingCreate, db: Session = Depends(get_db)):
     new_booking.class_ = db.query(class_.Class).get(new_booking.class_id)
 
     return new_booking
+
+
+app.include_router(router)
