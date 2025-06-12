@@ -83,7 +83,7 @@ export default function BookingsPage() {
                 </tr>
               ) : (
                 bookings.map((b) => (
-                  <tr key={b.id} className="bg-[#b3a591] even:bg-[#b3a591]">
+                  <tr key={b.id} className="bg-[#ddd4c7] even:bg-[#ddd4c7]">
                     <td className="text-[#4A2C2A] font-bold py-2 px-2 text-center rounded-l-xl">{b.date}</td>
                     <td className="text-[#4A2C2A]font-bold py-2 px-2 text-center">{b.name}</td>
                     <td className="text-[#4A2C2A] font-bold py-2 px-2 text-center">{b.from}</td>
@@ -93,7 +93,7 @@ export default function BookingsPage() {
                     )}
                     <td className="py-2 px-2 text-center rounded-r-xl ">
                       <button
-                        className="bg-[#ff1500] text-white px-4 py-1 rounded font-bold hover:bg-[#e4574f] transition text-xs "
+                        className="bg-[#ff1500] text-white px-4 py-1 rounded-xl font-bold hover:bg-[#e4574f] transition text-xs "
                         onClick={() => handleCancel(b.id)}
                       >
                         Cancel
