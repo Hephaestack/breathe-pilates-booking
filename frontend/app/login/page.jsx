@@ -26,7 +26,7 @@ export default function LoginPage() {
   };
 
   return (
-  <div className="min-h-screen w-full flex flex-col justify-center items-center bg-gradient-to-br from-[#a259ec] via-[#fbc2eb] to-[#fd6e6a] px-4 py-8">
+  <div className="min-h-screen w-full flex flex-col justify-center items-center px-4 py-8">
     <motion.main
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
@@ -40,21 +40,21 @@ export default function LoginPage() {
           initial={{ scale: 0.9, rotate: -8 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: 'spring', stiffness: 120, damping: 8 }}
-          className="w-20 h-20 rounded-full bg-[#a259ec] flex items-center justify-center text-white text-4xl font-bold shadow-lg mb-4"
+          className="w-20 h-20 rounded-full bg-[#b3b18f] flex items-center justify-center text-white text-4xl font-bold shadow-lg mb-4"
         >
           🧘‍♀️
         </motion.div>
-        <h1 className="text-3xl font-extrabold text-[#a259ec] text-center mb-2 tracking-tight drop-shadow">
+        <h1 className="text-3xl font-extrabold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-2 tracking-tight drop-shadow">
           Pilates Space
         </h1>
-        <p className="text-base text-gray-700 text-center max-w-xs leading-relaxed mb-8">
+        <p className="text-base text-[#4A2C2A] text-center max-w-xs leading-relaxed mb-8">
           Calm your mind. Strengthen your body.<br />Let’s begin your journey.
         </p>
         {/* CTA Button */}
         <motion.button
           whileTap={{ scale: 0.97 }}
           whileHover={{ scale: 1.03 }}
-          className="w-full max-w-xs py-3 px-6 text-lg font-semibold rounded-xl bg-gradient-to-r from-[#a259ec] to-[#fd6e6a] text-white shadow-xl hover:from-[#7c3aed] hover:to-[#ff8fab] transition duration-300 ease-in-out mb-2"
+          className="w-full max-w-xs py-3 px-6 text-lg font-semibold rounded-xl bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] transition duration-300 ease-in-out mb-2"
           onClick={handleLogin}
           disabled={loading}
         >
@@ -63,7 +63,7 @@ export default function LoginPage() {
       </div>
     </motion.main>
     {/* Footer */}
-    <div className="text-xs text-gray-400 mt-8 mb-5 text-center">
+    <div className="text-xs text-white mt-8 mb-5 text-center font-extrabold">
       © {new Date().getFullYear()} Pilates Space. All rights reserved.
     </div>
   </div>
