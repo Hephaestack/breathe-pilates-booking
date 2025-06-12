@@ -13,7 +13,7 @@ class ClassSummary(BaseModel):
     max_participants: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ClassBase(BaseModel):
@@ -34,7 +34,7 @@ class ClassOut(ClassBase):
     users: List['UserSummary'] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 from db.schemas.user import UserSummary
 ClassOut.model_rebuild()

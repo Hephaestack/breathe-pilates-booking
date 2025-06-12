@@ -16,6 +16,7 @@ user1 = User(
     password=1,
     role=UserRole.client,
     subscription_model=SubscriptionModel.subscription_2,
+    package_total=None,
     subscription_starts=date(2025, 6, 1),
     subscription_expires=date(2025, 6, 30),
     remaining_classes=None,
@@ -28,9 +29,10 @@ user2 = User(
     password=2,
     role=UserRole.client,
     subscription_model=SubscriptionModel.package_10,
+    package_total=10,
     subscription_starts=None,
     subscription_expires=None,
-    remaining_classes=5,
+    remaining_classes=None,
 )
 
 class1 = Class(

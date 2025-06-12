@@ -9,7 +9,7 @@ class UserSummary(BaseModel):
     name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserBase(BaseModel):
@@ -18,6 +18,10 @@ class UserBase(BaseModel):
     name: str
     role: UserRole
     subscription_model: SubscriptionModel
+    package_total: int
+
+class UserCreate(UserBase):
+    pass
 
 
 class UserOut(UserBase):
@@ -25,7 +29,7 @@ class UserOut(UserBase):
     bookings: List['BookingOut'] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 from db.schemas.booking import BookingOut
 UserOut.model_rebuild()

@@ -6,7 +6,7 @@ from typing import List
 
 from db.database import SessionLocal, engine, Base
 from db.models import user, booking, class_
-from db.schemas import UserOut, ClassOut, BookingCreate, BookingOut, UserSummary
+from db.schemas import UserOut, UserCreate, ClassOut, BookingCreate, BookingOut, UserSummary
 
 Base.metadata.create_all(bind=engine)
 
@@ -68,6 +68,33 @@ def get_class(db: Session = Depends(get_db)):
         c.current_participants = len(c.users)
 
     return classes
+
+
+@app.post("/users", response_model=UserOut)
+def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
+    existing = db.query(user.User).filter(user.User.phone == user_data.phone).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="User already exists")
+
+    user_dict = user_data.model_dump()
+    requested_password = user_dict.get("password")
+
+    if not requested_password:
+        latest = (
+            db.query(user.User)
+            .filter(user.User.password != None)
+            .order_by(user.User.password.desc())
+            .first()
+        )
+        next_password = (latest.password + 1) if latest and latest.password else 1
+        user_dict["password"] = next_password
+
+    new_user = user.User(**user_dict)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return new_user
 
 
 @app.post("/bookings", response_model=BookingOut, status_code=status.HTTP_201_CREATED)

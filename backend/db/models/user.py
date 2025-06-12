@@ -21,6 +21,7 @@ class SubscriptionModel(str, enum.Enum):
 class UserRole(str, enum.Enum):
     client = "client"
     instructor = "instructor"
+    admin = "admin"
 
 
 class User(Base):
@@ -28,10 +29,11 @@ class User(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     phone = Column(String, unique=True, nullable=False)
-    password = Column(Integer, nullable=False)
+    password = Column(Integer, unique=True, index=True, nullable=False)
     name = Column(String, nullable=False)
     role = Column(Enum(UserRole), nullable=False)
     subscription_model = Column(Enum(SubscriptionModel), nullable=False)
+    package_total = Column(Integer, nullable=True)
     subscription_starts = Column(Date, nullable=True)
     subscription_expires = Column(Date, nullable=True)
     remaining_classes = Column(Integer, nullable=True)

@@ -20,7 +20,7 @@ class BookingOut(BookingBase):
     class_: 'ClassSummary'
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 from db.schemas.class_ import ClassSummary
 BookingOut.model_rebuild()
