@@ -39,6 +39,14 @@ export default function LoginPage() {
         username: 'instructor',
         password: 'instructor123',
       },
+       {
+        id: 3,
+        name: 'Admin User',
+        email: 'jane@instructor.com',
+        role: 'Admin',
+        username: 'Admin',
+        password: 'Admin123',
+      },
     ];
 
     // Find user by username and password
@@ -49,16 +57,15 @@ export default function LoginPage() {
    setTimeout(() => {
     setLoading(false);
     if (foundUser) {
-      localStorage.setItem('user', JSON.stringify(foundUser));
-      if (foundUser.role === 'instructor') {
-        router.push('/instructor-dashboard');
-      } else {
-        router.push('/client-dashboard');
-      }
-    } else {
-      setError('The username or password you entered is incorrect. Please try again.');
-      setShowToast(true);
-    }
+  localStorage.setItem('user', JSON.stringify(foundUser));
+  if (foundUser.role === 'instructor') {
+    router.push('/instructor-dashboard');
+  } else if (foundUser.role === 'Admin') {
+    router.push('/admin-dashboard');
+  } else {
+    router.push('/client-dashboard');
+  }
+}
   }, 1000);
 };
 

@@ -41,43 +41,40 @@ export default function Dashboard() {
   className="w-full max-w-xs space-y-4"
 >
   <button
-    className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] text-[#f5e9e0] shadow-[0_8px_64px_0_rgba(72,41,37,0.6)]] hover:shadow-[0_0_16px_4px_rgba(72,41,37,0.25)] transition duration-300 ease-in-out border-none outline-none"
+    className="w-full py-3 px-6 text-lg font-semibold rounded-2xl text-white bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] hover:bg-gradient-to-br  focus:ring-yellow-300 dark:focus:ring-yellow-800 shadow-lg shadow-brown-500/50 dark:shadow-md "
     onClick={() => router.push('/programs')}
   >
     Book a Program
   </button>
-  <button
-    className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] text-[#f5e9e0] shadow-[0_4px_32px_0_rgba(72,41,37,0.6)] hover:shadow-[0_0_16px_4px_rgba(72,41,37,0.25)] transition duration-300 ease-in-out border-none outline-none"
-    onClick={() => router.push('/cancellations')}
+    <button
+    className="w-full py-3 px-6 text-lg font-semibold rounded-2xl text-white bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] hover:bg-gradient-to-br  focus:ring-yellow-300 dark:focus:ring-yellow-800 shadow-lg shadow-brown-500/50 dark:shadow-md "
+    onClick={() => router.push('/bookings')}
   >
-    Cancellations
+    My Bookings
   </button>
-  <button
-    className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] text-[#f5e9e0] shadow-[0_4px_32px_0_rgba(72,41,37,0.6)] hover:shadow-[0_0_16px_4px_rgba(72,41,37,0.25)] transition duration-300 ease-in-out border-none outline-none"
+   <button
+    className="w-full py-3 px-6 text-lg font-semibold rounded-2xl text-white bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] hover:bg-gradient-to-br  focus:ring-yellow-300 dark:focus:ring-yellow-800 shadow-lg shadow-brown-500/50 dark:shadow-md "
     onClick={() => router.push('/subscriptions')}
   >
     My Subscriptions
   </button>
   <button
-    className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] text-[#f5e9e0] shadow-[0_4px_32px_0_rgba(72,41,37,0.6)] hover:shadow-[0_0_16px_4px_rgba(72,41,37,0.25)] transition duration-300 ease-in-out border-none outline-none"
+    className="w-full py-3 px-6 text-lg font-semibold rounded-2xl text-white bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] hover:bg-gradient-to-br  focus:ring-yellow-300 dark:focus:ring-yellow-800 shadow-lg shadow-brown-500/50 dark:shadow-md  "
+    onClick={() => router.push('/cancellations')}
+  >
+    Cancellations
+  </button>
+ 
+  <button
+    className="w-full py-3 px-6 text-lg font-semibold rounded-2xl text-white bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] hover:bg-gradient-to-br  focus:ring-yellow-300 dark:focus:ring-yellow-800 shadow-lg shadow-brown-500/50 dark:shadow-md "
     onClick={() => router.push('/class-cancellations')}
   >
     Class Cancellations
   </button>
+
+
   <button
-    className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] text-[#f5e9e0] shadow-[0_4px_32px_0_rgba(72,41,37,0.6)] hover:shadow-[0_0_16px_4px_rgba(72,41,37,0.25)] transition duration-300 ease-in-out border-none outline-none"
-    onClick={() => router.push('/bookings')}
-  >
-    My Bookings
-  </button>
-  <button
-    className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] text-[#f5e9e0] shadow-[0_4px_32px_0_rgba(72,41,37,0.6)] hover:shadow-[0_0_16px_4px_rgba(72,41,37,0.25)] transition duration-300 ease-in-out border-none outline-none"
-    onClick={() => router.push('/all-bookings')}
-  >
-    All Bookings & Appointments
-  </button>
-  <button
-    className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-[#fff] text-[#333] shadow hover:bg-[#ccc] transition duration-300"
+    className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-[#ffffff] text-[#fc0000] shadow hover:bg-[#ccc] transition duration-300"
     onClick={() => {
       localStorage.removeItem('user');
       router.push('/login');
