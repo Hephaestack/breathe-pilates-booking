@@ -13,6 +13,7 @@ class UserSummary(BaseModel):
         from_attributes = True
 
 
+
 class UserBase(BaseModel):
     phone: str
     password: int
@@ -26,6 +27,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     pass
+
 
 
 class UserOut(UserBase):

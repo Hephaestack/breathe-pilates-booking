@@ -16,6 +16,7 @@ class ClassSummary(BaseModel):
         from_attributes = True
 
 
+
 class ClassBase(BaseModel):
     class_name: str
     date: date
