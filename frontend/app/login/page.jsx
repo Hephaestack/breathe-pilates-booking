@@ -92,21 +92,21 @@ export default function LoginPage() {
             initial={{ scale: 0.9, rotate: -8 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: 'spring', stiffness: 120, damping: 8 }}
-            className="w-20 h-20 rounded-full bg-[#b3b18f] flex items-center justify-center text-white text-4xl font-bold shadow-lg mb-4"
+            className="w-20 h-20 rounded-full bg-[#cfcfc2] flex items-center justify-center text-white text-4xl font-bold shadow-lg mb-4"
           >
             🧘‍♀️
           </motion.div>
           <h1 className="text-3xl font-extrabold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-2 tracking-tight drop-shadow">
-            Pilates Space
+            Breath Pilates
           </h1>
           <p className="text-base text-[#4A2C2A] text-center max-w-xs leading-relaxed mb-8">
-            Calm your mind. Strengthen your body.<br />Let’s begin your journey.
+            Calm your mind and strengthen your body.
           </p>
           {/* Username/Phone Input */}
           <input
             type="text"
             placeholder="Username or Phone"
-            className="w-full text-black max-w-xs mb-3 px-4 py-2 rounded-xl border border-[#b3b18f] focus:outline-none focus:ring-2 focus:ring-[#b3b18f] placeholder:text-[#4A2C2A] placeholder:font-semibold"
+            className="w-full text-[#4A2C2A] max-w-xs mb-3 px-4 py-2 rounded-xl border border-[#b3b18f] focus:outline-none focus:ring-2 focus:ring-[#b3b18f] placeholder:text-[#4A2C2A] placeholder:font-semibold"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             disabled={loading}

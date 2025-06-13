@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-
 function getUser() {
   if (typeof window !== 'undefined') {
     const user = localStorage.getItem('user');
@@ -11,7 +10,6 @@ function getUser() {
   }
   return null;
 }
-
 
 const cancellations = [
   {
@@ -39,7 +37,7 @@ export default function CancellationsPage() {
             Cancellations
           </h2>
           <button
-            className="text-2xl text-black hover:text-[#a259ec] transition"
+            className="text-2xl text-[#4A2C2A] hover:text-[#b3b18f] transition"
             onClick={() => router.back()}
             aria-label="Close"
           >
@@ -48,38 +46,37 @@ export default function CancellationsPage() {
         </div>
         <table className="w-full text-sm mb-4">
           <thead>
-            <tr className="text-white bg-[#000000]">
-              <th className="py-1 px-2 font-semibold">Date</th>
-              <th className="py-1 px-2 font-semibold">Class</th>
+            <tr className="text-white bg-[#b3b18f] rounded-xl">
+              <th className="py-1 px-2 font-semibold rounded-l-xl">Date</th>
+              <th className="  py-1 px-2 font-semibold">Class</th>
               <th className="py-1 px-2 font-semibold">From</th>
               <th className="py-1 px-2 font-semibold">To</th>
               {user?.role === 'instructor' && (
-                <th className="py-1 px-2 font-semibold">User</th>
+                <th className="py-1 px-2 font-semibold rounded-r-xl">User</th>
+              )}
+              {!user?.role && (
+                <th className="py-1 px-2 font-semibold rounded-r-xl"></th>
               )}
             </tr>
           </thead>
           <tbody>
             {cancellations.map((c, idx) => (
-              <tr key={idx} className="text-black bg-[#ffffff]">
-                <td className="py-1 px-2 text-center">{c.date}</td>
+              <tr key={idx} className="text-[#4A2C2A] bg-[#ffffff] rounded-xl">
+                <td className="py-1 px-2 text-center rounded-l-xl">{c.date}</td>
                 <td className="py-1 px-2 text-center">{c.name}</td>
                 <td className="py-1 px-2 text-center">{c.from}</td>
                 <td className="py-1 px-2 text-center">{c.to}</td>
                 {user?.role === 'instructor' && (
-                  <td className="py-1 px-2 text-center">{c.user}</td>
+                  <td className="py-1 px-2 text-center rounded-r-xl">{c.user}</td>
+                )}
+                {!user?.role && (
+                  <td className="py-1 px-2 text-center rounded-r-xl"></td>
                 )}
               </tr>
             ))}
           </tbody>
         </table>
-        <div className="flex justify-center">
-          <button
-            className="bg-[#000000] hover:bg-[#3f3f3f] text-white font-bold py-2 px-8 rounded-xl shadow transition"
-            onClick={() => router.back()}
-          >
-            OK
-          </button>
-        </div>
+        <div className="flex justify-center"></div>
       </div>
     </div>
   );
