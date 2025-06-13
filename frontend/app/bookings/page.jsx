@@ -92,12 +92,7 @@ export default function BookingsPage() {
                       <td className="text-black font-bold py-2 px-2 text-center">{b.user}</td>
                     )}
                     <td className="py-2 px-2 text-center rounded-r-xl ">
-                      <button
-                        className="bg-[#ff1500] text-white px-4 py-1 rounded-xl font-bold hover:bg-[#e4574f] transition text-xs "
-                        onClick={() => handleCancel(b.id)}
-                      >
-                        Cancel
-                      </button>
+         
                     </td>
                   </tr>
                 ))

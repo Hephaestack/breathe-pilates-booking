@@ -59,21 +59,6 @@ export default function Dashboard() {
     My Subscriptions
   </button>
   <button
-    className="w-full py-3 px-6 text-lg font-semibold rounded-2xl text-white bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] hover:bg-gradient-to-br  focus:ring-yellow-300 dark:focus:ring-yellow-800 shadow-lg shadow-brown-500/50 dark:shadow-md  "
-    onClick={() => router.push('/cancellations')}
-  >
-    Cancellations
-  </button>
- 
-  <button
-    className="w-full py-3 px-6 text-lg font-semibold rounded-2xl text-white bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] hover:bg-gradient-to-br  focus:ring-yellow-300 dark:focus:ring-yellow-800 shadow-lg shadow-brown-500/50 dark:shadow-md "
-    onClick={() => router.push('/class-cancellations')}
-  >
-    Class Cancellations
-  </button>
-
-
-  <button
     className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-[#ffffff] text-[#fc0000] shadow hover:bg-[#ccc] transition duration-300"
     onClick={() => {
       localStorage.removeItem('user');
