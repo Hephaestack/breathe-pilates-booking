@@ -42,7 +42,7 @@ export default function ProgramsPage() {
         <h1 className="text-2xl font-bold text-[#ffffff] mb-4 text-center">
           Available Programs
         </h1>
-        <div className="flex flex-col items-center w-full p-4 mb-6 rounded-2xl">
+        <div className="flex flex-col items-center w-full p-4 mb-6 rounded-2xl   ">
           <Calendar
             locale="el-GR"
             onChange={setSelectedDate}
@@ -64,7 +64,7 @@ export default function ProgramsPage() {
             Book a Program
           </button>
         </div>
-        <div className="flex flex-col items-center w-full p-5 bg-white shadow-lg rounded-2xl">
+        <div className="flex flex-col items-center w-full p-5 bg-white shadow-lg rounded-2xl border border-[#4A2C2A]/30 shadow-[#3a2826]">
           <h2 className="text-lg font-semibold text-[#000000] mb-3 text-center">
             {selectedDate.toLocaleDateString()}
           </h2>
