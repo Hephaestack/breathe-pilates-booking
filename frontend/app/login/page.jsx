@@ -134,7 +134,7 @@ export default function LoginPage() {
             onClick={handleLogin}
             disabled={loading}
           >
-            {loading ? 'Connecting...' : 'Sign In / Connect'}
+            {loading ? 'Connecting...' : 'Login'}
           </motion.button>
         </div>
       </motion.main>
