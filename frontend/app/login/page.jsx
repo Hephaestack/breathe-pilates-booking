@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react'; // <-- Add useState and useEffect import
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 export default function LoginPage() {
@@ -48,24 +48,25 @@ export default function LoginPage() {
         password: 'Admin123',
       },
     ];
-
     // Find user by username and password
     const foundUser = users.find(
       (u) => (u.username === username || u.email === username) && u.password === password
     );
 
-   setTimeout(() => {
+    setTimeout(() => {
     setLoading(false);
     if (foundUser) {
-  localStorage.setItem('user', JSON.stringify(foundUser));
-  if (foundUser.role === 'instructor') {
-    router.push('/instructor-dashboard');
-  } else if (foundUser.role === 'Admin') {
-    router.push('/admin-dashboard');
-  } else {
-    router.push('/client-dashboard');
-  }
-}
+      localStorage.setItem('user', JSON.stringify(foundUser));
+      if (foundUser.role === 'instructor') {
+        router.push('/instructor-dashboard');
+      } else if (foundUser.role === 'Admin') {
+        router.push('/admin-dashboard');
+      } else {
+        router.push('/client-dashboard');
+      }
+    } else {
+      setError('The username or password you entered is incorrect. Please try again.');
+    }
   }, 1000);
 };
 
@@ -112,20 +113,20 @@ export default function LoginPage() {
           />
           {/* Password Input */}
           <input
-            type="password"
-            placeholder="Password"
-            className="w-full max-w-xs mb-5 text-black px-4 py-2 rounded-xl border border-[#b3b18f] focus:outline-none focus:ring-2 focus:ring-[#b3b18f] placeholder:text-[#4A2C2A] placeholder:font-semibold"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={loading}
-          />
-          {/* Error Message */}
-          {error && (
-            <div className="w-full max-w-xs mb-4 text-center text-[#b94a48] bg-[#fbeee6] border border-[#f5c6cb] rounded-xl px-3 py-2 font-semibold text-sm">
-              {error}
-            </div>
-          )}
-          {/* CTA Button */}
+                type="password"
+                placeholder="Password"
+                className="w-full max-w-xs mb-5 text-black px-4 py-2 rounded-xl border border-[#b3b18f] focus:outline-none focus:ring-2 focus:ring-[#b3b18f] placeholder:text-[#4A2C2A] placeholder:font-semibold"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+              />
+              {/* Error Message below inputs */}
+              {error && (
+                <div className="w-full max-w-xs mb-4 text-center text-[#b94a48] bg-[#fbeee6] border border-[#f5c6cb] rounded-xl px-3 py-2 font-semibold text-sm">
+                  {error}
+                </div>
+              )}
+       {/* CTA Button */}
           <motion.button
             whileTap={{ scale: 0.97 }}
             whileHover={{ scale: 1.03 }}
