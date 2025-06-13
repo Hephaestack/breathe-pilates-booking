@@ -54,7 +54,12 @@ export default function InstructorDashboard() {
             >
               Appointments
             </button>
-
+            <button
+              className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] text-[#f5e9e0] shadow-[0_4px_32px_0_rgba(72,41,37,0.6)] hover:shadow-[0_0_16px_4px_rgba(72,41,37,0.25)] transition duration-300 ease-in-out border-none outline-none"
+              onClick={() => router.push('/create-user-page')}
+            >
+            Create User
+            </button>
             <button
               className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-[#fff] text-[#fd0000] shadow hover:bg-[#ccc] transition duration-300"
               onClick={() => {
@@ -64,6 +69,7 @@ export default function InstructorDashboard() {
             >
               Log Out
             </button>
+            
           </motion.div>
         </div>
       </motion.main>
