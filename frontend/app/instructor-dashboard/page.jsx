@@ -1,9 +1,49 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Navigation } from 'react-calendar';
+
+// CreativeButton with #b3b18f hover color
+function CreativeButton({ children, onClick, className = '', ...props }) {
+  const btnRef = useRef(null);
+
+  const handleMouseMove = (e) => {
+    const btn = btnRef.current;
+    const rect = btn.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    btn.style.setProperty('--x', `${x}px`);
+    btn.style.setProperty('--y', `${y}px`);
+  };
+
+  return (
+    <button
+      ref={btnRef}
+      onMouseMove={handleMouseMove}
+      onClick={onClick}
+      className={`relative w-full py-3 px-6 text-lg font-semibold rounded-2xl overflow-hidden bg-[#111] text-white transition-colors duration-300 z-10 border-none outline-none group ${className}`}
+      style={{
+        '--x': '50%',
+        '--y': '50%',
+      }}
+      {...props}
+    >
+      <span
+        className="pointer-events-none absolute left-0 top-0 w-full h-full rounded-2xl opacity-0 group-hover:opacity-50 transition-opacity duration-400"
+        style={{
+          background:
+            'radial-gradient(circle at var(--x, 50%) var(--y, 50%), #b3b18f 10%, transparent 70%)',
+          transition: 'transform 0.4s ease',
+          zIndex: 0,
+        }}
+      />
+      <span className="relative z-10 transition-colors duration-300 group-hover:text-[#b3b18f]">
+        {children}
+      </span>
+    </button>
+  );
+}
 
 export default function InstructorDashboard() {
   const [user, setUser] = useState(null);
@@ -29,8 +69,8 @@ export default function InstructorDashboard() {
         className="flex flex-col items-center justify-center flex-1 w-full max-w-md"
       >
         <div className="backdrop-blur-lg bg-white/60 rounded-3xl shadow-2xl px-8 py-10 w-full flex flex-col items-center border border-[#4A2C2A]/30 ">
-          <h1 className="text-3xl font-extrabold text-[#4A2C2A] text-center mb-4 tracking-tight drop-shadow">
-            Hello, {user.name} 
+          <h1 className="text-3xl font-extrabold  bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-4 tracking-tight drop-shadow">
+            Hello, {user.name}
           </h1>
           <p className="text-base text-[#8a7f7e] text-center max-w-xs leading-relaxed mb-8">
             Welcome to your Instructor dashboard!
@@ -41,35 +81,24 @@ export default function InstructorDashboard() {
             transition={{ delay: 0.2, duration: 0.3 }}
             className="w-full max-w-xs space-y-4"
           >
-            <button
-              className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] text-[#f5e9e0] shadow-[0_4px_32px_0_rgba(72,41,37,0.6)] hover:shadow-[0_0_16px_4px_rgba(72,41,37,0.25)] transition duration-300 ease-in-out border-none outline-none"
-              onClick={() => router.push('/cancellations')}
-            >
+            <CreativeButton onClick={() => router.push('/cancellations')}>
               Class Cancellations
-            </button>
-         
-            <button
-              className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] text-[#f5e9e0] shadow-[0_4px_32px_0_rgba(72,41,37,0.6)] hover:shadow-[0_0_16px_4px_rgba(72,41,37,0.25)] transition duration-300 ease-in-out border-none outline-none"
-              onClick={() => router.push('/bookings')}
-            >
+            </CreativeButton>
+            <CreativeButton onClick={() => router.push('/bookings')}>
               Appointments
-            </button>
-            <button
-              className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] text-[#f5e9e0] shadow-[0_4px_32px_0_rgba(72,41,37,0.6)] hover:shadow-[0_0_16px_4px_rgba(72,41,37,0.25)] transition duration-300 ease-in-out border-none outline-none"
-              onClick={() => router.push('/create-user-page')}
-            >
-            Create User
-            </button>
-            <button
-              className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-[#fff] text-[#fd0000] shadow hover:bg-[#ccc] transition duration-300"
-              onClick={() => {
-                localStorage.removeItem('user');
-                router.push('/login');
-              }}
-            >
-              Log Out
-            </button>
-            
+            </CreativeButton>
+            <CreativeButton onClick={() => router.push('/create-user-page')}>
+              Create User
+            </CreativeButton>
+             <button
+          className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-[#fff] text-[#fd0000] shadow hover:bg-[#ccc] transition duration-300"
+          onClick={() => {
+            localStorage.removeItem('user');
+            router.push('/login');
+          }}
+        >
+          Log Out
+        </button>
           </motion.div>
         </div>
       </motion.main>

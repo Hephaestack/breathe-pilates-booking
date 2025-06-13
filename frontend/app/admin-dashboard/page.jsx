@@ -1,8 +1,51 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+
+// CreativeButton component with #b3b18f hover color
+function CreativeButton({ children, onClick, className = '', ...props }) {
+  const btnRef = useRef(null);
+
+  const handleMouseMove = (e) => {
+    const btn = btnRef.current;
+    const rect = btn.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    btn.style.setProperty('--x', `${x}px`);
+    btn.style.setProperty('--y', `${y}px`);
+  };
+
+  return (
+    <button
+      ref={btnRef}
+      onMouseMove={handleMouseMove}
+      onClick={onClick}
+      className={`relative w-full py-3 px-6 text-lg font-semibold rounded-2xl overflow-hidden bg-[#111] text-white transition-colors duration-300 z-10 border-none outline-none group ${className}`}
+      style={{
+        '--x': '50%',
+        '--y': '50%',
+      }}
+      {...props}
+    >
+      {/* Glow effect */}
+      <span
+        className="pointer-events-none absolute left-0 top-0 w-full h-full rounded-2xl opacity-0 group-hover:opacity-50 transition-opacity duration-400"
+        style={{
+          background:
+            'radial-gradient(circle at var(--x, 50%) var(--y, 50%), #b3b18f 10%, transparent 70%)',
+          transition: 'transform 0.4s ease',
+          zIndex: 0,
+        }}
+      />
+      {/* Button text */}
+      <span className="relative z-10 transition-colors duration-300 group-hover:text-[#b3b18f]">
+        {children}
+      </span>
+    </button>
+  );
+}
 
 export default function AdminDashboard() {
   const [user, setUser] = useState(null);
@@ -17,7 +60,6 @@ export default function AdminDashboard() {
     }
   }, [router]);
 
-  // Guard: Don't render until user is loaded
   if (!user) return null;
 
   return (
@@ -41,44 +83,24 @@ export default function AdminDashboard() {
             transition={{ delay: 0.2, duration: 0.3 }}
             className="w-full max-w-xs space-y-4"
           >
+            <CreativeButton onClick={() => router.push('/programs')}>
+               Programs
+            </CreativeButton>
+            <CreativeButton onClick={() => router.push('/bookings')}>
+              Bookings
+            </CreativeButton>
+            <CreativeButton onClick={() => router.push('/cancellations')}>
+               Cancellations
+            </CreativeButton>
+            <CreativeButton onClick={() => router.push('/subscriptions')}>
+              Subscriptions
+            </CreativeButton>
+            <CreativeButton onClick={() => router.push('/create-user-page')}>
+              Create User
+            </CreativeButton>
+            {/* Log Out button - simple style */}
             <button
-              className="w-full py-3 px-6 text-lg font-semibold rounded-2xl text-white bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] hover:bg-gradient-to-br  focus:ring-yellow-300 dark:focus:ring-yellow-800 shadow-lg shadow-brown-500/50 dark:shadow-md"
-              onClick={() => router.push('/programs')}
-            >
-              All Programs
-            </button>
-            <button
-              className="w-full py-3 px-6 text-lg font-semibold rounded-2xl text-white bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] hover:bg-gradient-to-br  focus:ring-yellow-300 dark:focus:ring-yellow-800 shadow-lg shadow-brown-500/50 dark:shadow-md"
-              onClick={() => router.push('/bookings')}
-            >
-              All Bookings
-            </button>
-            <button
-              className="w-full py-3 px-6 text-lg font-semibold rounded-2xl text-white bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] hover:bg-gradient-to-br  focus:ring-yellow-300 dark:focus:ring-yellow-800 shadow-lg shadow-brown-500/50 dark:shadow-md"
-              onClick={() => router.push('/cancellations')}
-            >
-              All Cancellations
-            </button>
-            <button
-              className="w-full py-3 px-6 text-lg font-semibold rounded-2xl text-white bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] hover:bg-gradient-to-br  focus:ring-yellow-300 dark:focus:ring-yellow-800 shadow-lg shadow-brown-500/50 dark:shadow-md"
-              onClick={() => router.push('/users')}
-            >
-              All Users
-            </button>
-            <button
-              className="w-full py-3 px-6 text-lg font-semibold rounded-2xl text-white bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] hover:bg-gradient-to-br  focus:ring-yellow-300 dark:focus:ring-yellow-800 shadow-lg shadow-brown-500/50 dark:shadow-md"
-              onClick={() => router.push('/subscriptions')}
-            >
-              All Subscriptions
-            </button>
-                  <button
-              className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-gradient-to-b from-[#221816] via-[#0f0b0a] to-[#0b0a08] text-[#f5e9e0] shadow-[0_4px_32px_0_rgba(72,41,37,0.6)] hover:shadow-[0_0_16px_4px_rgba(72,41,37,0.25)] transition duration-300 ease-in-out border-none outline-none"
-              onClick={() => router.push('/create-user-page')}
-            >
-            Create User
-            </button>
-            <button
-              className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-[#fff] text-[#fd0000] shadow hover:bg-[#ccc] transition duration-300"
+              className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-white text-[#fd0000] shadow hover:bg-[#ccc] transition duration-300"
               onClick={() => {
                 localStorage.removeItem('user');
                 router.push('/login');

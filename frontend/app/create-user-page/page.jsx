@@ -60,8 +60,8 @@ export default function CreateUserPage() {
 
   return (
     <div className="  min-h-screen flex flex-col items-center justify-center px-4 py-8 ">
-      <div className="w-full max-w-md bg-white/80 rounded-2xl shadow-2xl px-6 py-8 shadow-black">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent  tracking-tight drop-shadow  text-center">
+      <div className="w-full max-w-md bg-white/80 rounded-2xl shadow-2xl px-6 py-8 shadow-[#4A2C2A]">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#000000] bg-clip-text text-transparent  tracking-tight drop-shadow  text-center">
           Create User
         </h1>
         <form className="flex flex-col gap-4 text-[#4A2C2A]" onSubmit={handleSubmit}>
