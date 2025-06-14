@@ -90,11 +90,11 @@ body {
 /* === Special Day States === */
 .react-calendar__tile--active {
   background: #484138 !important;
-  color: #fff !important;
+  color: #ffffff !important;
 }
 .react-calendar__tile.has-program {
-  background: #423d3e !important;
-  color: #4a2c2a !important;
+  background: #b3b18f !important;
+  color: #eeff00 !important;
   font-weight: bold;
 }
 .react-calendar__tile--now {
@@ -111,4 +111,28 @@ body {
 .calendar-center {
   display: flex;
   justify-content: center;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 800; /* bold for headings */
+  font-family: inherit;
+  background: linear-gradient(to right, #b3b18f, #A5957E, #4A2C2A);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+strong, b {
+  font-weight: 700;
+}
+
+a {
+  color: #a5957e;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #b3b18f;
+  text-decoration: underline;
 }

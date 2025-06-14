@@ -3,9 +3,13 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../components/LanguageSwitcher';
+import '../../i18n/i18n';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -13,13 +17,13 @@ export default function LoginPage() {
   const [showToast, setShowToast] = useState(false);
 
   const handleLogin = () => {
-  setError('');
-  if (!username || !password) {
-    setError('Please enter both your username (or phone) and password to continue.');
-    setShowToast(true);
-    return;
-  }
-  setLoading(true);
+    setError('');
+    if (!username || !password) {
+      setError(t('login_required'));
+      setShowToast(true);
+      return;
+    }
+    setLoading(true);
 
     // Mock users
     const users = [
@@ -39,7 +43,7 @@ export default function LoginPage() {
         username: 'instructor',
         password: 'instructor123',
       },
-       {
+      {
         id: 3,
         name: 'Admin User',
         email: 'jane@instructor.com',
@@ -54,21 +58,22 @@ export default function LoginPage() {
     );
 
     setTimeout(() => {
-    setLoading(false);
-    if (foundUser) {
-      localStorage.setItem('user', JSON.stringify(foundUser));
-      if (foundUser.role === 'instructor') {
-        router.push('/instructor-dashboard');
-      } else if (foundUser.role === 'Admin') {
-        router.push('/admin-dashboard');
+      setLoading(false);
+      if (foundUser) {
+        localStorage.setItem('user', JSON.stringify(foundUser));
+        if (foundUser.role === 'instructor') {
+          router.push('/instructor-dashboard');
+        } else if (foundUser.role === 'Admin') {
+          router.push('/admin-dashboard');
+        } else {
+          router.push('/client-dashboard');
+        }
       } else {
-        router.push('/client-dashboard');
+        setError(t('login_incorrect'));
+        setShowToast(true);
       }
-    } else {
-      setError('The username or password you entered is incorrect. Please try again.');
-    }
-  }, 1000);
-};
+    }, 1000);
+  };
 
   useEffect(() => {
     if (showToast) {
@@ -100,12 +105,12 @@ export default function LoginPage() {
             Breath Pilates
           </h1>
           <p className="text-base text-[#4A2C2A] text-center max-w-xs leading-relaxed mb-8">
-            Calm your mind and strengthen your body.
+            {t('login_subtitle')}
           </p>
           {/* Username/Phone Input */}
           <input
             type="text"
-            placeholder="Username or Phone"
+            placeholder={t('login_username')}
             className="w-full text-[#4A2C2A] max-w-xs mb-3 px-4 py-2 rounded-xl border border-[#b3b18f] focus:outline-none focus:ring-2 focus:ring-[#b3b18f] placeholder:text-[#4A2C2A] placeholder:font-semibold"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -113,20 +118,20 @@ export default function LoginPage() {
           />
           {/* Password Input */}
           <input
-                type="password"
-                placeholder="Password"
-                className="w-full max-w-xs mb-5 text-black px-4 py-2 rounded-xl border border-[#b3b18f] focus:outline-none focus:ring-2 focus:ring-[#b3b18f] placeholder:text-[#4A2C2A] placeholder:font-semibold"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
-              />
-              {/* Error Message below inputs */}
-              {error && (
-                <div className="w-full max-w-xs mb-4 text-center text-[#b94a48] bg-[#fbeee6] border border-[#f5c6cb] rounded-xl px-3 py-2 font-semibold text-sm">
-                  {error}
-                </div>
-              )}
-       {/* CTA Button */}
+            type="password"
+            placeholder={t('login_password')}
+            className="w-full max-w-xs mb-5 text-black px-4 py-2 rounded-xl border border-[#b3b18f] focus:outline-none focus:ring-2 focus:ring-[#b3b18f] placeholder:text-[#4A2C2A] placeholder:font-semibold"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
+          />
+          {/* Error Message below inputs */}
+          {error && (
+            <div className="w-full max-w-xs mb-4 text-center text-[#b94a48] bg-[#fbeee6] border border-[#f5c6cb] rounded-xl px-3 py-2 font-semibold text-sm">
+              {error}
+            </div>
+          )}
+          {/* CTA Button */}
           <motion.button
             whileTap={{ scale: 0.97 }}
             whileHover={{ scale: 1.03 }}
@@ -134,13 +139,15 @@ export default function LoginPage() {
             onClick={handleLogin}
             disabled={loading}
           >
-            {loading ? 'Connecting...' : 'Login'}
+            {loading ? t('login_connecting') : t('login')}
           </motion.button>
         </div>
+        {/* Language Switcher BELOW the card */}
+        <LanguageSwitcher />
       </motion.main>
       {/* Footer */}
       <div className="mt-8 mb-5 text-xs font-extrabold text-center text-white">
-        © {new Date().getFullYear()} Pilates Space. All rights reserved.
+        {t('footer_copyright', { year: new Date().getFullYear() })}
       </div>
     </div>
   );

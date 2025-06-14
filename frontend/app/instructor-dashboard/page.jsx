@@ -1,13 +1,12 @@
 'use client';
-
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import '../../i18n/i18n';
 
-// CreativeButton with #b3b18f hover color
 function CreativeButton({ children, onClick, className = '', ...props }) {
   const btnRef = useRef(null);
-
   const handleMouseMove = (e) => {
     const btn = btnRef.current;
     const rect = btn.getBoundingClientRect();
@@ -16,7 +15,6 @@ function CreativeButton({ children, onClick, className = '', ...props }) {
     btn.style.setProperty('--x', `${x}px`);
     btn.style.setProperty('--y', `${y}px`);
   };
-
   return (
     <button
       ref={btnRef}
@@ -48,6 +46,7 @@ function CreativeButton({ children, onClick, className = '', ...props }) {
 export default function InstructorDashboard() {
   const [user, setUser] = useState(null);
   const router = useRouter();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -70,10 +69,10 @@ export default function InstructorDashboard() {
       >
         <div className="backdrop-blur-lg bg-white/60 rounded-3xl shadow-2xl px-8 py-10 w-full flex flex-col items-center border border-[#4A2C2A]/30 ">
           <h1 className="text-3xl font-extrabold  bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-4 tracking-tight drop-shadow">
-            Hello, {user.name}
+            {t('hello', { name: user.name })}
           </h1>
           <p className="text-base text-[#8a7f7e] text-center max-w-xs leading-relaxed mb-8">
-            Welcome to your Instructor dashboard!
+            {t('welcome_instructor')}
           </p>
           <motion.div
             initial={{ opacity: 0, y: 8 }}
@@ -82,28 +81,28 @@ export default function InstructorDashboard() {
             className="w-full max-w-xs space-y-4"
           >
             <CreativeButton onClick={() => router.push('/cancellations')}>
-              Class Cancellations
+              {t('class_cancellations')}
             </CreativeButton>
             <CreativeButton onClick={() => router.push('/bookings')}>
-              Appointments
+              {t('appointments')}
             </CreativeButton>
             <CreativeButton onClick={() => router.push('/create-user-page')}>
-              Create User
+              {t('create_user')}
             </CreativeButton>
-             <button
-          className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-[#fff] text-[#fd0000] shadow hover:bg-[#ccc] transition duration-300"
-          onClick={() => {
-            localStorage.removeItem('user');
-            router.push('/login');
-          }}
-        >
-          Log Out
-        </button>
+            <button
+              className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-[#fff] text-[#fd0000] shadow hover:bg-[#ccc] transition duration-300"
+              onClick={() => {
+                localStorage.removeItem('user');
+                router.push('/login');
+              }}
+            >
+              {t('log_out')}
+            </button>
           </motion.div>
         </div>
       </motion.main>
       <div className="mt-8 mb-5 text-xs font-extrabold text-center text-white">
-        © {new Date().getFullYear()} Pilates Space. All rights reserved.
+        {t('footer_copyright', { year: new Date().getFullYear() })}
       </div>
     </div>
   );

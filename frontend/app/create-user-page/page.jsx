@@ -3,7 +3,22 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import '../../i18n/i18n';
+import { useTranslation } from 'react-i18next';
 import 'react-calendar/dist/Calendar.css';
+
+// Toast library (simple, no extra install needed)
+function Toast({ message, onClose }) {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 2500);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+  return (
+    <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-[#4A2C2A] text-white px-6 py-3 rounded-xl shadow-lg z-50 font-semibold text-center">
+      {message}
+    </div>
+  );
+}
 
 const Calendar = dynamic(() => import('react-calendar'), { ssr: false });
 
@@ -15,30 +30,43 @@ const availableSubscriptions = [
 
 export default function CreateUserPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     name: '',
     phone: '',
     city: '',
     subscription: '',
   });
-
   const [dateRange, setDateRange] = useState(null);
   const [mounted, setMounted] = useState(false);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     setDateRange([new Date(), new Date()]);
     setMounted(true);
   }, []);
 
-  if (!mounted) return null; // <--- This line ensures nothing is rendered until client-side
+  if (!mounted) return null;
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Username must be numbers only
+    if (!/^\d+$/.test(form.name)) {
+      setToast(t('username_numbers_only'));
+      return;
+    }
+    // Location must be numbers and letters only (no symbols)
+    if (!/^[\w\s\d]+$/i.test(form.city)) {
+      setToast(t('location_letters_numbers_only'));
+      return;
+    }
     const [startDate, endDate] = dateRange || [];
     alert(
-      'User created:\n' +
+      t('user_created') +
+        ':\n' +
         JSON.stringify(
           {
             ...form,
@@ -59,14 +87,19 @@ export default function CreateUserPage() {
   };
 
   return (
-    <div className="  min-h-screen flex flex-col items-center justify-center px-4 py-8 ">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
+      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
       <div className="w-full max-w-md bg-white/80 rounded-2xl shadow-2xl px-6 py-8 shadow-[#4A2C2A]">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#000000] bg-clip-text text-transparent  tracking-tight drop-shadow  text-center">
-          Create User
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#000000] bg-clip-text text-transparent tracking-tight drop-shadow text-center">
+          {t('create_user')}
         </h1>
-        <form className="flex flex-col gap-4 text-[#4A2C2A]" onSubmit={handleSubmit}>
-          <label className="font-semibold ">
-            Name
+        <form
+          className="flex flex-col gap-4 text-[#4A2C2A]"
+          onSubmit={handleSubmit}
+        >
+          {/* Name */}
+          <label className="font-semibold">
+            {t('name')}
             <input
               className="block w-full mt-1 p-2 rounded border focus:outline-none"
               name="name"
@@ -75,6 +108,7 @@ export default function CreateUserPage() {
               required
             />
           </label>
+          {/* Phone */}
           <label className="font-semibold">
             Phone
             <input
@@ -85,8 +119,9 @@ export default function CreateUserPage() {
               required
             />
           </label>
+          {/* Location */}
           <label className="font-semibold">
-            Location (City)
+            {t('location')}
             <input
               className="block w-full mt-1 p-2 rounded border focus:outline-none"
               name="city"
@@ -95,8 +130,9 @@ export default function CreateUserPage() {
               required
             />
           </label>
+          {/* Subscription */}
           <label className="font-semibold">
-            Subscription
+            {t('subscription')}
             <select
               className="block w-full mt-1 p-2 rounded border focus:outline-none"
               name="subscription"
@@ -104,7 +140,7 @@ export default function CreateUserPage() {
               onChange={handleChange}
               required
             >
-              <option value="">Select subscription</option>
+              <option value="">{t('select_subscription')}</option>
               {availableSubscriptions.map((sub) => (
                 <option key={sub.id} value={sub.name}>
                   {sub.name}
@@ -112,31 +148,35 @@ export default function CreateUserPage() {
               ))}
             </select>
           </label>
-      <label className="font-semibold text-center ">
-  Start & End Date
-    </label>
-     <div className="calendar-center">
-   <Calendar
-  selectRange
-  value={dateRange}
-  onChange={setDateRange}
-  locale="en-GB"
-  tileClassName={({ date }) =>
-    date.getDay() === 0 || date.getDay() === 6 ? 'calendar-weekend' : null
-  }
-/>
-     </div>
-<div className="mt-2 text-sm text-[#4A2C2A] text-center">
-  {dateRange && dateRange[0] && dateRange[1]
-    ? `Selected: ${dateRange[0].toLocaleDateString('en-GB')} - ${dateRange[1].toLocaleDateString('en-GB')}`
-    : 'Select a start and end date'}
-</div>
-         
+          {/* Calendar */}
+          <label className="font-semibold text-center">{t('start_end_date')}</label>
+          <div className="calendar-center">
+            <Calendar
+              selectRange
+              value={dateRange}
+              onChange={setDateRange}
+              locale="en-GB"
+              tileClassName={({ date }) =>
+                date.getDay() === 0 || date.getDay() === 6
+                  ? 'calendar-weekend'
+                  : null
+              }
+            />
+          </div>
+          <div className="mt-2 text-sm text-[#4A2C2A] text-center">
+            {dateRange && dateRange[0] && dateRange[1]
+              ? t('selected_dates', {
+                  start: dateRange[0].toLocaleDateString('en-GB'),
+                  end: dateRange[1].toLocaleDateString('en-GB'),
+                })
+              : t('select_dates')}
+          </div>
+          {/* Submit */}
           <button
             type="submit"
-            className=" text-white mt-4 px-6 py-2   bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A]  duration-300 ease-in-out font-semibold rounded-xl shadow transition"
+            className="text-white mt-4 px-6 py-2 bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] duration-300 ease-in-out font-semibold rounded-xl shadow transition"
           >
-            Create
+            {t('create')}
           </button>
         </form>
         <div className="flex justify-between mt-6"></div>

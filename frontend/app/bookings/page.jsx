@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import '../../i18n/i18n';
+import { useTranslation } from 'react-i18next';
 
 // Example bookings data
 const mockBookings = [
@@ -44,6 +46,7 @@ export default function BookingsPage() {
   const [bookings, setBookings] = useState(mockBookings);
   const [user, setUser] = useState(null);
   const router = useRouter();
+  const { t } = useTranslation();
 
   useEffect(() => {
     setUser(getUser());
@@ -59,12 +62,12 @@ export default function BookingsPage() {
         <div className="flex items-center justify-between mb-2 px-2">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent mb-2 tracking-tight drop-shadow flex items-center gap-2">
             <span className="material-icons">My</span>
-            Bookings
+            {t('my_bookings')}
           </h2>
           <button
             className="text-2xl text-[#4A2C2A] hover:text-[#b3b18f] transition"
             onClick={() => router.back()}
-            aria-label="Close"
+            aria-label={t('cancel')}
           >
             ×
           </button>
@@ -73,12 +76,12 @@ export default function BookingsPage() {
           <table className="w-full text-sm border-separate border-spacing-y-1">
             <thead>
               <tr className="bg-[#b3b18f] text-[#ffffff] font-bold">
-                <th className="py-2 px-2 rounded-l-xl font-semibold">Date</th>
-                <th className="py-2 px-2 font-semibold">Name</th>
-                <th className="py-2 px-2 font-semibold">From</th>
-                <th className="py-2 px-2 font-semibold">To</th>
+                <th className="py-2 px-2 rounded-l-xl font-semibold">{t('date')}</th>
+                <th className="py-2 px-2 font-semibold">{t('name')}</th>
+                <th className="py-2 px-2 font-semibold">{t('from')}</th>
+                <th className="py-2 px-2 font-semibold">{t('to')}</th>
                 {user?.role === 'instructor' && (
-                  <th className="py-2 px-2 font-semibold">User</th>
+                  <th className="py-2 px-2 font-semibold">{t('user')}</th>
                 )}
                 <th className="py-2 px-2 rounded-r-xl"></th>
               </tr>
@@ -87,7 +90,7 @@ export default function BookingsPage() {
               {bookings.length === 0 ? (
                 <tr>
                   <td colSpan={user?.role === 'instructor' ? 6 : 5} className="text-center text-black py-8">
-                    No bookings found.
+                    {t('no_bookings_found')}
                   </td>
                 </tr>
               ) : (
