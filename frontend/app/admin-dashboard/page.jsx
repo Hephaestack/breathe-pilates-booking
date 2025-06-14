@@ -1,13 +1,12 @@
 'use client';
-
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import '../../i18n/i18n';
 
-// CreativeButton component with #b3b18f hover color
 function CreativeButton({ children, onClick, className = '', ...props }) {
   const btnRef = useRef(null);
-
   const handleMouseMove = (e) => {
     const btn = btnRef.current;
     const rect = btn.getBoundingClientRect();
@@ -16,7 +15,6 @@ function CreativeButton({ children, onClick, className = '', ...props }) {
     btn.style.setProperty('--x', `${x}px`);
     btn.style.setProperty('--y', `${y}px`);
   };
-
   return (
     <button
       ref={btnRef}
@@ -29,7 +27,6 @@ function CreativeButton({ children, onClick, className = '', ...props }) {
       }}
       {...props}
     >
-      {/* Glow effect */}
       <span
         className="pointer-events-none absolute left-0 top-0 w-full h-full rounded-2xl opacity-0 group-hover:opacity-50 transition-opacity duration-400"
         style={{
@@ -39,7 +36,6 @@ function CreativeButton({ children, onClick, className = '', ...props }) {
           zIndex: 0,
         }}
       />
-      {/* Button text */}
       <span className="relative z-10 transition-colors duration-300 group-hover:text-[#b3b18f]">
         {children}
       </span>
@@ -50,6 +46,7 @@ function CreativeButton({ children, onClick, className = '', ...props }) {
 export default function AdminDashboard() {
   const [user, setUser] = useState(null);
   const router = useRouter();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -72,10 +69,10 @@ export default function AdminDashboard() {
       >
         <div className="backdrop-blur-lg bg-white/60 rounded-3xl shadow-2xl px-8 py-10 w-full flex flex-col items-center border border-[#4A2C2A]/30 ">
           <h1 className="text-3xl font-extrabold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-2 tracking-tight drop-shadow">
-            Hello, {user.name}
+            {t('hello', { name: user.name })}
           </h1>
           <p className="text-base text-[#8a7f7e] text-center max-w-xs leading-relaxed mb-8">
-            Welcome to your Admin dashboard! You have full access to all data and management tools.
+            {t('welcome_admin')}
           </p>
           <motion.div
             initial={{ opacity: 0, y: 8 }}
@@ -84,21 +81,20 @@ export default function AdminDashboard() {
             className="w-full max-w-xs space-y-4"
           >
             <CreativeButton onClick={() => router.push('/programs')}>
-               Programs
+              {t('programs')}
             </CreativeButton>
             <CreativeButton onClick={() => router.push('/bookings')}>
-              Bookings
+              {t('bookings')}
             </CreativeButton>
             <CreativeButton onClick={() => router.push('/cancellations')}>
-               Cancellations
+              {t('cancellations')}
             </CreativeButton>
             <CreativeButton onClick={() => router.push('/subscriptions')}>
-              Subscriptions
+              {t('subscriptions')}
             </CreativeButton>
             <CreativeButton onClick={() => router.push('/create-user-page')}>
-              Create User
+              {t('create_user')}
             </CreativeButton>
-            {/* Log Out button - simple style */}
             <button
               className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-white text-[#fd0000] shadow hover:bg-[#ccc] transition duration-300"
               onClick={() => {
@@ -106,13 +102,13 @@ export default function AdminDashboard() {
                 router.push('/login');
               }}
             >
-              Log Out
+              {t('log_out')}
             </button>
           </motion.div>
         </div>
       </motion.main>
       <div className="mt-8 mb-5 text-xs font-extrabold text-center text-white">
-        © {new Date().getFullYear()} Pilates Space. All rights reserved.
+        {t('footer_copyright', { year: new Date().getFullYear() })}
       </div>
     </div>
   );

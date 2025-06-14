@@ -3,7 +3,7 @@
 import { useSearchParams, useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-// Mock data for demonstration (replace with your real data/fetch)
+// --- Mock Data (replace with your real data/fetch) ---
 const mockPrograms = {
   '2025-07-16': [
     {
@@ -52,7 +52,7 @@ export default function BookDetailPage() {
   const program =
     mockPrograms[date]?.find((p) => p.name === programName) || null;
 
-  // Booking handler: sends only program and date, user info comes from backend JWT
+  // --- Booking Handler ---
   const handleBook = async () => {
     if (!program || program.booked >= program.capacity) return;
     setLoading(true);
@@ -60,7 +60,7 @@ export default function BookDetailPage() {
       const res = await fetch('/api/book', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // sends cookies (with JWT) automatically
+        credentials: 'include',
         body: JSON.stringify({
           program: program.name,
           date: date,
@@ -79,11 +79,14 @@ export default function BookDetailPage() {
     setLoading(false);
   };
 
+  // --- Not Found State ---
   if (!program) {
     return (
-      <div className="min-h-screen flex items-center justify-center ">
-        <div className="bg-white rounded-2xl shadow-2xl px-6 py-8 max-w-md w-full text-center">
-          <h2 className="text-xl font-bold text-[#000000] mb-4">Program not found</h2>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-white/80 rounded-2xl shadow-2xl px-6 py-8 max-w-md w-full text-center">
+          <h2 className="text-xl font-bold text-[#4A2C2A] mb-4">
+            Program not found
+          </h2>
           <button
             className="mt-4 px-6 py-2 bg-[#ffffff] text-black rounded-xl font-semibold hover:bg-[#222122] transition"
             onClick={() => router.push('/programs')}
@@ -95,26 +98,28 @@ export default function BookDetailPage() {
     );
   }
 
-  // Determine border color based on availability
+  // --- Booking Details Card ---
   const isFull = program.booked >= program.capacity;
-  const borderColor = isFull ? 'border-red-300' : 'border-green-300';
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center  px-2 py-8">
-      <div className={`bg-white rounded-2xl shadow-2xl px-4 py-6 border-4 ${borderColor} w-full max-w-md shadow-[#50322f]`}>
+    <div className="min-h-screen flex flex-col items-center justify-center px-2 py-8">
+      <div className="bg-white/80 rounded-2xl shadow-2xl px-4 py-6 border border-[#4A2C2A]/30 w-full max-w-md shadow-[#4A2C2A]">
+        {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-[#000000] flex items-center gap-2 ">
+          <h2 className="text-xl font-bold text-[#4A2C2A] flex items-center gap-2">
             Booking Details
           </h2>
           <button
-            className="text-2xl text-gray-400 hover:text-[#ffffff] transition"
+            className="text-2xl text-[#50322f] hover:text-[#b3b18f] transition"
             onClick={() => router.push('/programs')}
             aria-label="Close"
           >
             ×
           </button>
         </div>
-        <div className="bg-gradient-to-r from-[#a09e7e] via-[#A5957E] to-[#50322f] rounded-xl p-4 mb-4">
+
+        {/* Program Info */}
+        <div className="bg-[#b3b18f] rounded-xl p-4 mb-4">
           <div className="grid grid-cols-2 gap-2 mb-2">
             <div className="font-semibold text-[#ffffff]">Class</div>
             <div className="font-semibold text-[#ffffff]">Location</div>
@@ -126,53 +131,57 @@ export default function BookDetailPage() {
               <span className="font-semibold text-[#fff]">
                 Participants:&nbsp;
               </span>
-              <span className={`inline-block rounded px-2 py-0.5 font-semibold ${isFull ? 'bg-red-200 text-red-800' : 'bg-green-200 text-green-800'}`}>
+              <span
+                className={`inline-block rounded px-2 py-0.5 font-semibold ${
+                  isFull
+                    ? 'bg-red-200 text-red-800'
+                    : 'bg-white text-[#50322f]'
+                }`}
+              >
                 {program.booked} / {program.capacity}
               </span>
             </div>
-            <button
-              className="ml-4 px-4 py-2 bg-[#black] text-white font-semibold rounded-xl shadow hover:bg-[#a58e8c] transition"
-              disabled={isFull || loading}
-              onClick={handleBook}
-            >
-              {loading ? 'Booking...' : 'Book a Program'}
-            </button>
           </div>
         </div>
+
+        {/* Table */}
+      
         <table className="w-full text-sm mt-2">
-          <thead>
-            <tr className="text-[#50322f] bg-[#ffffff]">
-              <th className="py-1 px-2 font-semibold">Date</th>
-              <th className="py-1 px-2 font-semibold">From</th>
-              <th className="py-1 px-2 font-semibold">To</th>
-              <th className="py-1 px-2 font-semibold">Bookings</th>
-              <th className="py-1 px-2 font-semibold">Waitlist</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="bg-[#b3b18f]">
-              <td className="py-1 px-2 text-center">{formatDate(date)}</td>
-              <td className="py-1 px-2 text-center">{program.time}</td>
-              <td className="py-1 px-2 text-center">{program.to || '--'}</td>
-              <td className="py-1 px-2 text-center">
-                <span className="inline-block bg-[#b3b18f] rounded px-2 py-0.5 text-[#ffffff] font-semibold">
-                  {program.booked} / {program.capacity}
-                </span>
-              </td>
-              <td className="py-1 px-2 text-center">
-                <span className="inline-block bg-[#b3b18f] rounded px-2 py-0.5 text-[#ffffff] font-semibold">
-                  0
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+       <thead>
+    <tr className="text-[#ffffff] bg-[#b3b18f] font-bold">
+      <th className="py-1 px-2 font-semibold rounded-tl-xl">Date</th>
+      <th className="py-1 px-2 font-semibold">From</th>
+      <th className="py-1 px-2 font-semibold">To</th>
+      <th className="py-1 px-2 font-semibold">Bookings</th>
+      <th className="py-1 px-2 font-semibold rounded-tr-xl">Waitlist</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr className="bg-[#ffffff] text-[#4A2C2A]">
+      <td className="py-1 px-2 text-center rounded-bl-xl">{formatDate(date)}</td>
+      <td className="py-1 px-2 text-center">{program.time}</td>
+      <td className="py-1 px-2 text-center">{program.to || '--'}</td>
+      <td className="py-1 px-2 text-center">
+        <span className="inline-block bg-[#b3b18f] rounded px-2 py-0.5 text-[#ffffff] font-semibold">
+          {program.booked} / {program.capacity}
+        </span>
+      </td>
+      <td className="py-1 px-2 text-center rounded-br-xl">
+        <span className="inline-block rounded px-2 py-0.5 text-[#4A2C2A] font-semibold">
+          0
+        </span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+        {/* Book Button */}
         <div className="flex flex-col items-center mt-4">
           <button
-            className="bg-[#4A2C2A] hover:bg-[#724340] text-white font-bold py-2 px-8 rounded-xl shadow transition mb-2"
-            onClick={() => router.push('/programs')}
+            className="px-4 py-2 bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] text-center tracking-tight drop-shadow text-white font-semibold rounded-xl shadow hover:brightness-110 transition"
+            disabled={isFull || loading}
+            onClick={handleBook}
           >
-            OK
+            {loading ? 'Booking...' : 'Book It'}
           </button>
         </div>
       </div>

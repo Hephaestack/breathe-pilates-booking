@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import '../../i18n/i18n';
+import { useTranslation } from 'react-i18next';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 
@@ -41,6 +43,7 @@ export default function ProgramsPage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [dateRange, setDateRange] = useState([new Date(), new Date()]);
   const router = useRouter();
+  const { t } = useTranslation();
 
   const dateKey = formatDate(selectedDate);
   const programs = mockPrograms[dateKey] || [];
@@ -49,7 +52,7 @@ export default function ProgramsPage() {
     <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
       <div className="flex flex-col items-center w-full max-w-md">
         <h1 className="text-2xl font-bold text-[#ffffff] mb-4 text-center">
-          Available Programs
+          {t('available_programs')}
         </h1>
         <div className="calendar-center">
           <Calendar
@@ -79,7 +82,7 @@ export default function ProgramsPage() {
             {formatDateDisplay(selectedDate)}
           </h2>
           {programs.length === 0 ? (
-            <p className="text-center text-[#4A2C2A] ">No programs available for this date.</p>
+            <p className="text-center text-[#4A2C2A] ">{t('no_programs')}</p>
           ) : (
             <ul className="w-full space-y-3">
               {programs.map((prog, idx) => {
@@ -93,7 +96,9 @@ export default function ProgramsPage() {
                     <div className="flex flex-col text-[#4A2C2A] ">
                       <span className="text-lg font-bold">{prog.time}</span>
                       <span className="text-base">{prog.name}</span>
-                      <span className="text-sm text-[#4A2C2A] ">Instructor: {prog.instructor}</span>
+                      <span className="text-sm text-[#4A2C2A] ">
+                        {t('instructor')}: {prog.instructor}
+                      </span>
                       <span className="text-sm font-semibold mt-1">
                         {prog.booked} / {prog.capacity}
                       </span>
@@ -111,7 +116,7 @@ export default function ProgramsPage() {
                         )
                       }
                     >
-                      Book
+                      {t('book')}
                     </button>
                   </li>
                 );
