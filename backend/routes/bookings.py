@@ -3,17 +3,26 @@ from sqlalchemy.orm import Session
 
 from db.models import booking, class_
 from db.schemas.booking import BookingCreate, BookingOut
-from utils import get_db
+from utils.auth import get_current_user, oauth2_scheme
+from utils.db import get_db
+from db.models.user import User
 
 router = APIRouter()
 
 @router.post("/bookings", response_model=BookingOut, status_code=status.HTTP_201_CREATED)
-def create_booking(booking_data: BookingCreate, db: Session = Depends(get_db)):
+def create_booking(
+    booking_data: BookingCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    token: str = Depends(oauth2_scheme) 
+):
+    user_id = current_user.id
+    
     # checking for existing booking of user in same class
     existing = (
         db.query(booking.Booking)
         .filter(
-            booking.Booking.user_id == booking_data.user_id,
+            booking.Booking.user_id == user_id,
             booking.Booking.class_id == booking_data.class_id
         )
         .first()
@@ -22,7 +31,12 @@ def create_booking(booking_data: BookingCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Booking already exists")
 
     # creates new booking
-    new_booking = booking.Booking(**booking_data.model_dump())
+    new_booking = booking.Booking(
+        user_id = user_id,
+        class_id = booking_data.class_id,
+        status = booking_data.status
+    )
+
     db.add(new_booking)
     db.commit()
     db.refresh(new_booking)

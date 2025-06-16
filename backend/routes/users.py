@@ -6,16 +6,21 @@ from sqlalchemy.orm import Session, joinedload
 from db.database import SessionLocal
 from db.models import booking, user
 from db.schemas.user import UserCreate, UserOut, UserSummary
-from utils import get_db
+from utils.db import get_db
 
 router = APIRouter()
 
 @router.get("/users", response_model=List[UserSummary])
-def get_users(db: Session = Depends(get_db)):
+def get_users(
+    db: Session = Depends(get_db)
+):
     return db.query(user.User).all()
 
 @router.get("/users/{user_id}", response_model=UserOut)
-def get_user(user_id: UUID, db: Session = Depends(get_db)):
+def get_user(
+    user_id: UUID,
+    db: Session = Depends(get_db)
+):
     user_obj = (
         db.query(user.User)
         .options(joinedload(user.User.bookings).joinedload(booking.Booking.class_))
@@ -36,7 +41,10 @@ def get_user(user_id: UUID, db: Session = Depends(get_db)):
     return user_obj
 
 @router.post("/users", response_model=UserOut)
-def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
+def create_user(
+    user_data: UserCreate,
+    db: Session = Depends(get_db)
+):
     existing = db.query(user.User).filter(user.User.phone == user_data.phone).first()
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
