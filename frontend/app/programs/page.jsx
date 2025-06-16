@@ -39,14 +39,37 @@ function formatDateDisplay(date) {
   return `${day}/${month}/${year}`;
 }
 
+function getDatesInRange(start, end) {
+  const dates = [];
+  let current = new Date(start);
+  while (current <= end) {
+    dates.push(new Date(current));
+    current.setDate(current.getDate() + 1);
+  }
+  return dates;
+}
+
 export default function ProgramsPage() {
-  const [selectedDate, setSelectedDate] = useState(new Date());
   const [dateRange, setDateRange] = useState([new Date(), new Date()]);
   const router = useRouter();
   const { t } = useTranslation();
 
-  const dateKey = formatDate(selectedDate);
-  const programs = mockPrograms[dateKey] || [];
+  // Get all dates in the selected range
+  const [start, end] = dateRange;
+  const datesInRange =
+    start && end
+      ? getDatesInRange(start, end)
+      : start
+      ? [start]
+      : [];
+
+  // Collect all programs in the range
+  const programsInRange = datesInRange
+    .map((date) => {
+      const key = formatDate(date);
+      return { date, programs: mockPrograms[key] || [] };
+    })
+    .filter((entry) => entry.programs.length > 0);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
@@ -60,12 +83,6 @@ export default function ProgramsPage() {
             value={dateRange}
             onChange={(range) => {
               setDateRange(range);
-              // If a single date is selected, update selectedDate for program display
-              if (Array.isArray(range) && range[0] instanceof Date) {
-                setSelectedDate(range[0]);
-              } else if (range instanceof Date) {
-                setSelectedDate(range);
-              }
             }}
             locale="en-GB"
             tileClassName={({ date, view }) => {
@@ -77,55 +94,71 @@ export default function ProgramsPage() {
             }}
           />
         </div>
-        <div className="flex flex-col items-center w-full p-5   border-[#4A2C2A]/30 shadow-[#3a2826]">
+        <div className="flex flex-col items-center w-full p-5 border-[#4A2C2A]/30 shadow-[#3a2826]">
           <h2 className="text-lg font-semibold text-[#4A2C2A] mb-3 text-center">
-            {formatDateDisplay(selectedDate)}
+            {start && end
+              ? `${formatDateDisplay(start)} - ${formatDateDisplay(end)}`
+              : start
+              ? formatDateDisplay(start)
+              : ''}
           </h2>
-          {programs.length === 0 ? (
+          {programsInRange.length === 0 ? (
             <p className="text-center text-[#4A2C2A] ">{t('no_programs')}</p>
           ) : (
-            <ul className="w-full space-y-3">
-              {programs.map((prog, idx) => {
-                const isFull = prog.booked >= prog.capacity;
-                const borderColor = isFull ? 'border-red-400' : 'border-green-400';
-                return (
-                  <li
-                    key={idx}
-                    className={`p-4 rounded-xl bg-[#ffffff] flex items-center justify-between shadow border-2 ${borderColor}`}
-                  >
-                    <div className="flex flex-col text-[#4A2C2A] ">
-                      <span className="text-lg font-bold">{prog.time}</span>
-                      <span className="text-base">{prog.name}</span>
-                      <span className="text-sm text-[#4A2C2A] ">
-                        {t('instructor')}: {prog.instructor}
-                      </span>
-                      <span className="text-sm font-semibold mt-1">
-                        {prog.booked} / {prog.capacity}
-                      </span>
-                    </div>
-                    <button
-                      className={`ml-4 px-4 py-2 rounded-xl font-semibold shadow transition ${
-                        isFull
-                          ? 'bg-red-500 text-white cursor-not-allowed'
-                          : 'bg-green-400 text-white hover:bg-green-500'
-                      }`}
-                      disabled={isFull}
-                      onClick={() =>
-                        router.push(
-                          `/book/${dateKey}?program=${encodeURIComponent(prog.name)}`
-                        )
-                      }
-                    >
-                      {t('book')}
-                    </button>
-                  </li>
-                );
-              })}
+            <ul className="w-full space-y-6">
+              {programsInRange.map(({ date, programs }) => (
+                <li key={formatDate(date)}>
+                  <div className="font-bold mb-2 text-[#4A2C2A]">
+                    {formatDateDisplay(date)}
+                  </div>
+                  <ul className="space-y-3">
+                    {programs.map((prog, idx) => {
+                      const isFull = prog.booked >= prog.capacity;
+                      const borderColor = isFull
+                        ? 'border-red-400'
+                        : 'border-green-400';
+                      return (
+                        <li
+                          key={idx}
+                          className={`p-4 rounded-xl bg-[#ffffff] flex items-center justify-between shadow border-2 ${borderColor}`}
+                        >
+                          <div className="flex flex-col text-[#4A2C2A] ">
+                            <span className="text-lg font-bold">{prog.time}</span>
+                            <span className="text-base">{prog.name}</span>
+                            <span className="text-sm text-[#4A2C2A] ">
+                              {t('instructor')}: {prog.instructor}
+                            </span>
+                            <span className="mt-1 text-sm font-semibold">
+                              {prog.booked} / {prog.capacity}
+                            </span>
+                          </div>
+                          <button
+                            className={`ml-4 px-4 py-2 rounded-xl font-semibold shadow transition ${
+                              isFull
+                                ? 'bg-red-500 text-white cursor-not-allowed'
+                                : 'bg-green-400 text-white hover:bg-green-500'
+                            }`}
+                            disabled={isFull}
+                            onClick={() =>
+                              router.push(
+                                `/book/${formatDate(date)}?program=${encodeURIComponent(
+                                  prog.name
+                                )}`
+                              )
+                            }
+                          >
+                            {t('book')}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </li>
+              ))}
             </ul>
           )}
         </div>
       </div>
-      {/* Add this CSS to your global stylesheet */}
       <style jsx global>{`
         .has-program {
           background: #d1fae5 !important;
