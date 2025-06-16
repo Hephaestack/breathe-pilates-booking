@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routes import auth, users, classes, bookings
-from db.database import SessionLocal, engine, Base
+from db.database import engine, Base
 
 Base.metadata.create_all(bind=engine)
 
