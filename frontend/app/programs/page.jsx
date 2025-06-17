@@ -1,5 +1,5 @@
 'use client';
-
+import { useRef } from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import '../../i18n/i18n';
@@ -50,10 +50,34 @@ function getDatesInRange(start, end) {
 }
 
 export default function ProgramsPage() {
+  const { t, i18n } = useTranslation();
+  const calendarLocale = i18n.language === 'gr' ? 'el-GR' : 'en-US';
   const [dateRange, setDateRange] = useState([new Date(), new Date()]);
+  const [selecting, setSelecting] = useState(false);
+  const lastClickRef = useRef({ date: null, time: 0 });
+  const justClearedRef = useRef(false); // <-- Add this ref
   const router = useRouter();
-  const { t } = useTranslation();
 
+  const handleDayClick = (date) => {
+    const now = Date.now();
+    if (
+      lastClickRef.current.date &&
+      lastClickRef.current.date.getTime() === date.getTime() &&
+      now - lastClickRef.current.time < 300
+    ) {
+      // Double click detected: clear selection
+      setDateRange([null, null]);
+      setSelecting(false);
+      lastClickRef.current = { date: null, time: 0 };
+      justClearedRef.current = true; // <-- Set flag
+    } else {
+      // Single click: select date
+      setDateRange([date, date]);
+      setSelecting(true);
+      lastClickRef.current = { date, time: now };
+      justClearedRef.current = false; // <-- Reset flag
+    }
+  };
   // Get all dates in the selected range
   const [start, end] = dateRange;
   const datesInRange =
@@ -71,7 +95,7 @@ export default function ProgramsPage() {
     })
     .filter((entry) => entry.programs.length > 0);
 
-  return (
+ return (
     <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
       <div className="flex flex-col items-center w-full max-w-md">
         <h1 className="text-2xl font-bold text-[#ffffff] mb-4 text-center">
@@ -79,12 +103,21 @@ export default function ProgramsPage() {
         </h1>
         <div className="calendar-center">
           <Calendar
-            selectRange
+  selectRange
+  locale={calendarLocale}
             value={dateRange}
             onChange={(range) => {
-              setDateRange(range);
+              if (justClearedRef.current) {
+                // Prevent range selection after double-click clear
+                justClearedRef.current = false;
+                return;
+              }
+              if (Array.isArray(range) && range[1]) {
+                setDateRange(range);
+                setSelecting(false);
+              }
             }}
-            locale="en-GB"
+            onClickDay={handleDayClick}
             tileClassName={({ date, view }) => {
               const key = formatDate(date);
               if (view === 'month' && mockPrograms[key]) {
@@ -92,16 +125,29 @@ export default function ProgramsPage() {
               }
               return '';
             }}
-          />
+  tileContent={({ date, view }) =>
+    view === 'month' ? (
+      <div
+        style={{ width: '100%', height: '100%' }}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          handleDoubleClickDay(date);
+        }}
+      />
+    ) : null
+  }
+/>
         </div>
         <div className="flex flex-col items-center w-full p-5 border-[#4A2C2A]/30 shadow-[#3a2826]">
           <h2 className="text-lg font-semibold text-[#4A2C2A] mb-3 text-center">
-            {start && end
-              ? `${formatDateDisplay(start)} - ${formatDateDisplay(end)}`
-              : start
-              ? formatDateDisplay(start)
-              : ''}
-          </h2>
+  {start && end
+    ? start.getTime() === end.getTime()
+      ? formatDateDisplay(start)
+      : `${formatDateDisplay(start)} - ${formatDateDisplay(end)}`
+    : start
+    ? formatDateDisplay(start)
+    : ''}
+</h2>
           {programsInRange.length === 0 ? (
             <p className="text-center text-[#4A2C2A] ">{t('no_programs')}</p>
           ) : (
@@ -159,14 +205,37 @@ export default function ProgramsPage() {
           )}
         </div>
       </div>
-      <style jsx global>{`
-        .has-program {
-          background: #d1fae5 !important;
-          border-radius: 50% !important;
-          color: #065f46 !important;
-          font-weight: bold;
-        }
-      `}</style>
+    <style jsx global>{`
+  .has-program {
+    background: #B5651D !important;
+    border-radius: 50% !important;
+    color: #065f46 !important;
+    font-weight: bold;
+    position: relative;
+    z-index: 2;
+  }
+  /* Only highlight range dates that also have a program */
+  .react-calendar__tile--range.has-program,
+  .react-calendar__tile--active.has-program,
+  .react-calendar__tile--rangeStart.has-program,
+  .react-calendar__tile--rangeEnd.has-program {
+    background: #34d399 !important;
+    color: #fff !important;
+  }
+  /* Range dates without a program: use light brown */
+  .react-calendar__tile--range:not(.has-program),
+  .react-calendar__tile--rangeStart:not(.has-program),
+  .react-calendar__tile--rangeEnd:not(.has-program) {
+    background: #e7c9a9 !important; /* Light brown */
+    color: #4A2C2A !important;      /* Dark brown text */
+    border-radius: 50% !important;
+  }
+  /* Today in range, but not a program */
+  .react-calendar__tile--now.react-calendar__tile--range:not(.has-program) {
+    background: #e7c9a9 !important;
+    color: #4A2C2A !important;
+  }
+`}</style>
     </div>
   );
 }
