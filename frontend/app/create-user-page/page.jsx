@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import '../../i18n/i18n';
@@ -9,7 +9,7 @@ import 'react-calendar/dist/Calendar.css';
 
 // Toast library (simple, no extra install needed)
 function Toast({ message, onClose }) {
-  useEffect(() => {
+  React.useEffect(() => {
     const timer = setTimeout(onClose, 2500);
     return () => clearTimeout(timer);
   }, [onClose]);
@@ -37,19 +37,44 @@ export default function CreateUserPage() {
     city: '',
     subscription: '',
   });
-  const [dateRange, setDateRange] = useState(null);
-  const [mounted, setMounted] = useState(false);
+  const [dateRange, setDateRange] = useState([null, null]);
   const [toast, setToast] = useState(null);
 
-  useEffect(() => {
-    setDateRange([new Date(), new Date()]);
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
+  // Double-click logic
+  const lastClickRef = useRef({ date: null, time: 0 });
+  const justClearedRef = useRef(false);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleDayClick = (date) => {
+    const now = Date.now();
+    if (
+      lastClickRef.current.date &&
+      lastClickRef.current.date.getTime() === date.getTime() &&
+      now - lastClickRef.current.time < 300
+    ) {
+      // Double click detected: clear selection
+      setDateRange([null, null]);
+      lastClickRef.current = { date: null, time: 0 };
+      justClearedRef.current = true;
+    } else {
+      // Single click: select date
+      setDateRange([date, date]);
+      lastClickRef.current = { date, time: now };
+      justClearedRef.current = false;
+    }
+  };
+
+  const handleCalendarChange = (range) => {
+    if (justClearedRef.current) {
+      justClearedRef.current = false;
+      return;
+    }
+    if (Array.isArray(range) && range[1]) {
+      setDateRange(range);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -63,7 +88,18 @@ export default function CreateUserPage() {
       setToast(t('location_letters_numbers_only'));
       return;
     }
-    const [startDate, endDate] = dateRange || [];
+
+    let startDate, endDate;
+    if (Array.isArray(dateRange) && dateRange[0] && dateRange[1]) {
+      startDate = dateRange[0];
+      endDate = dateRange[1];
+    } else if (dateRange && dateRange[0]) {
+      startDate = endDate = dateRange[0];
+    } else {
+      setToast(t('select_dates'));
+      return;
+    }
+
     alert(
       t('user_created') +
         ':\n' +
@@ -83,11 +119,27 @@ export default function CreateUserPage() {
       city: '',
       subscription: '',
     });
-    setDateRange([new Date(), new Date()]);
+    setDateRange([null, null]);
   };
 
+  // For display
+  let displayDates = '';
+  if (Array.isArray(dateRange) && dateRange[0] && dateRange[1]) {
+    displayDates = t('selected_dates', {
+      start: dateRange[0].toLocaleDateString('en-GB'),
+      end: dateRange[1].toLocaleDateString('en-GB'),
+    });
+  } else if (dateRange && dateRange[0]) {
+    displayDates = t('selected_dates', {
+      start: dateRange[0].toLocaleDateString('en-GB'),
+      end: dateRange[0].toLocaleDateString('en-GB'),
+    });
+  } else {
+    displayDates = t('select_dates');
+  }
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
       <div className="w-full max-w-md bg-white/80 rounded-2xl shadow-2xl px-6 py-8 shadow-[#4A2C2A]">
         <h1 className="text-2xl font-bold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#000000] bg-clip-text text-transparent tracking-tight drop-shadow text-center">
@@ -101,7 +153,7 @@ export default function CreateUserPage() {
           <label className="font-semibold">
             {t('name')}
             <input
-              className="block w-full mt-1 p-2 rounded border focus:outline-none"
+              className="block w-full p-2 mt-1 border rounded focus:outline-none"
               name="name"
               value={form.name}
               onChange={handleChange}
@@ -112,7 +164,7 @@ export default function CreateUserPage() {
           <label className="font-semibold">
             Phone
             <input
-              className="block w-full mt-1 p-2 rounded border focus:outline-none"
+              className="block w-full p-2 mt-1 border rounded focus:outline-none"
               name="phone"
               value={form.phone}
               onChange={handleChange}
@@ -123,7 +175,7 @@ export default function CreateUserPage() {
           <label className="font-semibold">
             {t('location')}
             <input
-              className="block w-full mt-1 p-2 rounded border focus:outline-none"
+              className="block w-full p-2 mt-1 border rounded focus:outline-none"
               name="city"
               value={form.city}
               onChange={handleChange}
@@ -134,7 +186,7 @@ export default function CreateUserPage() {
           <label className="font-semibold">
             {t('subscription')}
             <select
-              className="block w-full mt-1 p-2 rounded border focus:outline-none"
+              className="block w-full p-2 mt-1 border rounded focus:outline-none"
               name="subscription"
               value={form.subscription}
               onChange={handleChange}
@@ -151,25 +203,16 @@ export default function CreateUserPage() {
           {/* Calendar */}
           <label className="font-semibold text-center">{t('start_end_date')}</label>
           <div className="calendar-center">
-            <Calendar
-              selectRange
-              value={dateRange}
-              onChange={setDateRange}
-              locale="en-GB"
-              tileClassName={({ date }) =>
-                date.getDay() === 0 || date.getDay() === 6
-                  ? 'calendar-weekend'
-                  : null
-              }
-            />
+           <Calendar
+  selectRange
+  value={dateRange}
+  onChange={handleCalendarChange}
+  onClickDay={handleDayClick}
+  locale="en-GB"
+/>
           </div>
           <div className="mt-2 text-sm text-[#4A2C2A] text-center">
-            {dateRange && dateRange[0] && dateRange[1]
-              ? t('selected_dates', {
-                  start: dateRange[0].toLocaleDateString('en-GB'),
-                  end: dateRange[1].toLocaleDateString('en-GB'),
-                })
-              : t('select_dates')}
+            {displayDates}
           </div>
           {/* Submit */}
           <button
@@ -181,6 +224,19 @@ export default function CreateUserPage() {
         </form>
         <div className="flex justify-between mt-6"></div>
       </div>
+      <style jsx global>{`
+  .react-calendar__tile--range,
+  .react-calendar__tile--rangeStart,
+  .react-calendar__tile--rangeEnd {
+    background: #e7c9a9 !important; /* Light brown */
+    color: #4A2C2A !important;      /* Dark brown text */
+    border-radius: 50% !important;
+  }
+  .react-calendar__tile--now.react-calendar__tile--range {
+    background: #e7c9a9 !important;
+    color: #4A2C2A !important;
+  }
+`}</style>
     </div>
   );
 }

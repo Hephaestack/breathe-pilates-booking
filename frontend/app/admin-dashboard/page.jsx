@@ -5,9 +5,29 @@ import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import '../../i18n/i18n';
 
+function useIsTouchDevice() {
+  const [isTouch, setIsTouch] = useState(false);
+  useEffect(() => {
+    const checkTouch = () =>
+      setIsTouch(
+        'ontouchstart' in window ||
+        navigator.maxTouchPoints > 0 ||
+        navigator.msMaxTouchPoints > 0
+      );
+    checkTouch();
+    window.addEventListener('resize', checkTouch);
+    return () => window.removeEventListener('resize', checkTouch);
+  }, []);
+  return isTouch;
+}
+
 function CreativeButton({ children, onClick, className = '', ...props }) {
   const btnRef = useRef(null);
+  const isTouch = useIsTouchDevice();
+
+  // Mouse move effect for desktop only
   const handleMouseMove = (e) => {
+    if (isTouch) return;
     const btn = btnRef.current;
     const rect = btn.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -15,8 +35,17 @@ function CreativeButton({ children, onClick, className = '', ...props }) {
     btn.style.setProperty('--x', `${x}px`);
     btn.style.setProperty('--y', `${y}px`);
   };
+
+  // Simple tap animation for mobile
+  const mobileTapProps = isTouch
+    ? {
+        whileTap: { scale: 0.96 },
+        transition: { type: 'spring', stiffness: 400, damping: 20 },
+      }
+    : {};
+
   return (
-    <button
+    <motion.button
       ref={btnRef}
       onMouseMove={handleMouseMove}
       onClick={onClick}
@@ -25,21 +54,24 @@ function CreativeButton({ children, onClick, className = '', ...props }) {
         '--x': '50%',
         '--y': '50%',
       }}
+      {...mobileTapProps}
       {...props}
     >
-      <span
-        className="pointer-events-none absolute left-0 top-0 w-full h-full rounded-2xl opacity-0 group-hover:opacity-50 transition-opacity duration-400"
-        style={{
-          background:
-            'radial-gradient(circle at var(--x, 50%) var(--y, 50%), #b3b18f 10%, transparent 70%)',
-          transition: 'transform 0.4s ease',
-          zIndex: 0,
-        }}
-      />
+      {!isTouch && (
+        <span
+          className="absolute top-0 left-0 w-full h-full transition-opacity opacity-0 pointer-events-none rounded-2xl group-hover:opacity-50 duration-400"
+          style={{
+            background:
+              'radial-gradient(circle at var(--x, 50%) var(--y, 50%), #b3b18f 10%, transparent 70%)',
+            transition: 'transform 0.4s ease',
+            zIndex: 0,
+          }}
+        />
+      )}
       <span className="relative z-10 transition-colors duration-300 group-hover:text-[#b3b18f]">
         {children}
       </span>
-    </button>
+    </motion.button>
   );
 }
 
@@ -47,6 +79,7 @@ export default function AdminDashboard() {
   const [user, setUser] = useState(null);
   const router = useRouter();
   const { t } = useTranslation();
+  const isTouch = useIsTouchDevice();
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -62,9 +95,9 @@ export default function AdminDashboard() {
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-screen px-4 py-8">
       <motion.main
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: isTouch ? 10 : 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
+        transition={{ duration: isTouch ? 0.3 : 0.6, ease: 'easeOut' }}
         className="flex flex-col items-center justify-center flex-1 w-full max-w-md"
       >
         <div className="backdrop-blur-lg bg-white/60 rounded-3xl shadow-2xl px-8 py-10 w-full flex flex-col items-center border border-[#4A2C2A]/30 ">
@@ -75,9 +108,9 @@ export default function AdminDashboard() {
             {t('welcome_admin')}
           </p>
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: isTouch ? 4 : 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.3 }}
+            transition={{ delay: 0.2, duration: isTouch ? 0.2 : 0.3 }}
             className="w-full max-w-xs space-y-4"
           >
             <CreativeButton onClick={() => router.push('/programs')}>
@@ -95,15 +128,17 @@ export default function AdminDashboard() {
             <CreativeButton onClick={() => router.push('/create-user-page')}>
               {t('create_user')}
             </CreativeButton>
-            <button
+            <motion.button
               className="w-full py-3 px-6 text-lg font-semibold rounded-2xl bg-white text-[#fd0000] shadow hover:bg-[#ccc] transition duration-300"
               onClick={() => {
                 localStorage.removeItem('user');
                 router.push('/login');
               }}
+              whileTap={isTouch ? { scale: 0.96 } : undefined}
+              transition={isTouch ? { type: 'spring', stiffness: 400, damping: 20 } : undefined}
             >
               {t('log_out')}
-            </button>
+            </motion.button>
           </motion.div>
         </div>
       </motion.main>
