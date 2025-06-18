@@ -2,8 +2,15 @@ from pydantic import BaseModel
 from uuid import UUID
 from typing import List, Optional
 from datetime import date
+
 from db.models.user import UserRole, SubscriptionModel
 
+class LoginRequest(BaseModel):
+    phone: str
+    password: int
+
+class LoginResponse(BaseModel):
+    id: UUID 
 
 class UserSummary(BaseModel):
     id: UUID

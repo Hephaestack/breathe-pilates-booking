@@ -3,8 +3,7 @@ from sqlalchemy.orm import Session
 
 from db.models import booking, class_
 from db.schemas.booking import BookingCreate, BookingOut
-from utils.auth import get_current_user, oauth2_scheme
-from utils.db import get_db
+from utils.db import get_db, get_current_user
 from db.models.user import User
 
 router = APIRouter()
@@ -14,7 +13,6 @@ def create_booking(
     booking_data: BookingCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    token: str = Depends(oauth2_scheme) 
 ):
     user_id = current_user.id
     
