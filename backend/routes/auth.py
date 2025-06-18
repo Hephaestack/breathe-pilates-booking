@@ -1,15 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlalchemy.orm import Session
 
 from utils.auth import create_access_token
 from db.models import user as user_model
 from db.schemas.token import LoginRequest, Token
-from utils import get_db
+from utils.db import get_db
 
 router = APIRouter()
 
 @router.post("/login", response_model=Token)
-def login(data: LoginRequest, db: Session = Depends(get_db)):
+def login(
+    data: LoginRequest,
+    db: Session = Depends(get_db)
+):
     db_user = db.query(user_model.User).filter(user_model.User.phone == data.phone).first()
     if not db_user or db_user.password != data.password:
         raise HTTPException(status_code=401, detail="Invalid credentials")
