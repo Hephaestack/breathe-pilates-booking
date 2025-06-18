@@ -28,4 +28,4 @@ except Exception as e:
     print(f"Failed to connect: {e}")
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()  # <== THIS FIXES YOUR ERROR
+Base = declarative_base()

@@ -10,7 +10,7 @@ class LoginRequest(BaseModel):
     password: int
 
 class LoginResponse(BaseModel):
-    id: UUID 
+    id: UUID
 
 class UserSummary(BaseModel):
     id: UUID
@@ -18,8 +18,6 @@ class UserSummary(BaseModel):
 
     class Config:
         from_attributes = True
-
-
 
 class UserBase(BaseModel):
     phone: str
@@ -34,8 +32,6 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     pass
-
-
 
 class UserOut(UserBase):
     id: UUID
