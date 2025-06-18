@@ -15,6 +15,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showToast, setShowToast] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  // Load remembered username on mount (only in browser)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const remembered = localStorage.getItem('rememberedUsername');
+      if (remembered) {
+        setUsername(remembered);
+        setRememberMe(true);
+      }
+    }
+  }, []);
 
   const handleLogin = () => {
     setError('');
@@ -35,22 +47,6 @@ export default function LoginPage() {
         username: 'client',
         password: 'client123',
       },
-      {
-        id: 2,
-        name: 'Instructor Jane',
-        email: 'jane@instructor.com',
-        role: 'instructor',
-        username: 'instructor',
-        password: 'instructor123',
-      },
-      {
-        id: 3,
-        name: 'Admin User',
-        email: 'jane@instructor.com',
-        role: 'Admin',
-        username: 'Admin',
-        password: 'Admin123',
-      },
     ];
     // Find user by username and password
     const foundUser = users.find(
@@ -61,6 +57,24 @@ export default function LoginPage() {
       setLoading(false);
       if (foundUser) {
         localStorage.setItem('user', JSON.stringify(foundUser));
+        // Remember Me logic
+        if (rememberMe) {
+          localStorage.setItem('rememberedUsername', username);
+        } else {
+          localStorage.removeItem('rememberedUsername');
+        }
+        // Save a mock subscription for client users
+        if (foundUser.role === 'client') {
+          localStorage.setItem(
+            'subscription',
+            JSON.stringify({
+              id: 1,
+              type: 'monthly',
+              name: 'Monthly Pilates',
+              expires: '2025-08-15',
+            })
+          );
+        }
         if (foundUser.role === 'instructor') {
           router.push('/instructor-dashboard');
         } else if (foundUser.role === 'Admin') {
@@ -84,6 +98,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-screen px-4 py-8">
+      <LanguageSwitcher />
       <motion.main
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -120,11 +135,22 @@ export default function LoginPage() {
           <input
             type="password"
             placeholder={t('login_password')}
-            className="w-full max-w-xs mb-5 text-black px-4 py-2 rounded-xl border border-[#b3b18f] focus:outline-none focus:ring-2 focus:ring-[#b3b18f] placeholder:text-[#4A2C2A] placeholder:font-semibold"
+            className="w-full max-w-xs mb-3 text-black px-4 py-2 rounded-xl border border-[#b3b18f] focus:outline-none focus:ring-2 focus:ring-[#b3b18f] placeholder:text-[#4A2C2A] placeholder:font-semibold"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
           />
+          {/* Remember Me Checkbox */}
+          <label className="flex items-center w-full max-w-xs mb-5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={() => setRememberMe((v) => !v)}
+              className="form-checkbox accent-[#b3b18f] border-[#b3b18f] mr-2"
+              disabled={loading}
+            />
+            <span className="text-[#4A2C2A] font-semibold text-sm">{t('remember_me')}</span>
+          </label>
           {/* Error Message below inputs */}
           {error && (
             <div className="w-full max-w-xs mb-4 text-center text-[#b94a48] bg-[#fbeee6] border border-[#f5c6cb] rounded-xl px-3 py-2 font-semibold text-sm">
@@ -135,20 +161,14 @@ export default function LoginPage() {
           <motion.button
             whileTap={{ scale: 0.97 }}
             whileHover={{ scale: 1.03 }}
-            className="w-full max-w-xs py-3 px-6 text-lg font-semibold rounded-xl bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] transition duration-300 ease-in-out mb-2"
+            className="btn-primary"
             onClick={handleLogin}
             disabled={loading}
           >
             {loading ? t('login_connecting') : t('login')}
           </motion.button>
         </div>
-        {/* Language Switcher BELOW the card */}
-        <LanguageSwitcher />
       </motion.main>
-      {/* Footer */}
-      <div className="mt-8 mb-5 text-xs font-extrabold text-center text-white">
-        {t('footer_copyright', { year: new Date().getFullYear() })}
-      </div>
     </div>
   );
 }

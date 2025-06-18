@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import '../../i18n/i18n';
 import { useTranslation } from 'react-i18next';
 
@@ -22,6 +22,14 @@ const mockSubscriptions = [
 export default function SubscriptionsPage() {
   const [subscriptions] = useState(mockSubscriptions);
   const { t } = useTranslation();
+
+  // Save the monthly subscription to localStorage for use in other pages
+  useEffect(() => {
+    const monthly = subscriptions.find((sub) => sub.type === 'monthly');
+    if (monthly) {
+      localStorage.setItem('subscription', JSON.stringify(monthly));
+    }
+  }, [subscriptions]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8">

@@ -116,7 +116,7 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-weight: 800; /* bold for headings */
   font-family: inherit;
-  background: linear-gradient(to right, #b3b18f, #A5957E, #4A2C2A);
+  background: linear-gradient(to right, #4A2C2A, #A5957E, #4A2C2A);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -135,4 +135,12 @@ a {
 a:hover {
   color: #b3b18f;
   text-decoration: underline;
+}
+
+/* Add to your globals.css */
+.btn-primary {
+  @apply bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] text-white transition duration-300 ease-in-out hover:from-[#A5957E] hover:to-[#b3b18f] hover:text-white;
+}
+.btn-primary {
+  @apply w-full max-w-xs py-3 px-6 text-lg font-semibold rounded-xl bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] transition duration-300 ease-in-out mb-2 text-white hover:from-[#A5957E] hover:to-[#b3b18f] hover:text-white;
 }

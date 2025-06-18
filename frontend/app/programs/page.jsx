@@ -1,6 +1,5 @@
 'use client';
-import { useRef } from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import '../../i18n/i18n';
 import { useTranslation } from 'react-i18next';
@@ -31,22 +30,14 @@ function formatDate(date) {
   return `${year}-${month}-${day}`;
 }
 
-function formatDateDisplay(date) {
-  // Returns DD/MM/YYYY
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${day}/${month}/${year}`;
-}
-
-function getDatesInRange(start, end) {
-  const dates = [];
-  let current = new Date(start);
-  while (current <= end) {
-    dates.push(new Date(current));
+function getNextDays(startDate, count = 5) {
+  const days = [];
+  let current = new Date(startDate);
+  for (let i = 0; i < count; i++) {
+    days.push(new Date(current));
     current.setDate(current.getDate() + 1);
   }
-  return dates;
+  return days;
 }
 
 export default function ProgramsPage() {
@@ -55,9 +46,27 @@ export default function ProgramsPage() {
   const [dateRange, setDateRange] = useState([new Date(), new Date()]);
   const [selecting, setSelecting] = useState(false);
   const lastClickRef = useRef({ date: null, time: 0 });
-  const justClearedRef = useRef(false); // <-- Add this ref
+  const justClearedRef = useRef(false);
+  const [filter, setFilter] = useState('');
   const router = useRouter();
 
+  // Επόμενες 5 μέρες για το row
+  const daysRow = getNextDays(new Date());
+
+  // Επιλεγμένη μέρα (αν range, πάρε την πρώτη)
+  const selectedDate = dateRange[0] || new Date();
+
+  // Προγράμματα για την επιλεγμένη μέρα
+  const programs = mockPrograms[formatDate(selectedDate)] || [];
+  const filteredPrograms = filter
+    ? programs.filter(
+        (p) =>
+          p.name.toLowerCase().includes(filter.toLowerCase()) ||
+          p.instructor.toLowerCase().includes(filter.toLowerCase())
+      )
+    : programs;
+
+  // Calendar day click handler
   const handleDayClick = (date) => {
     const now = Date.now();
     if (
@@ -69,173 +78,137 @@ export default function ProgramsPage() {
       setDateRange([null, null]);
       setSelecting(false);
       lastClickRef.current = { date: null, time: 0 };
-      justClearedRef.current = true; // <-- Set flag
+      justClearedRef.current = true;
     } else {
       // Single click: select date
       setDateRange([date, date]);
       setSelecting(true);
       lastClickRef.current = { date, time: now };
-      justClearedRef.current = false; // <-- Reset flag
+      justClearedRef.current = false;
     }
   };
-  // Get all dates in the selected range
-  const [start, end] = dateRange;
-  const datesInRange =
-    start && end
-      ? getDatesInRange(start, end)
-      : start
-      ? [start]
-      : [];
 
-  // Collect all programs in the range
-  const programsInRange = datesInRange
-    .map((date) => {
-      const key = formatDate(date);
-      return { date, programs: mockPrograms[key] || [] };
-    })
-    .filter((entry) => entry.programs.length > 0);
+  // Optional: handle double click on tile (for clearing)
+  const handleDoubleClickDay = (date) => {
+    setDateRange([null, null]);
+    setSelecting(false);
+    lastClickRef.current = { date: null, time: 0 };
+    justClearedRef.current = true;
+  };
 
- return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
-      <div className="flex flex-col items-center w-full max-w-md">
-        <h1 className="text-2xl font-bold text-[#ffffff] mb-4 text-center">
-          {t('available_programs')}
-        </h1>
-        <div className="calendar-center">
-          <Calendar
-  selectRange
-  locale={calendarLocale}
-            value={dateRange}
-            onChange={(range) => {
-              if (justClearedRef.current) {
-                // Prevent range selection after double-click clear
-                justClearedRef.current = false;
-                return;
-              }
-              if (Array.isArray(range) && range[1]) {
-                setDateRange(range);
-                setSelecting(false);
-              }
-            }}
-            onClickDay={handleDayClick}
-            tileClassName={({ date, view }) => {
-              const key = formatDate(date);
-              if (view === 'month' && mockPrograms[key]) {
-                return 'has-program';
-              }
-              return '';
-            }}
-  tileContent={({ date, view }) =>
-    view === 'month' ? (
-      <div
-        style={{ width: '100%', height: '100%' }}
-        onDoubleClick={(e) => {
-          e.stopPropagation();
-          handleDoubleClickDay(date);
-        }}
-      />
-    ) : null
-  }
-/>
-        </div>
-        <div className="flex flex-col items-center w-full p-5 border-[#4A2C2A]/30 shadow-[#3a2826]">
-          <h2 className="text-lg font-semibold text-[#4A2C2A] mb-3 text-center">
-  {start && end
-    ? start.getTime() === end.getTime()
-      ? formatDateDisplay(start)
-      : `${formatDateDisplay(start)} - ${formatDateDisplay(end)}`
-    : start
-    ? formatDateDisplay(start)
-    : ''}
-</h2>
-          {programsInRange.length === 0 ? (
-            <p className="text-center text-[#4A2C2A] ">{t('no_programs')}</p>
-          ) : (
-            <ul className="w-full space-y-6">
-              {programsInRange.map(({ date, programs }) => (
-                <li key={formatDate(date)}>
-                  <div className="font-bold mb-2 text-[#4A2C2A]">
-                    {formatDateDisplay(date)}
-                  </div>
-                  <ul className="space-y-3">
-                    {programs.map((prog, idx) => {
-                      const isFull = prog.booked >= prog.capacity;
-                      const borderColor = isFull
-                        ? 'border-red-400'
-                        : 'border-green-400';
-                      return (
-                        <li
-                          key={idx}
-                          className={`p-4 rounded-xl bg-[#ffffff] flex items-center justify-between shadow border-2 ${borderColor}`}
-                        >
-                          <div className="flex flex-col text-[#4A2C2A] ">
-                            <span className="text-lg font-bold">{prog.time}</span>
-                            <span className="text-base">{prog.name}</span>
-                            <span className="text-sm text-[#4A2C2A] ">
-                              {t('instructor')}: {prog.instructor}
-                            </span>
-                            <span className="mt-1 text-sm font-semibold">
-                              {prog.booked} / {prog.capacity}
-                            </span>
-                          </div>
-                          <button
-                            className={`ml-4 px-4 py-2 rounded-xl font-semibold shadow transition ${
-                              isFull
-                                ? 'bg-red-500 text-white cursor-not-allowed'
-                                : 'bg-green-400 text-white hover:bg-green-500'
-                            }`}
-                            disabled={isFull}
-                            onClick={() =>
-                              router.push(
-                                `/book/${formatDate(date)}?program=${encodeURIComponent(
-                                  prog.name
-                                )}`
-                              )
-                            }
-                          >
-                            {t('book')}
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+  return (
+    <div className="flex flex-col items-center justify-start min-h-screen px-4 py-6 ">
+      {/* Logo */}
+      <div className="w-14 h-14 rounded-full bg-white/80 flex items-center justify-center mb-2 shadow border border-[#b3b18f]">
+        <span className="text-xs text-[#4A2C2A]">logo</span>
       </div>
-    <style jsx global>{`
-  .has-program {
-    background: #B5651D !important;
-    border-radius: 50% !important;
-    color: #065f46 !important;
-    font-weight: bold;
-    position: relative;
-    z-index: 2;
-  }
-  /* Only highlight range dates that also have a program */
-  .react-calendar__tile--range.has-program,
-  .react-calendar__tile--active.has-program,
-  .react-calendar__tile--rangeStart.has-program,
-  .react-calendar__tile--rangeEnd.has-program {
-    background: #34d399 !important;
-    color: #fff !important;
-  }
-  /* Range dates without a program: use light brown */
-  .react-calendar__tile--range:not(.has-program),
-  .react-calendar__tile--rangeStart:not(.has-program),
-  .react-calendar__tile--rangeEnd:not(.has-program) {
-    background: #e7c9a9 !important; /* Light brown */
-    color: #4A2C2A !important;      /* Dark brown text */
-    border-radius: 50% !important;
-  }
-  /* Today in range, but not a program */
-  .react-calendar__tile--now.react-calendar__tile--range:not(.has-program) {
-    background: #e7c9a9 !important;
-    color: #4A2C2A !important;
-  }
-`}</style>
+
+      {/* Days Row */}
+      <div className="flex flex-row items-center justify-center w-full max-w-xs mb-3 space-x-2">
+        {daysRow.map((day, idx) => (
+          <button
+            key={idx}
+            className={`w-12 h-12 rounded-xl font-bold border flex flex-col items-center justify-center transition
+              ${formatDate(day) === formatDate(selectedDate)
+                ? 'bg-[#b3b18f] text-white border-[#b3b18f]'
+                : 'bg-white/80 text-[#4A2C2A] border-[#b3b18f]'
+              }`}
+            onClick={() => setDateRange([day, day])}
+          >
+            <span className="text-xs">{day.toLocaleDateString('el-GR', { weekday: 'short' })}</span>
+            <span className="text-base">{day.getDate()}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Calendar with selectRange */}
+      <div className="calendar-center w-full max-w-xs mb-3">
+        <Calendar
+          selectRange
+          locale={calendarLocale}
+          value={dateRange}
+          onChange={(range) => {
+            if (justClearedRef.current) {
+              justClearedRef.current = false;
+              return;
+            }
+            if (Array.isArray(range) && range[1]) {
+              setDateRange(range);
+              setSelecting(false);
+            }
+          }}
+          onClickDay={handleDayClick}
+          tileClassName={({ date, view }) => {
+            const key = formatDate(date);
+            if (view === 'month' && mockPrograms[key]) {
+              return 'has-program';
+            }
+            return '';
+          }}
+          tileContent={({ date, view }) =>
+            view === 'month' ? (
+              <div
+                style={{ width: '100%', height: '100%' }}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  handleDoubleClickDay(date);
+                }}
+              />
+            ) : null
+          }
+        />
+      </div>
+
+      {/* Προγράμματα */}
+      <div className="w-full max-w-xs flex-1 rounded-2xl border border-[#b3b18f] p-4 bg-white/80 shadow text-[#4A2C2A] min-h-[200px]">
+        {filteredPrograms.length === 0 ? (
+          <div className="text-center text-[#4A2C2A]  font-semibold mt-8">Δεν βρέθηκαν προγράμματα</div>
+        ) : (
+          filteredPrograms.map((prog, idx) => {
+            const isFull = prog.booked >= prog.capacity;
+            return (
+              <div
+                key={idx}
+                className="mb-4 p-3 rounded-xl border border-[#b3b18f] bg-[#f9f9f6]/80 flex flex-col"
+              >
+                <div className="flex flex-row justify-between items-center">
+                  <div>
+                    <div className="text-lg font-bold text-[#4A2C2A] ">{prog.name}</div>
+                    <div className="text-sm">{prog.time} - {prog.instructor}</div>
+                    <div className="text-xs mt-1">{prog.booked} / {prog.capacity}</div>
+                  </div>
+                  <button
+                    className={`ml-2 px-3 py-1 rounded-xl font-semibold shadow transition text-xs
+                      ${isFull
+                        ? 'bg-red-400 text-white cursor-not-allowed'
+                        : 'bg-[#045e04] text-white hover:bg-[#a5957e]'
+                      }`}
+                    disabled={isFull}
+                    onClick={() =>
+                      router.push(
+                        `/book/${formatDate(selectedDate)}?program=${encodeURIComponent(prog.name)}`
+                      )
+                    }
+                  >
+                    {t('book')}
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      <style jsx global>{`
+        .has-program {
+          background: #B5651D !important;
+          border-radius: 50% !important;
+          color: #065f46 !important;
+          font-weight: bold;
+          position: relative;
+          z-index: 2;
+        }
+      `}</style>
     </div>
   );
 }

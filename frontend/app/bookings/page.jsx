@@ -61,7 +61,6 @@ export default function BookingsPage() {
       <div className="bg-white/80 rounded-2xl shadow-2xl px-4 py-6 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md">
         <div className="flex items-center justify-between mb-2 px-2">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent mb-2 tracking-tight drop-shadow flex items-center gap-2">
-            <span className="material-icons">My</span>
             {t('my_bookings')}
           </h2>
           <button
