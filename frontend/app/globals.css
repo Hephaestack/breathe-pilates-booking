@@ -144,3 +144,29 @@ a:hover {
 .btn-primary {
   @apply w-full max-w-xs py-3 px-6 text-lg font-semibold rounded-xl bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] transition duration-300 ease-in-out mb-2 text-white hover:from-[#A5957E] hover:to-[#b3b18f] hover:text-white;
 }
+
+ .range-has-program-green {
+    background: #2e7d32 !important;
+    color: #fff !important;
+    font-weight: bold;
+    position: relative;
+    z-index: 3;
+  }
+  .has-program-brown {
+    background: #b3b18f !important;
+    color: #4A2C2A !important;
+    font-weight: bold;
+    position: relative;
+    z-index: 2;
+  }
+  .selected-date-rounded,
+  .rounded-date {
+    border-radius: 50% !important;
+    box-sizing: border-box;
+  }
+  .selected-date-rounded {
+    border: 2px solid !important;
+  }
+  body.non-fixed-footer footer {
+  position: static !important;
+}
