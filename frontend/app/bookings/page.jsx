@@ -74,7 +74,7 @@ export default function BookingsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm border-separate border-spacing-y-1">
             <thead>
-              <tr className="bg-[#b3b18f] text-[#ffffff] font-bold">
+              <tr className="bg-[#dbdac6] text-[#4A2C2A] font-bold">
                 <th className="py-2 px-2 rounded-l-xl font-semibold">{t('date')}</th>
                 <th className="py-2 px-2 font-semibold">{t('name')}</th>
                 <th className="py-2 px-2 font-semibold">{t('from')}</th>

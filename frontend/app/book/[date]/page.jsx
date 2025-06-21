@@ -103,12 +103,6 @@ export default function BookDetailPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-2 py-8">
-      {/* Subscription Expiry Date */}
-      {subscription?.expires && (
-        <div className="mb-4 bg-[#f5f5e6] rounded-xl px-4 py-2 text-[#4A2C2A] font-semibold shadow">
-          {t('subscription_expires', { expiryDate: subscription.expires })}
-        </div>
-      )}
       <div className="bg-white/80 rounded-2xl shadow-2xl px-4 py-6 border border-[#4A2C2A]/30 w-full max-w-md shadow-[#4A2C2A]">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
@@ -125,16 +119,16 @@ export default function BookDetailPage() {
         </div>
 
         {/* Program Info */}
-        <div className="bg-[#b3b18f] rounded-xl p-4 mb-4">
+        <div className="bg-[#ffffff] rounded-xl p-4 mb-4">
           <div className="grid grid-cols-2 gap-2 mb-2">
-            <div className="font-semibold text-[#ffffff]">{t('class')}</div>
-            <div className="font-semibold text-[#ffffff]">{t('location')}</div>
-            <div className="text-[#fff]">{program.name}</div>
-            <div className="text-[#fff]">{program.location}</div>
+            <div className="font-semibold text-[#50322f]">{t('class')}</div>
+            <div className="font-semibold text-[#50322f]">{t('location')}</div>
+            <div className="text-[#50322f]">{program.name}</div>
+            <div className="text-[#50322f]">{program.location}</div>
           </div>
           <div className="flex items-center justify-between mt-2">
             <div>
-              <span className="font-semibold text-[#fff]">
+              <span className="font-semibold text-[#50322f]">
                 {t('participants')}:&nbsp;
               </span>
               <span
@@ -153,7 +147,7 @@ export default function BookDetailPage() {
         {/* Table */}
         <table className="w-full text-sm mt-2">
           <thead>
-            <tr className="text-[#ffffff] bg-[#b3b18f] font-bold">
+            <tr className="text-[#4A2C2A] bg-[#dbdac6] font-bold">
               <th className="py-1 px-2 font-semibold rounded-tl-xl">{t('date')}</th>
               <th className="py-1 px-2 font-semibold">{t('from')}</th>
               <th className="py-1 px-2 font-semibold">{t('to')}</th>
@@ -167,7 +161,7 @@ export default function BookDetailPage() {
               <td className="py-1 px-2 text-center">{program.time}</td>
               <td className="py-1 px-2 text-center">{program.to || '--'}</td>
               <td className="py-1 px-2 text-center">
-                <span className="inline-block bg-[#b3b18f] rounded px-2 py-0.5 text-[#ffffff] font-semibold">
+                <span className="inline-block bg-[#dbdac6] rounded px-2 py-0.5 text-[#50322f] font-semibold">
                   {program.booked} / {program.capacity}
                 </span>
               </td>

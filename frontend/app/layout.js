@@ -1,7 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import BackArrow from "./components/BackArrow";
-import Footer from "./components/Footer";
 import ShowBackArrow from "./components/ShowBackArrow";
 
 const geistSans = Geist({
@@ -15,17 +13,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Breathe Pilates Booking",
-  description: "Ετοιμάστε την επόμενη προπόνησή σας με το Breathe Pilates Booking",
+  title: "Breathe Pilates Efi Zikou",
+  description: "Booking system for Breathe Pilates by Efi Zikou",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+      <link rel="icon" type="image/png" href="/icon.png" />
+    </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-           <ShowBackArrow />
+        <ShowBackArrow />
         {children}
-        <Footer />
       </body>
     </html>
   );

@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import '../../i18n/i18n';
+import Footer from '../components/Footer';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,11 +19,13 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
 
   // Load remembered username on mount (only in browser)
-  useEffect(() => {
+ useEffect(() => {
     if (typeof window !== 'undefined') {
-      const remembered = localStorage.getItem('rememberedUsername');
+      const remembered = localStorage.getItem('rememberedCredentials');
       if (remembered) {
-        setUsername(remembered);
+        const { username, password } = JSON.parse(remembered);
+        setUsername(username);
+        setPassword(password);
         setRememberMe(true);
       }
     }
@@ -57,11 +60,14 @@ export default function LoginPage() {
       setLoading(false);
       if (foundUser) {
         localStorage.setItem('user', JSON.stringify(foundUser));
-        // Remember Me logic
+        // Remember Me logic (save both username and password)
         if (rememberMe) {
-          localStorage.setItem('rememberedUsername', username);
+          localStorage.setItem(
+            'rememberedCredentials',
+            JSON.stringify({ username, password })
+          );
         } else {
-          localStorage.removeItem('rememberedUsername');
+          localStorage.removeItem('rememberedCredentials');
         }
         // Save a mock subscription for client users
         if (foundUser.role === 'client') {
@@ -103,25 +109,32 @@ export default function LoginPage() {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="flex flex-col items-center justify-center flex-1 w-full max-w-md"
+        className="flex flex-col items-center justify-center flex-1 w-full max-w-md "
       >
         {/* Glassmorphism Card */}
-        <div className="backdrop-blur-lg bg-white/80 rounded-3xl shadow-2xl px-8 py-10 w-full flex flex-col items-center border border-[#a259ec]/30">
-          {/* Animated Logo */}
-          <motion.div
-            initial={{ scale: 0.9, rotate: -8 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: 'spring', stiffness: 120, damping: 8 }}
-            className="w-20 h-20 rounded-full bg-[#cfcfc2] flex items-center justify-center text-white text-4xl font-bold shadow-lg mb-4"
-          >
-            🧘‍♀️
-          </motion.div>
+        <div className="backdrop-blur-lg bg-white/80 shadow-[#3a2826]   rounded-3xl shadow-2xl px-8 py-10 w-full flex flex-col items-center border border-[#a259ec]/30">
+
+          {/*Logo */}
+        <div className="w-28 h-28  rounded-full  flex items-center justify-center shadow-lg mb-5 shadow-[#3a2826]  ">
+  <img
+    src="logo.svg"
+    alt="Logo"
+    className="w-50 h-30 object-cover "
+    style={{ background: 'none' }}
+  />
+</div>
+
           <h1 className="text-3xl font-extrabold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-2 tracking-tight drop-shadow">
-            Breath Pilates
+            Breath Pilates 
+          </h1>
+         <h1 className="text-2xl font-extrabold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-2 tracking-tight drop-shadow"
+         >
+          Efi Zikou
           </h1>
           <p className="text-base text-[#4A2C2A] text-center max-w-xs leading-relaxed mb-8">
-            {t('login_subtitle')}
+           Brand Phrase
           </p>
+          
           {/* Username/Phone Input */}
           <input
             type="text"
@@ -169,6 +182,7 @@ export default function LoginPage() {
           </motion.button>
         </div>
       </motion.main>
+      <Footer />
     </div>
   );
 }

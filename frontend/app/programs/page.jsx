@@ -1,11 +1,11 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import '../../i18n/i18n';
 import { useTranslation } from 'react-i18next';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import { useEffect } from "react";
 
 const mockPrograms = {
   '2025-07-16': [
@@ -31,77 +31,13 @@ function formatDate(date) {
   return `${year}-${month}-${day}`;
 }
 
-function getNextDays(startDate, count = 5) {
-  const days = [];
-  let current = new Date(startDate);
-  for (let i = 0; i < count; i++) {
-    days.push(new Date(current));
-    current.setDate(current.getDate() + 1);
-  }
-  return days;
+function formatDateDisplay(date) {
+  // Returns DD/MM/YYYY
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${day}/${month}/${year}`;
 }
-
-export default function ProgramsPage() {
-  useEffect(() => {
-  document.body.classList.add("non-fixed-footer");
-  return () => {
-    document.body.classList.remove("non-fixed-footer");
-  };
-}, []);
-  const { t, i18n } = useTranslation();
-  const calendarLocale = i18n.language === 'gr' ? 'el-GR' : 'en-US';
-  const [dateRange, setDateRange] = useState([new Date(), new Date()]);
-  const [selecting, setSelecting] = useState(false);
-  const lastClickRef = useRef({ date: null, time: 0 });
-  const justClearedRef = useRef(false);
-  const [filter, setFilter] = useState('');
-  const router = useRouter();
-
-  // Επόμενες 5 μέρες για το row
-  const daysRow = getNextDays(new Date());
-
-  // Επιλεγμένη μέρα (αν range, πάρε την πρώτη)
-  const selectedDate = dateRange[0] || new Date();
-
-  // Προγράμματα για την επιλεγμένη μέρα
-  const programs = mockPrograms[formatDate(selectedDate)] || [];
-  const filteredPrograms = filter
-    ? programs.filter(
-        (p) =>
-          p.name.toLowerCase().includes(filter.toLowerCase()) ||
-          p.instructor.toLowerCase().includes(filter.toLowerCase())
-      )
-    : programs;
-
-  // Calendar day click handler
-  const handleDayClick = (date) => {
-    const now = Date.now();
-    if (
-      lastClickRef.current.date &&
-      lastClickRef.current.date.getTime() === date.getTime() &&
-      now - lastClickRef.current.time < 300
-    ) {
-      // Double click detected: clear selection
-      setDateRange([null, null]);
-      setSelecting(false);
-      lastClickRef.current = { date: null, time: 0 };
-      justClearedRef.current = true;
-    } else {
-      // Single click: select date
-      setDateRange([date, date]);
-      setSelecting(true);
-      lastClickRef.current = { date, time: now };
-      justClearedRef.current = false;
-    }
-  };
-
-  // Optional: handle double click on tile (for clearing)
-  const handleDoubleClickDay = (date) => {
-    setDateRange([null, null]);
-    setSelecting(false);
-    lastClickRef.current = { date: null, time: 0 };
-    justClearedRef.current = true;
-  };
 
 function getDatesInRange(start, end) {
   const dates = [];
@@ -113,164 +49,190 @@ function getDatesInRange(start, end) {
   return dates;
 }
 
-let programsByDate = [];
-if (dateRange[0] && dateRange[1]) {
-  const dates = getDatesInRange(dateRange[0], dateRange[1]);
-  programsByDate = dates.map(date => ({
-    date,
-    programs: mockPrograms[formatDate(date)] || []
-  })).filter(day => day.programs.length > 0);
-} else if (dateRange[0]) {
-  programsByDate = [{
-    date: dateRange[0],
-    programs: mockPrograms[formatDate(dateRange[0])] || []
-  }];
-} else {
-  programsByDate = [];
-}
-// ...existing code...
+export default function ProgramsPage() {
+  const { t, i18n } = useTranslation();
+  const calendarLocale = i18n.language === 'gr' ? 'el-GR' : 'en-US';
+  const [dateRange, setDateRange] = useState([new Date(), new Date()]);
+  const [selecting, setSelecting] = useState(false);
+  const lastClickRef = useRef({ date: null, time: 0 });
+  const justClearedRef = useRef(false); // <-- Add this ref
+  const router = useRouter();
 
-  return (
-    <div className="flex flex-col items-center justify-start min-h-screen px-4 py-6 programs-non-fixed-footer ">
-      {/* Logo */}
-      <div className="w-14 h-14 rounded-full bg-white/80 flex items-center justify-center mb-2 shadow border border-[#b3b18f]">
-        <span className="text-xs text-[#4A2C2A]">logo</span>
-      </div>
+  const handleDayClick = (date) => {
+    const now = Date.now();
+    if (
+      lastClickRef.current.date &&
+      lastClickRef.current.date.getTime() === date.getTime() &&
+      now - lastClickRef.current.time < 300
+    ) {
+      // Double click detected: clear selection
+      setDateRange([null, null]);
+      setSelecting(false);
+      lastClickRef.current = { date: null, time: 0 };
+      justClearedRef.current = true; // <-- Set flag
+    } else {
+      // Single click: select date
+      setDateRange([date, date]);
+      setSelecting(true);
+      lastClickRef.current = { date, time: now };
+      justClearedRef.current = false; // <-- Reset flag
+    }
+  };
+  // Get all dates in the selected range
+  const [start, end] = dateRange;
+  const datesInRange =
+    start && end
+      ? getDatesInRange(start, end)
+      : start
+      ? [start]
+      : [];
 
-      {/* Days Row */}
-      <div className="flex flex-row items-center justify-center w-full max-w-xs mb-3 space-x-2">
-        {daysRow.map((day, idx) => (
-          <button
-            key={idx}
-            className={`w-12 h-12 rounded-xl font-bold border flex flex-col items-center justify-center transition
-              ${formatDate(day) === formatDate(selectedDate)
-                ? 'bg-[#b3b18f] text-white border-[#b3b18f]'
-                : 'bg-white/80 text-[#4A2C2A] border-[#b3b18f]'
-              }`}
-            onClick={() => setDateRange([day, day])}
-          >
-            <span className="text-xs">{day.toLocaleDateString('el-GR', { weekday: 'short' })}</span>
-            <span className="text-base">{day.getDate()}</span>
-          </button>
-        ))}
-      </div>
+  // Collect all programs in the range
+  const programsInRange = datesInRange
+    .map((date) => {
+      const key = formatDate(date);
+      return { date, programs: mockPrograms[key] || [] };
+    })
+    .filter((entry) => entry.programs.length > 0);
 
-      {/* Calendar with selectRange */}
-      <div className="w-full max-w-xs mb-3 calendar-center">
-   <Calendar
+ return (
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
+      <div className="  bg-white/80 backdrop-blur-lg  rounded-3xl shadow-2xl shadow-[#3a2826] px-8 py-10 w-full flex flex-col items-center  max-w-md">
+        <h1 className=" text-2xl font-bold mb-9 text-center">
+          {t('available_programs')}
+        </h1>
+        <div className="calendar-center drop-shadow-xl shadow-[#302f2f]">
+          <Calendar
   selectRange
   locale={calendarLocale}
-  value={dateRange}
-  onChange={(range) => {
-    if (justClearedRef.current) {
-      justClearedRef.current = false;
-      return;
-    }
-    if (Array.isArray(range) && range[1]) {
-      setDateRange(range);
-      setSelecting(false);
-    }
-  }}
-  onClickDay={handleDayClick}
-  tileClassName={({ date, view }) => {
-    const key = formatDate(date);
-    // Highlight days with programs in range
-    if (
-      view === 'month' &&
-      dateRange[0] &&
-      dateRange[1] &&
-      date >= dateRange[0] &&
-      date <= dateRange[1] &&
-      mockPrograms[key]
-    ) {
-      return 'range-has-program-green selected-date-rounded';
-    }
-    // Highlight days with programs (not in range)
-    if (view === 'month' && mockPrograms[key]) {
-      return 'has-program-brown rounded-date';
-    }
-    // Highlight all selected dates (single or range)
-    if (
-      view === 'month' &&
-      dateRange[0] &&
-      (
-        (dateRange[1] && date >= dateRange[0] && date <= dateRange[1]) ||
-        (!dateRange[1] && formatDate(date) === formatDate(dateRange[0]))
-      )
-    ) {
-      return 'selected-date-rounded';
-    }
-    return '';
-  }}
-  tileContent={() => null}
+            value={dateRange}
+            onChange={(range) => {
+              if (justClearedRef.current) {
+                // Prevent range selection after double-click clear
+                justClearedRef.current = false;
+                return;
+              }
+              if (Array.isArray(range) && range[1]) {
+                setDateRange(range);
+                setSelecting(false);
+              }
+            }}
+            onClickDay={handleDayClick}
+            tileClassName={({ date, view }) => {
+              const key = formatDate(date);
+              if (view === 'month' && mockPrograms[key]) {
+                return 'has-program';
+              }
+              return '';
+            }}
+  tileContent={({ date, view }) =>
+    view === 'month' ? (
+      <div
+        style={{ width: '100%', height: '100%' }}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          handleDoubleClickDay(date);
+        }}
+      />
+    ) : null
+  }
 />
-      </div>
-
-      {/* Προγράμματα */}
-<div
-  className="w-full max-w-xs flex-1 rounded-2xl border border-[#b3b18f] p-3 bg-white/80 shadow text-[#4A2C2A] min-h-[120px] mb-24"
->
-  {programsByDate.length === 0 ? (
-    <div className="text-center text-[#4A2C2A] font-semibold mt-8">Δεν βρέθηκαν προγράμματα</div>
-  ) : (
-    programsByDate.map(({ date, programs }, idx) => (
-      <div key={idx} className="mb-4">
-        <div className="mb-2 font-bold">{date.toLocaleDateString('el-GR')}</div>
-        {programs
-          .filter(
-            (p) =>
-              !filter ||
-              p.name.toLowerCase().includes(filter.toLowerCase()) ||
-              p.instructor.toLowerCase().includes(filter.toLowerCase())
-          )
-          .map((prog, pidx) => {
-            const isFull = prog.booked >= prog.capacity;
-            return (
-              <div
-                key={pidx}
-                className="mb-2 p-3 rounded-xl border border-[#b3b18f] bg-[#f9f9f6]/80 flex flex-col"
-              >
-                <div className="flex flex-row items-center justify-between">
-                  <div>
-                    <div className="text-lg font-bold text-[#4A2C2A] ">{prog.name}</div>
-                    <div className="text-sm">{prog.time} - {prog.instructor}</div>
-                    <div className="mt-1 text-xs">{prog.booked} / {prog.capacity}</div>
+        </div>
+        <div className="flex flex-col items-center w-full p-5 border-[#4A2C2A]/30 shadow-[#3a2826]">
+          <h2 className="text-lg font-semibold text-[#4A2C2A] mb-3 text-center">
+  {start && end
+    ? start.getTime() === end.getTime()
+      ? formatDateDisplay(start)
+      : `${formatDateDisplay(start)} - ${formatDateDisplay(end)}`
+    : start
+    ? formatDateDisplay(start)
+    : ''}
+</h2>
+          {programsInRange.length === 0 ? (
+            <p className="text-center text-[#4A2C2A] ">{t('no_programs')}</p>
+          ) : (
+            <ul className="w-full space-y-6">
+              {programsInRange.map(({ date, programs }) => (
+                <li key={formatDate(date)}>
+                  <div className="font-bold mb-2 text-[#4A2C2A]">
+                    {formatDateDisplay(date)}
                   </div>
-                  <button
-                    className={`ml-2 px-3 py-1 rounded-xl font-semibold shadow transition text-xs
-                      ${isFull
-                        ? 'bg-red-400 text-white cursor-not-allowed'
-                        : 'bg-[#045e04] text-white hover:bg-[#a5957e]'
-                      }`}
-                    disabled={isFull}
-                    onClick={() =>
-                      router.push(
-                        `/book/${formatDate(date)}?program=${encodeURIComponent(prog.name)}`
-                      )
-                    }
-                  >
-                    {t('book')}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+                  <ul className="space-y-3">
+                    {programs.map((prog, idx) => {
+                      const isFull = prog.booked >= prog.capacity;
+                      const borderColor = isFull
+                        ? 'border-red-400'
+                        : 'border-green-400';
+                      return (
+                        <li
+                          key={idx}
+                          className={`p-4 rounded-xl bg-[#ffffff] flex items-center justify-between shadow border-2 ${borderColor}`}
+                        >
+                          <div className="flex flex-col text-[#4A2C2A] ">
+                            <span className="text-lg font-bold">{prog.time}</span>
+                            <span className="text-base">{prog.name}</span>
+                            <span className="mt-1 text-sm font-semibold">
+                              {prog.booked} / {prog.capacity}
+                            </span>
+                          </div>
+                          <button
+                            className={`ml-4 px-4 py-2 rounded-xl font-semibold shadow transition ${
+                              isFull
+                                ? 'bg-red-500 text-white cursor-not-allowed'
+                                : 'bg-green-400 text-white hover:bg-green-500'
+                            }`}
+                            disabled={isFull}
+                            onClick={() =>
+                              router.push(
+                                `/book/${formatDate(date)}?program=${encodeURIComponent(
+                                  prog.name
+                                )}`
+                              )
+                            }
+                          >
+                            {t('book')}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
-    ))
-  )}
-</div>
-
-
-      <style jsx global>{`
-        .has-program {
-          background: #B5651D !important;
-          border-radius: 50% !important;
-          color: #065f46 !important;
-          font-weight: bold;
-          position: relative;
-          z-index: 2;
-        }
-      `}</style>
+    <style jsx global>{`
+  .has-program {
+    background: #B5651D !important;
+    border-radius: 50% !important;
+    color: #065f46 !important;
+    font-weight: bold;
+    position: relative;
+    z-index: 2;
+  }
+  /* Only highlight range dates that also have a program */
+  .react-calendar__tile--range.has-program,
+  .react-calendar__tile--active.has-program,
+  .react-calendar__tile--rangeStart.has-program,
+  .react-calendar__tile--rangeEnd.has-program {
+    background: #34d399 !important;
+    color: #fff !important;
+  }
+  /* Range dates without a program: use light brown */
+  .react-calendar__tile--range:not(.has-program),
+  .react-calendar__tile--rangeStart:not(.has-program),
+  .react-calendar__tile--rangeEnd:not(.has-program) {
+    background: #e7c9a9 !important; /* Light brown */
+    color: #4A2C2A !important;      /* Dark brown text */
+    border-radius: 50% !important;
+  }
+  /* Today in range, but not a program */
+  .react-calendar__tile--now.react-calendar__tile--range:not(.has-program) {
+    background: #e7c9a9 !important;
+    color: #4A2C2A !important;
+  }
+`}</style>
     </div>
   );
 }

@@ -39,15 +39,15 @@ export default function SubscriptionsPage() {
         </h1>
         <ul className="space-y-5">
           {subscriptions.map((sub) => (
-            <li key={sub.id} className="p-4 rounded-xl bg-[#b3b18f] shadow flex flex-col items-center">
+            <li key={sub.id} className="p-4 rounded-xl bg-[#dbdac6] shadow flex flex-col items-center text-[#4A2C2A]">
               <span className="font-bold text-lg">{sub.name}</span>
               {sub.type === 'monthly' && (
-                <span className="text-sm text-[#ffffff] mt-2">
+                <span className="text-sm text-[#4A2C2A] mt-2">
                   {t('expires')}: {sub.expires}
                 </span>
               )}
               {sub.type === 'package' && (
-                <span className="text-sm text-[#ffffff] mt-2">
+                <span className="text-sm text-[#4A2C2A] mt-2">
                   {t('remaining_lessons')}: {sub.remaining}
                 </span>
               )}
