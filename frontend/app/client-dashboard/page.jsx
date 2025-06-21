@@ -38,7 +38,7 @@ export default function Dashboard() {
             {t('hello', { name: user.name })}
           </h1>
           {subscription?.expires && (
-            <p className="text-base text-[#8a7f7e] text-center max-w-xs leading-relaxed mb-2">
+            <p className="text-base text-[#3b3939] text-center max-w-xs leading-relaxed mb-2">
         {subscription?.expires && t('subscription_expires', { expiryDate: subscription.expires })}
             </p>
           )}
@@ -65,7 +65,7 @@ export default function Dashboard() {
               {t('my_subscriptions')}
             </button>
             <button
-              className="w-full py-2 px-6 text-lg font-semibold rounded-2xl bg-[#ffffff] text-[#fc0000] shadow hover:bg-[#ccc] transition duration-300"
+              className="w-full py-2 px-6 text-lg font-semibold rounded-xl bg-[#ffffff] text-[#fc0000] shadow hover:bg-[#ccc] transition duration-300"
               onClick={() => {
                 localStorage.removeItem('user');
                 router.push('/login');
