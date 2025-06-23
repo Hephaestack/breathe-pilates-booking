@@ -1,3 +1,4 @@
+from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -45,3 +46,21 @@ def create_booking(
     new_booking.class_ = db.query(class_.Class).get(new_booking.class_id)
 
     return new_booking
+
+@router.delete("/bookings/{booking_id}", status_code=status.HTTP_204_NO_CONTENT)
+def cancel_booking(
+    booking_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    booking_obj = db.query(booking.Booking).get(booking_id)
+    if not booking_obj:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    if booking_obj.user_id != current_user.id:
+        raise HTTPException(403, "Not allowed to cancel this booking")
+
+    db.delete(booking_obj)
+    db.commit()
+
+    return
