@@ -2,8 +2,15 @@ from pydantic import BaseModel
 from uuid import UUID
 from typing import List, Optional
 from datetime import date
+
 from db.models.user import UserRole, SubscriptionModel
 
+class LoginRequest(BaseModel):
+    phone: str
+    password: int
+
+class LoginResponse(BaseModel):
+    id: UUID
 
 class UserSummary(BaseModel):
     id: UUID
@@ -11,8 +18,6 @@ class UserSummary(BaseModel):
 
     class Config:
         from_attributes = True
-
-
 
 class UserBase(BaseModel):
     phone: str
@@ -27,8 +32,6 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     pass
-
-
 
 class UserOut(UserBase):
     id: UUID

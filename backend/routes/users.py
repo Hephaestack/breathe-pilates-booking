@@ -4,17 +4,28 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
 from db.database import SessionLocal
-from db.models import booking, user
-from db.schemas.user import UserCreate, UserOut, UserSummary
+from db.models import booking, user as user_model
+from db.schemas.user import UserCreate, UserOut, UserSummary, LoginRequest, LoginResponse
 from utils.db import get_db
 
 router = APIRouter()
+
+@router.post("/login", response_model=LoginResponse)
+def login(
+    data: LoginRequest,
+    db: Session = Depends(get_db)
+):
+    db_user = db.query(user_model.User).filter(user_model.User.phone == data.phone).first()
+    if not db_user or db_user.password != data.password:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    return {"id": db_user.id}
 
 @router.get("/users", response_model=List[UserSummary])
 def get_users(
     db: Session = Depends(get_db)
 ):
-    return db.query(user.User).all()
+    return db.query(user_model.User).all()
 
 @router.get("/users/{user_id}", response_model=UserOut)
 def get_user(
@@ -22,9 +33,9 @@ def get_user(
     db: Session = Depends(get_db)
 ):
     user_obj = (
-        db.query(user.User)
-        .options(joinedload(user.User.bookings).joinedload(booking.Booking.class_))
-        .filter(user.User.id == user_id)
+        db.query(user_model.User)
+        .options(joinedload(user_model.User.bookings).joinedload(booking.Booking.class_))
+        .filter(user_model.User.id == user_id)
         .first()
     )
 
@@ -45,7 +56,7 @@ def create_user(
     user_data: UserCreate,
     db: Session = Depends(get_db)
 ):
-    existing = db.query(user.User).filter(user.User.phone == user_data.phone).first()
+    existing = db.query(user_model.User).filter(user_model.User.phone == user_data.phone).first()
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
 
@@ -54,15 +65,15 @@ def create_user(
 
     if not requested_password:
         latest = (
-            db.query(user.User)
-            .filter(user.User.password != None)
-            .order_by(user.User.password.desc())
+            db.query(user_model.User)
+            .filter(user_model.User.password != None)
+            .order_by(user_model.User.password.desc())
             .first()
         )
         next_password = (latest.password + 1) if latest and latest.password else 1
         user_dict["password"] = next_password
 
-    new_user = user.User(**user_dict)
+    new_user = user_model.User(**user_dict)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)

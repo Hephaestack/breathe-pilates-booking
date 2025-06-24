@@ -1,9 +1,10 @@
+from uuid import uuid4
+from datetime import date
+
 from db.database import Base, engine, SessionLocal
 from db.models.user import User, UserRole, SubscriptionModel
 from db.models.class_ import Class
 from db.models.booking import Booking
-from uuid import uuid4
-from datetime import date
 
 Base.metadata.create_all(bind=engine)
 
@@ -32,13 +33,13 @@ user2 = User(
     package_total=10,
     subscription_starts=None,
     subscription_expires=None,
-    remaining_classes=None,
+    remaining_classes=8,
 )
 
 class1 = Class(
     id=uuid4(),
     class_name="Pilates Reformer",
-    date=date(2025, 6, 12),
+    date=date(2025, 6, 25),
     time="18:00",
     max_participants=8,
 )
@@ -46,9 +47,17 @@ class1 = Class(
 class2 = Class(
     id=uuid4(),
     class_name="Pilates Mat",
-    date=date(2025, 6, 13),
+    date=date(2025, 6, 26),
     time="10:00",
     max_participants=6,
+)
+
+class3 = Class(
+    id=uuid4(),
+    class_name="Yoga",
+    date=date(2025, 6, 26),
+    time="11:00",
+    max_participants=5,
 )
 
 booking1 = Booking(user_id=user1.id, class_id=class1.id)
