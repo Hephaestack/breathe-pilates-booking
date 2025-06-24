@@ -13,20 +13,13 @@ export default function Dashboard() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (!userData) {
-      router.push('/login');
-    } else {
-      setUser(JSON.parse(userData));
-      // Example: fetch subscription from localStorage or API
-      const subData = localStorage.getItem('subscription');
-      if (subData) {
-        setSubscription(JSON.parse(subData));
-      }
-      // Or fetch from API:
-      // fetch('/api/subscription').then(res => res.json()).then(setSubscription);
+    const storedUser = JSON.parse(localStorage.getItem('user'));
+    if (storedUser && storedUser.id) {
+      fetch('http://localhost:8000/users/' + storedUser.id)
+        .then(res => res.json())
+        .then(data => setUser({ ...storedUser, name: data.name }));
     }
-  }, [router]);
+  }, []);
 
   if (!user) return null;
 

@@ -31,7 +31,7 @@ export default function LoginPage() {
     }
   }, []);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setError('');
     if (!username || !password) {
       setError(t('login_required'));
@@ -40,26 +40,17 @@ export default function LoginPage() {
     }
     setLoading(true);
 
-    // Mock users
-    const users = [
-      {
-        id: 1,
-        name: 'Test User',
-        email: 'test@example.com',
-        role: 'client',
-        username: 'client',
-        password: 'client123',
-      },
-    ];
-    // Find user by username and password
-    const foundUser = users.find(
-      (u) => (u.username === username || u.email === username) && u.password === password
-    );
-
-    setTimeout(() => {
+    try {
+      const res = await fetch('http://localhost:8000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: username, password: password }),
+      });
+      const data = await res.json();
       setLoading(false);
-      if (foundUser) {
-        localStorage.setItem('user', JSON.stringify(foundUser));
+
+      if (res.ok && data.id) {
+        localStorage.setItem('user', JSON.stringify(data));
         // Remember Me logic (save both username and password)
         if (rememberMe) {
           localStorage.setItem(
@@ -69,21 +60,10 @@ export default function LoginPage() {
         } else {
           localStorage.removeItem('rememberedCredentials');
         }
-        // Save a mock subscription for client users
-        if (foundUser.role === 'client') {
-          localStorage.setItem(
-            'subscription',
-            JSON.stringify({
-              id: 1,
-              type: 'monthly',
-              name: 'Monthly Pilates',
-              expires: '2025-08-15',
-            })
-          );
-        }
-        if (foundUser.role === 'instructor') {
+        // Redirect based on role if available, else to client-dashboard
+        if (data.role === 'instructor') {
           router.push('/instructor-dashboard');
-        } else if (foundUser.role === 'Admin') {
+        } else if (data.role === 'Admin') {
           router.push('/admin-dashboard');
         } else {
           router.push('/client-dashboard');
@@ -92,7 +72,11 @@ export default function LoginPage() {
         setError(t('login_incorrect'));
         setShowToast(true);
       }
-    }, 1000);
+    } catch (err) {
+      setLoading(false);
+      setError(t('login_incorrect'));
+      setShowToast(true);
+    }
   };
 
   useEffect(() => {

@@ -12,6 +12,13 @@ class LoginRequest(BaseModel):
 class LoginResponse(BaseModel):
     id: UUID
 
+class SubscriptionOut(BaseModel):
+    subscription_model: SubscriptionModel
+    package_total: Optional[int] = None
+    subscription_starts: Optional[date] = None
+    subscription_expires: Optional[date] = None
+    remaining_classes: Optional[int] = None
+
 class UserSummary(BaseModel):
     id: UUID
     name: str

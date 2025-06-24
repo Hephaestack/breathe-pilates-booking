@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from db.database import SessionLocal
 from db.models import booking, user as user_model
-from db.schemas.user import UserCreate, UserOut, UserSummary, LoginRequest, LoginResponse
+from db.schemas.user import UserCreate, UserOut, UserSummary, LoginRequest, LoginResponse, SubscriptionOut
 from utils.db import get_db
 
 router = APIRouter()
@@ -79,3 +79,26 @@ def create_user(
     db.refresh(new_user)
 
     return new_user
+
+@router.post("/subscription", response_model=SubscriptionOut)
+def get_user_subscription(
+    user_id:UUID,
+    db: Session = Depends(get_db)
+):
+    user_obj = (
+        db.query(user_model.User)
+        .options(joinedload(user_model.User.bookings).joinedload(booking.Booking.class_))
+        .filter(user_model.User.id == user_id)
+        .first()
+    )
+
+    if not user_obj:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {
+        "subscription_model": user_obj.subscription_model,
+        "package_total": user_obj.package_total or 0,
+        "subscription_starts": user_obj.subscription_starts or None,
+        "subscription_expires": user_obj.subscription_expires or None,
+        "remaining_classes": user_obj.remaining_classes or 0,
+    }

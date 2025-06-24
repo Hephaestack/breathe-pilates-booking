@@ -1,0 +1,7 @@
+pip install sqlalchemy
+pip install fastapi
+pip install uvicorn
+pip install pydantic
+pip install dotenv
+pip install pytest
+pip install psycopg2
