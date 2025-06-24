@@ -1,4 +1,5 @@
-from sqlalchemy import create_engine
+from sqlalchemy import NullPool, create_engine
+from sqlalchemy.pool import NullPool
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from dotenv import load_dotenv
@@ -9,7 +10,7 @@ load_dotenv()
 
 # Fetch variables
 USER = os.getenv("USER")
-PASSWORD = os.getenv("DB_PASSWORD")
+PASSWORD = os.getenv("PASSWORD")
 HOST = os.getenv("HOST")
 PORT = os.getenv("PORT")
 DBNAME = os.getenv("DB_NAME")
@@ -18,7 +19,7 @@ DBNAME = os.getenv("DB_NAME")
 DATABASE_URL = f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}?sslmode=require"
 
 # Create the SQLAlchemy engine
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, poolclass=NullPool)
 
 # Test the connection
 try:
