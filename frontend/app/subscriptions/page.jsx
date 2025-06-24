@@ -4,56 +4,109 @@ import { useState, useEffect } from 'react';
 import '../../i18n/i18n';
 import { useTranslation } from 'react-i18next';
 
-const mockSubscriptions = [
-  {
-    id: 1,
-    type: 'monthly',
-    name: 'Monthly Pilates',
-    expires: '2025-08-15',
-  },
-  {
-    id: 2,
-    type: 'package',
-    name: '10-Class Package',
-    remaining: 4,
-  },
-];
-
 export default function SubscriptionsPage() {
-  const [subscriptions] = useState(mockSubscriptions);
+  const [subscription, setSubscription] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { t } = useTranslation();
 
-  // Save the monthly subscription to localStorage for use in other pages
   useEffect(() => {
-    const monthly = subscriptions.find((sub) => sub.type === 'monthly');
-    if (monthly) {
-      localStorage.setItem('subscription', JSON.stringify(monthly));
-    }
-  }, [subscriptions]);
+    const fetchSubscription = async () => {
+      try {
+        // Get user from localStorage
+        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        
+        if (!storedUser.id) {
+          setError('User not found');
+          setLoading(false);
+          return;
+        }        // Fetch subscription data from the backend
+        const response = await fetch(`http://localhost:8000/subscription?user_id=${storedUser.id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
+        if (!response.ok) {
+          throw new Error('Failed to fetch subscription data');
+        }
+
+        const data = await response.json();
+        setSubscription(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubscription();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
+        <div className="bg-white/80 rounded-2xl shadow-2xl px-4 py-6 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md">
+          <p className="text-center text-[#4A2C2A]">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
+        <div className="bg-white/80 rounded-2xl shadow-2xl px-4 py-6 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md">
+          <p className="text-center text-red-600">Error: {error}</p>
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
-      <div className="bg-white/80 rounded-2xl shadow-2xl px-4 py-6 border border-[#4A2C2A]/30  shadow-[#3a2826] w-full max-w-md">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
+      <div className="bg-white/80 rounded-2xl shadow-2xl px-4 py-6 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md">
         <h1 className="text-2xl font-bold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-5 tracking-tight drop-shadow">
           {t('my_subscriptions')}
         </h1>
-        <ul className="space-y-5">
-          {subscriptions.map((sub) => (
-            <li key={sub.id} className="p-4 rounded-xl bg-[#dbdac6] shadow flex flex-col items-center text-[#4A2C2A]">
-              <span className="font-bold text-lg">{sub.name}</span>
-              {sub.type === 'monthly' && (
+        
+        {subscription && (
+          <div className="space-y-5">
+            <div className="p-4 rounded-xl bg-[#dbdac6] shadow flex flex-col items-center text-[#4A2C2A]">
+              <span className="text-lg font-bold">{subscription.subscription_model}</span>
+              
+              {/* Display different info based on subscription type */}
+              {subscription.subscription_model.includes('συνδρομή') && subscription.subscription_expires && (
                 <span className="text-sm text-[#4A2C2A] mt-2">
-                  {t('expires')}: {sub.expires}
+                  {t('expires')}: {subscription.subscription_expires}
                 </span>
               )}
-              {sub.type === 'package' && (
-                <span className="text-sm text-[#4A2C2A] mt-2">
-                  {t('remaining_lessons')}: {sub.remaining}
+              
+              {subscription.subscription_model.includes('πακέτο') && (
+                <div className="text-sm text-[#4A2C2A] mt-2 text-center">
+                  {subscription.package_total && (
+                    <div>Total Classes: {subscription.package_total}</div>
+                  )}
+                  {subscription.remaining_classes !== null && (
+                    <div className="mt-1 font-semibold">
+                      {t('remaining_lessons')}: {subscription.remaining_classes}
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {subscription.subscription_starts && (
+                <span className="text-xs text-[#4A2C2A] mt-2">
+                  Started: {subscription.subscription_starts}
                 </span>
               )}
-            </li>
-          ))}
-        </ul>
+            </div>
+          </div>
+        )}
+        
+        {!subscription && (
+          <p className="text-center text-[#4A2C2A]">No subscription found</p>
+        )}
       </div>
     </div>
   );

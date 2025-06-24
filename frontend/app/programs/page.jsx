@@ -79,7 +79,7 @@ export default function ProgramsPage() {
       <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl shadow-[#3a2826] px-6 py-10 w-full flex flex-col items-center max-w-lg">
         <h1 className="text-2xl font-bold text-center mb-9">
           {t('available_programs')}
-        </h1>        <div className="calendar-center drop-shadow-xl shadow-[#302f2f]">
+        </h1>      <div className="calendar-center drop-shadow-xl shadow-[#302f2f]">
           <Calendar
             locale={calendarLocale}
             value={selectedDate}
@@ -180,10 +180,21 @@ export default function ProgramsPage() {
           background: #e7c9a9 !important;
           color: #4A2C2A !important;
           border-radius: 50% !important;
-        }
-        .react-calendar__tile--now.react-calendar__tile--range:not(.has-program) {
+        }        .react-calendar__tile--now.react-calendar__tile--range:not(.has-program) {
           background: #e7c9a9 !important;
           color: #4A2C2A !important;
+        }
+        .react-calendar__tile--now:not(.react-calendar__tile--active) {
+          background: #f0e6d6 !important;
+          color: #4A2C2A !important;
+          border: 2px solid #d4b896 !important;
+          border-radius: 50% !important;
+          font-weight: 600 !important;
+        }
+        .react-calendar__tile--now.has-program:not(.react-calendar__tile--active) {
+          background: #d4a574 !important;
+          color: #4A2C2A !important;
+          border: 2px solid #B5651D !important;
         }
       `}</style>
     </div>
