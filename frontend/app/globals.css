@@ -30,9 +30,9 @@ body {
 /* --- React Calendar Custom Styles --- */
 /* === Calendar Container === */
 .react-calendar {
+  border: none !important;         /* Remove border */
   border-radius: 1.5rem;
-  border: none;
-  box-shadow: 0 4px 24px 0 rgba(255, 253, 253, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(74,44,42,0.18); /* Add a stronger shadow */
   background: #fff;
   font-family: inherit;
   padding: 1rem;
@@ -44,12 +44,12 @@ body {
   margin-bottom: 1rem;
 }
 .react-calendar__navigation button {
-  color: #000;
+  color: #4A2C2A;
   font-weight: bold;
   background: none;
   border: none;
   font-size: 1.2rem;
-  border-radius: 0.75rem;
+  border-radius: 0.20rem;
   transition: background 0.2s;
 }
 .react-calendar__navigation button:enabled:hover,
@@ -62,7 +62,7 @@ body {
   text-align: center;
   text-transform: uppercase;
   font-weight: 600;
-  color: #000;
+  color: #4A2C2A;
   font-size: 0.95rem;
   margin-bottom: 0.5rem;
 }
@@ -79,7 +79,7 @@ body {
   background: none;
   transition: background 0.2s, color 0.2s;
   font-weight: 500;
-  color: #000;
+  color: #4A2C2A;
 }
 .react-calendar__tile:enabled:hover,
 .react-calendar__tile:enabled:focus {
@@ -93,12 +93,12 @@ body {
   color: #ffffff !important;
 }
 .react-calendar__tile.has-program {
-  background: #b3b18f !important;
-  color: #eeff00 !important;
+  background: #dbdac6!important;
+  color: #4A2C2A !important;
   font-weight: bold;
 }
 .react-calendar__tile--now {
-  background: #f3e8ff !important;
+  background: #3a383c!important;
   color: #000 !important;
 }
 .react-calendar__month-view__days__day--weekend,
@@ -143,4 +143,30 @@ a:hover {
 }
 .btn-primary {
   @apply w-full max-w-xs py-3 px-6 text-lg font-semibold rounded-xl bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] transition duration-300 ease-in-out mb-2 text-white hover:from-[#A5957E] hover:to-[#b3b18f] hover:text-white;
+}
+
+ .range-has-program-green {
+    background: #2e7d32 !important;
+    color: #fff !important;
+    font-weight: bold;
+    position: relative;
+    z-index: 3;
+  }
+  .has-program-brown {
+    background: #b3b18f !important;
+    color: #4A2C2A !important;
+    font-weight: bold;
+    position: relative;
+    z-index: 2;
+  }
+  .selected-date-rounded,
+  .rounded-date {
+    border-radius: 50% !important;
+    box-sizing: border-box;
+  }
+  .selected-date-rounded {
+    border: 2px solid !important;
+  }
+  body.non-fixed-footer footer {
+  position: static !important;
 }
