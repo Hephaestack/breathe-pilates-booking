@@ -21,7 +21,18 @@ export default function Dashboard() {
     }
   }, []);
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
+        <div className="bg-white/80 rounded-2xl shadow-2xl px-4 py-6 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4A2C2A] mb-4"></div>
+            <p className="text-center text-[#4A2C2A] font-bold">{t('loading')}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-screen px-4 py-8">
