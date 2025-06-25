@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import '../../i18n/i18n';
 import Footer from '../components/Footer';
+import useToast from '../hooks/useToast';
+import ToastContainer from '../components/ToastContainer';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,6 +19,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const { toasts, hideToast, showError } = useToast();
 
   // Load remembered username on mount (only in browser)
  useEffect(() => {
@@ -34,8 +37,7 @@ export default function LoginPage() {
   const handleLogin = async () => {
     setError('');
     if (!username || !password) {
-      setError(t('login_required'));
-      setShowToast(true);
+      showError(t('login_required'));
       return;
     }
     setLoading(true);
@@ -69,13 +71,11 @@ export default function LoginPage() {
           router.push('/client-dashboard');
         }
       } else {
-        setError(t('login_incorrect'));
-        setShowToast(true);
+        showError(t('login_incorrect'));
       }
     } catch (err) {
       setLoading(false);
-      setError(t('login_incorrect'));
-      setShowToast(true);
+      showError(t('login_incorrect'));
     }
   };
 
@@ -167,6 +167,7 @@ export default function LoginPage() {
         </div>
       </motion.main>
       <Footer />
+      <ToastContainer toasts={toasts} hideToast={hideToast} />
     </div>
   );
 }

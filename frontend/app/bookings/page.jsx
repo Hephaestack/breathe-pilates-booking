@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import '../../i18n/i18n';
 import { useTranslation } from 'react-i18next';
+import useToast from '../hooks/useToast';
+import ToastContainer from '../components/ToastContainer';
 
 // Helper function to format date
 function formatDate(dateString) {
@@ -30,13 +32,14 @@ export default function BookingsPage() {
   const [error, setError] = useState(null);
   const router = useRouter();
   const { t } = useTranslation();
+  const { toasts, hideToast, showSuccess, showError } = useToast();
 
   useEffect(() => {
     const fetchUserBookings = async () => {
       try {
         const storedUser = getUser();
         if (!storedUser || !storedUser.id) {
-          setError('User not found');
+          setError(t('user_not_found'));
           setLoading(false);
           return;
         }
@@ -47,7 +50,7 @@ export default function BookingsPage() {
         const response = await fetch(`http://localhost:8000/users/${storedUser.id}`);
         
         if (!response.ok) {
-          throw new Error('Failed to fetch user data');
+          throw new Error(t('failed_fetch_user_data'));
         }
 
         const userData = await response.json();
@@ -75,11 +78,43 @@ export default function BookingsPage() {
 
     fetchUserBookings();  }, []);
 
+  const handleCancelBooking = async (bookingId) => {
+    try {
+      const storedUser = getUser();
+      if (!storedUser || !storedUser.id) {
+        showError(t('user_not_found'));
+        return;
+      }
+
+      const response = await fetch(`http://localhost:8000/bookings/${bookingId}?user_id=${storedUser.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        showSuccess(t('cancel_successful'));
+        // Ανανέωσε τις κρατήσεις
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        const data = await response.json();
+        showError(t('cancel_error') + (data.detail ? ': ' + data.detail : ''));
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showError(t('cancel_connection_error'));
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen px-2 py-8">
         <div className="bg-white/80 rounded-2xl shadow-2xl px-4 py-6 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md">
-          <p className="text-center text-[#4A2C2A]">Loading...</p>
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4A2C2A] mb-4"></div>
+            <p className="text-center text-[#4A2C2A] font-bold">{t('loading')}</p>
+          </div>
         </div>
       </div>
     );
@@ -96,25 +131,19 @@ export default function BookingsPage() {
   }  return (
     <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
       <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl px-6 py-8 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-2xl">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent tracking-tight drop-shadow">
+        <div className="flex items-center justify-center mb-6">
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent tracking-tight drop-shadow text-center">
             {t('my_bookings')}
           </h2>
-          <button
-            className="text-3xl text-[#4A2C2A] hover:text-[#b3b18f] transition-colors duration-200"
-            onClick={() => router.back()}
-            aria-label={t('cancel')}
-          >
-            ×
-          </button>
         </div>
           <div className="overflow-hidden shadow-lg rounded-2xl">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#dbdac6] text-[#4A2C2A]">
-                <th className="px-4 py-4 font-semibold text-center">{t('date')}</th>
-                <th className="px-4 py-4 font-semibold text-center">{t('name')}</th>
-                <th className="px-4 py-4 font-semibold text-center">Time</th>
+              <tr className="bg-[#dbdac6] text-[#4A2C2A] ">
+                <th className="px-4 py-4 font-extrabold text-center ">{t('date')}</th>
+                <th className="px-4 py-4 font-bold text-center">{t('name')}</th>
+                <th className="px-4 py-4 font-extrabold text-center">{t('time')}</th>
+                <th className="px-4 py-4 font-extrabold text-center"></th>
                 {user?.role === 'instructor' && (
                   <th className="px-4 py-4 font-semibold text-center">{t('user')}</th>
                 )}
@@ -123,19 +152,28 @@ export default function BookingsPage() {
             <tbody>
               {bookings.length === 0 ? (
                 <tr>
-                  <td colSpan={user?.role === 'instructor' ? 4 : 3} className="py-12 text-center text-[#4A2C2A] bg-white">
+                  <td colSpan={user?.role === 'instructor' ? 5 : 4} className="py-12 text-center text-[#4A2C2A] bg-white">
                     <div className="flex flex-col items-center">
                       <div className="mb-2 text-lg font-medium">{t('no_bookings_found')}</div>
-                      <div className="text-sm text-gray-500">You haven't made any bookings yet</div>
+                      <div className="text-sm text-gray-500">{t('no_bookings_yet')}</div>
                     </div>
                   </td>
                 </tr>
               ) : (
                 bookings.map((b, index) => (
-                  <tr key={b.booking_id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors duration-150`}>
-                    <td className="py-4 px-4 text-[#4A2C2A] font-medium text-center">{b.date}</td>
-                    <td className="py-4 px-4 text-[#4A2C2A] font-medium text-center">{b.name}</td>
-                    <td className="py-4 px-4 text-[#4A2C2A] font-medium text-center">{b.from}{b.to && ` - ${b.to}`}</td>
+                  <tr key={b.booking_id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-white'} border-b border-gray-200 transition-colors duration-150`}>
+                    <td className="py-4 px-4 text-[#4A2C2A] text-center font-semibold">{b.date}</td>
+                    <td className="py-4 px-4 text-[#4A2C2A]  text-center font-semibold">{b.name}</td>
+                    <td className="py-4 px-4 text-[#4A2C2A]  text-center font-semibold">
+                      {b.from}{b.to && ` - ${b.to}`}
+                    </td>
+                    <td className="py-4 px-4 text-center">
+                      <button
+                        onClick={() => handleCancelBooking(b.booking_id)}
+                        className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded-full transition-colors">
+                        {t('cancel')}
+                      </button>
+                    </td>
                     {user?.role === 'instructor' && (
                       <td className="py-4 px-4 text-[#4A2C2A] font-medium text-center">{b.user}</td>
                     )}
@@ -146,6 +184,7 @@ export default function BookingsPage() {
           </table>
         </div>
       </div>
+      <ToastContainer toasts={toasts} hideToast={hideToast} />
     </div>
   );
 }
