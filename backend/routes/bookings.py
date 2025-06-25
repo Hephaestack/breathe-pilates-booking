@@ -9,7 +9,7 @@ from db.models.user import User
 
 router = APIRouter()
 
-@router.post("/bookings", response_model=BookingOut, status_code=status.HTTP_201_CREATED)
+@router.post("/bookings", response_model=BookingOut, status_code=status.HTTP_201_CREATED, tags=["Bookings"])
 def create_booking(
     booking_data: BookingCreate,
     db: Session = Depends(get_db),
@@ -47,7 +47,7 @@ def create_booking(
 
     return new_booking
 
-@router.delete("/bookings/{booking_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/bookings/{booking_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Bookings"])
 def cancel_booking(
     booking_id: UUID,
     current_user: User = Depends(get_current_user),

@@ -10,7 +10,7 @@ from utils.db import get_db
 
 router = APIRouter()
 
-@router.post("/login", response_model=LoginResponse)
+@router.post("/login", response_model=LoginResponse, tags=["Login"])
 def login(
     data: LoginRequest,
     db: Session = Depends(get_db)
@@ -21,13 +21,13 @@ def login(
 
     return {"id": db_user.id}
 
-@router.get("/users", response_model=List[UserSummary])
+@router.get("/users", response_model=List[UserSummary], tags=["Users"])
 def get_users(
     db: Session = Depends(get_db)
 ):
     return db.query(user_model.User).all()
 
-@router.get("/users/{user_id}", response_model=UserOut)
+@router.get("/users/{user_id}", response_model=UserOut, tags=["Users"])
 def get_user(
     user_id: UUID,
     db: Session = Depends(get_db)
@@ -51,7 +51,7 @@ def get_user(
 
     return user_obj
 
-@router.post("/users", response_model=UserOut)
+@router.post("/users", response_model=UserOut, tags=["Users"])
 def create_user(
     user_data: UserCreate,
     db: Session = Depends(get_db)
@@ -80,7 +80,7 @@ def create_user(
 
     return new_user
 
-@router.post("/subscription", response_model=SubscriptionOut)
+@router.post("/subscription", response_model=SubscriptionOut, tags=["Subscription"])
 def get_user_subscription(
     user_id:UUID,
     db: Session = Depends(get_db)

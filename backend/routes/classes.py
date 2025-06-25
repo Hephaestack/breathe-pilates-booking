@@ -8,7 +8,7 @@ from utils.db import get_db
 
 router = APIRouter()
 
-@router.get("/classes", response_model=List[ClassOut])
+@router.get("/classes", response_model=List[ClassOut], tags=["Classes"])
 def get_class(
     db: Session = Depends(get_db)
 ):
