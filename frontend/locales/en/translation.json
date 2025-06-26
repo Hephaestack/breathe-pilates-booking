@@ -62,6 +62,7 @@
   "cancel_successful": "Booking cancelled successfully!",
   "cancel_error": "Error cancelling booking",
   "cancel_connection_error": "Connection error while cancelling booking!",
-  "failed_fetch_user_data": "Failed to fetch user data"
+  "failed_fetch_user_data": "Failed to fetch user data",
+  "subscription_package_total" : "Subscription Package Total"
 
 }

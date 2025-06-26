@@ -87,7 +87,7 @@ export default function LoginPage() {
   }, [showToast]);
 
   return (
-    <div className="flex flex-col items-center justify-center w-full min-h-screen px-4 py-8">
+    <div className="flex flex-col items-center justify-center w-full min-h-screen px-2 py-8 sm:px-4">
       <LanguageSwitcher />
       <motion.main
         initial={{ opacity: 0, y: 30 }}
@@ -96,27 +96,24 @@ export default function LoginPage() {
         className="flex flex-col items-center justify-center flex-1 w-full max-w-md "
       >
         {/* Glassmorphism Card */}
-        <div className="backdrop-blur-lg bg-white/80 shadow-[#3a2826]   rounded-3xl shadow-2xl px-8 py-10 w-full flex flex-col items-center border border-[#a259ec]/30">
-
+        <div className="backdrop-blur-lg bg-white/80 shadow-[#3a2826] rounded-3xl shadow-2xl px-4 sm:px-8 py-6 sm:py-10 w-full flex flex-col items-center border border-[#a259ec]/30">
           {/*Logo */}
-        <div className="w-28 h-28  rounded-full  flex items-center justify-center shadow-lg mb-5 shadow-[#3a2826]  ">
-  <img
-    src="logo.svg"
-    alt="Logo"
-    className="w-50 h-30 object-cover "
-    style={{ background: 'none' }}
-  />
-</div>
-
-          <h1 className="text-3xl font-extrabold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-2 tracking-tight drop-shadow">
-            Breath Pilates 
+          <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full flex items-center justify-center shadow-lg mb-5 shadow-[#3a2826]">
+            <img
+              src="logo.svg"
+              alt="Logo"
+              className="object-cover w-20 h-12 sm:w-28 sm:h-20"
+              style={{ background: 'none' }}
+            />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-2 tracking-tight drop-shadow">
+            Breath Pilates
           </h1>
-         <h1 className="text-2xl font-extrabold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-2 tracking-tight drop-shadow"
-         >
-          Efi Zikou
+          <h1 className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-2 tracking-tight drop-shadow">
+            Efi Zikou
           </h1>
-          <p className="text-base text-[#4A2C2A] text-center max-w-xs leading-relaxed mb-8">
-           Brand Phrase
+          <p className="text-sm sm:text-base text-[#4A2C2A] text-center max-w-xs leading-relaxed mb-8">
+           
           </p>
           
           {/* Username/Phone Input */}

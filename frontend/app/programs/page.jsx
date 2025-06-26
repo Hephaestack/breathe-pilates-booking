@@ -7,6 +7,7 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import useToast from '../hooks/useToast';
 import ToastContainer from '../components/ToastContainer';
+import { motion } from 'framer-motion';
 
 function formatDate(date) {
   const year = date.getFullYear();
@@ -42,8 +43,12 @@ export default function ProgramsPage() {
   const { toasts, hideToast, showSuccess, showError } = useToast();
   
   const [programsByDate, setProgramsByDate] = useState({});
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [userBookings, setUserBookings] = useState([]);
+  const [programsLoading, setProgramsLoading] = useState(true);
 
   useEffect(() => {
+    setProgramsLoading(true);
     fetch('http://localhost:8000/classes')
       .then(res => res.json())
       .then(data => {
@@ -54,7 +59,24 @@ export default function ProgramsPage() {
           grouped[key].push(prog);
         });
         setProgramsByDate(grouped);
-      });
+      })
+      .finally(() => setProgramsLoading(false));
+  }, []);
+  useEffect(() => {
+    // Fetch user bookings if logged in
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.id) {
+      fetch(`http://localhost:8000/users/${user.id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && Array.isArray(data.bookings)) {
+            setUserBookings(data.bookings.map(b => b.class_id));
+          } else {
+            setUserBookings([]);
+          }
+        })
+        .catch(() => setUserBookings([]));
+    }
   }, []);
   const handleDayClick = (date) => {
     const now = Date.now();
@@ -80,46 +102,86 @@ export default function ProgramsPage() {
 
 const handleBookProgram = async (program) => {
   try {
-   
+    setBookingLoading(true);
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (!user.id) {
       showError(t('booking_login_required'));
+      setBookingLoading(false);
       return;
     }
 
-   
     const bookingData = {
       class_id: program.id,
       status: 'confirmed'
     };
-    
-   
+
     const response = await fetch(`http://localhost:8000/bookings?user_id=${user.id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(bookingData)
     });
-    
+
     const data = await response.json();
 
     if (response.ok) {
       showSuccess(t('booking_successful'));
-      // Ανανέωσε τα προγράμματα
-      setTimeout(() => window.location.reload(), 1500);
+      // Update participants count in state without reload
+      setProgramsByDate(prev => {
+        const dateKey = program.date;
+        if (!prev[dateKey]) return prev;
+        return {
+          ...prev,
+          [dateKey]: prev[dateKey].map(p =>
+            p.id === program.id
+              ? { ...p, current_participants: p.current_participants + 1 }
+              : p
+          )
+        };
+      });
+      // Add to userBookings immediately for instant feedback
+      setUserBookings(prev => [...prev, program.id]);
     } else {
       showError(t('booking_error') + (data.detail ? ': ' + data.detail : ''));
     }
   } catch (error) {
     console.error('Error:', error);
     showError(t('booking_connection_error'));
+  } finally {
+    setBookingLoading(false);
   }
 };
 
-  return (    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
-      <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl shadow-[#3a2826] px-6 py-10 w-full flex flex-col items-center max-w-lg">
-        <h1 className="text-2xl font-bold text-center mb-9">
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen px-2 py-8 sm:px-4">
+      {/* Booking loading overlay */}
+      {bookingLoading && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="flex flex-col items-center justify-center px-8 py-8 shadow-2xl bg-white/90 rounded-2xl"
+          >
+            <div className="animate-spin-pulse rounded-full h-12 w-12 border-b-4 border-[#b3b18f] mb-4"></div>
+            <div className="text-base text-[#4A2C2A]">Booking in progress...</div>
+          </motion.div>
+        </motion.div>
+      )}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl shadow-[#3a2826] px-2 sm:px-6 py-4 sm:py-10 w-full flex flex-col items-center max-w-full sm:max-w-lg"
+      >
+        <h1 className="mb-6 text-xl font-bold text-center sm:text-2xl">
           {t('available_programs')}
-        </h1>      <div className="calendar-center drop-shadow-xl shadow-[#302f2f]">
+        </h1>
+        <div className="calendar-center drop-shadow-xl shadow-[#302f2f] w-full overflow-x-auto">
           <Calendar
             locale={calendarLocale}
             value={selectedDate}
@@ -142,134 +204,102 @@ const handleBookProgram = async (program) => {
               view === 'month' ? (
                 <div
                   style={{ width: '100%', height: '100%' }}
-                  // If you want to handle double click, define handleDoubleClickDay
                 />
               ) : null
             }
           />
-        </div>        <div className="flex flex-col items-center w-full p-5 border-[#4A2C2A]/30 shadow-[#3a2826]">
-          <h2 className="text-lg font-semibold text-[#4A2C2A] mb-3 text-center">
+        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2, ease: 'easeOut' }}
+          className="flex flex-col items-center w-full p-2 sm:p-5 border-[#4A2C2A]/30 shadow-[#3a2826]"
+        >
+          <h2 className="text-base sm:text-lg font-semibold text-[#4A2C2A] mb-3 text-center">
             {selectedDate ? formatDateDisplay(selectedDate) : ''}
           </h2>
-          {programsForSelectedDate.length === 0 ? (
+          {programsLoading ? (
+            <div className="flex items-center justify-center w-full py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4A2C2A] mr-3"></div>
+              <span className="text-[#4A2C2A] font-bold">{t('loading')}</span>
+            </div>
+          ) : programsForSelectedDate.length === 0 ? (
             <p className="text-center text-[#4A2C2A] ">{t('no_programs')}</p>
           ) : (
             <ul className="w-full space-y-4">
               {programsForSelectedDate.map((prog, idx) => {
                 const isFull = prog.current_participants >= prog.max_participants;
+                const isBooked = userBookings.includes(prog.id);
                 return (
-                  <li
+                  <motion.li
                     key={idx}
-                    className="bg-white rounded-2xl border-1 border-teal-300 p-4"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.4, delay: 0.1 * idx, ease: 'easeOut' }}
+                    className="p-2 bg-white border-teal-300 rounded-2xl border-1 sm:p-4"
                   >
                     <div className="text-center">
-                      <div className="text-lg font-bold text-[#4A2C2A] mb-2">{prog.time} - {prog.class_name}</div>
-                      <div className="text-sm text-[#4A2C2A] mb-4">
+                      <div className="text-base sm:text-lg font-bold text-[#4A2C2A] mb-2">{prog.time} - {prog.class_name}</div>
+                      <div className="text-xs sm:text-sm text-[#4A2C2A] mb-4">
                         {prog.current_participants} / {prog.max_participants}
                       </div>
-
                       <button
-                        className={`w-full font-bold py-3 px-6 rounded-xl transition-colors ${
-                          isFull
-                            ? 'bg-red-500 text-white cursor-not-allowed'
-                            : 'bg-green-400 text-white hover:bg-green-500'
+                        className={`w-full font-bold py-2 sm:py-3 px-2 sm:px-6 rounded-xl transition-colors ${
+                          isBooked
+                            ? 'bg-red-500 text-white cursor-not-allowed opacity-80'
+                            : isFull || bookingLoading
+                              ? 'bg-red-500 text-white cursor-not-allowed opacity-60'
+                              : 'bg-green-400 text-white hover:bg-green-500'
                         }`}
-                        disabled={isFull}
-                       onClick={() => handleBookProgram(prog)}
+                        disabled={isFull || bookingLoading || isBooked}
+                        onClick={() => !isBooked && handleBookProgram(prog)}
                       >
-                        {t('book')}
+                        {isBooked ? 'Booked' : t('book')}
                       </button>
                     </div>
-                  </li>
+                  </motion.li>
                 );
               })}
             </ul>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
+      <ToastContainer toasts={toasts} hideToast={hideToast} />
       <style jsx global>{`
         /* Days with programs */
         .has-program {
-          background: #B5651D !important;
+          background: #dbdac6 !important; /* light brown */
           border-radius: 50% !important;
-          color: #065f46 !important;
+          color: #4A2C2A !important;
           font-weight: bold;
           position: relative;
           z-index: 2;
         }
-
-        /* Range selections with programs */
-        .react-calendar__tile--range.has-program,
-        .react-calendar__tile--active.has-program,
-        .react-calendar__tile--rangeStart.has-program,
-        .react-calendar__tile--rangeEnd.has-program {
-          background: #34d399 !important;
-          color: #fff !important;
-        }
-
-        /* Range selections without programs */
-        .react-calendar__tile--range:not(.has-program),
-        .react-calendar__tile--rangeStart:not(.has-program),
-        .react-calendar__tile--rangeEnd:not(.has-program) {
-          background: #e7c9a9 !important;
-          color: #4A2C2A !important;
-          border-radius: 50% !important;
-        }
-
-        .react-calendar__tile--now.react-calendar__tile--range:not(.has-program) {
-          background: #e7c9a9 !important;
-          color: #4A2C2A !important;
-        }
-
-        /* Today styling - regular day */
-        .react-calendar__tile--now:not(.react-calendar__tile--active) {
-          background: #8a7f7e !important;
-          color: white !important;
-          border: none !important;
-          border-radius: 50% !important;
-          font-weight: 600 !important;
-        }
-
-        /* Today styling - with program */
-        .react-calendar__tile--now.has-program:not(.react-calendar__tile--active) {
-          background: #4A2C2A !important;
-          color: white !important;
-          border: none !important;
-        }
-
-        /* Today styling - weekend */
-        .react-calendar__tile--now.react-calendar__month-view__days__day--weekend:not(.react-calendar__tile--active) {
-          background: #4A2C2A !important;
-          color: white !important;
-          border: none !important;
-          border-radius: 50% !important;
-          font-weight: 600 !important;
-        }
-
         /* Selected/Active day styling - any day */
         .react-calendar__tile--active {
-          background: #8a7f7e !important;
-          color: white !important;
+          background: #b3b18f !important; /* more intense brown */
+          color: #fff !important;
           border-radius: 50% !important;
           font-weight: 600 !important;
           border: none !important;
         }
-
         /* Selected day with program */
         .react-calendar__tile--active.has-program {
-          background: #8a7f7e !important;
-          color: white !important;
+          background: #b3b18f !important; /* more intense brown */
+          color: #fff !important;
           border: none !important;
         }
-
-        /* Selected day that is today */
-        .react-calendar__tile--active.react-calendar__tile--now {
-          background: #8a7f7e !important;
-          color: white !important;
-          border: none !important;
+        /* Spinner pulse animation */
+        @keyframes spin-pulse {
+          0% { transform: rotate(0deg) scale(1); }
+          50% { transform: rotate(180deg) scale(1.15); }
+          100% { transform: rotate(360deg) scale(1); }
         }
+        .animate-spin-pulse {
+          animation: spin-pulse 1s linear infinite;
+        }
+        /* Removed all styling for .react-calendar__tile--now (current date) */
       `}</style>
-      <ToastContainer toasts={toasts} hideToast={hideToast} />
     </div>
   );
 }

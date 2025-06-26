@@ -21,8 +21,8 @@ const Toast = ({ message, type = 'success', duration = 3000, onClose }) => {
   if (!isVisible) return null;
 
   const getToastStyles = () => {
-    const baseStyles = "fixed top-4 right-4 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-lg border font-semibold transition-all duration-300 transform";
-    
+    // Remove max-w-xs and sm:max-w-sm to allow natural width, and reduce padding
+    const baseStyles = "relative flex items-center gap-2 px-4 py-2 rounded-xl shadow-2xl backdrop-blur-lg border font-semibold transition-all duration-300 transform w-auto min-w-[180px] max-w-[90vw]";
     switch (type) {
       case 'success':
         return `${baseStyles} bg-green-500/90 border-green-400/50 text-white ${isLeaving ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'}`;
@@ -71,7 +71,7 @@ const Toast = ({ message, type = 'success', duration = 3000, onClose }) => {
   return (
     <div className={getToastStyles()}>
       {getIcon()}
-      <span className="text-sm">{message}</span>
+      <span className="flex-1 text-sm text-left">{message}</span>
       <button
         onClick={() => {
           setIsLeaving(true);
@@ -80,7 +80,8 @@ const Toast = ({ message, type = 'success', duration = 3000, onClose }) => {
             onClose();
           }, 300);
         }}
-        className="ml-2 hover:bg-white/20 rounded-full p-1 transition-colors"
+        className="flex items-center self-stretch justify-center p-1 ml-2 transition-colors rounded-full hover:bg-white/20"
+        style={{ alignSelf: 'stretch', marginLeft: 'auto' }}
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

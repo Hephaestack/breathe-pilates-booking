@@ -70,46 +70,41 @@ export default function SubscriptionsPage() {
     );
   }
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
-      <div className=" bg-white/80 rounded-2xl shadow-2xl px-4 py-6 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-5 tracking-tight drop-shadow">
+    <div className="flex flex-col items-center justify-center min-h-screen px-2 py-8 sm:px-4">
+      <div className="bg-white/80 rounded-2xl shadow-2xl px-2 py-6 sm:px-4 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md">
+        <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-5 tracking-tight drop-shadow">
           {t('my_subscriptions')}
         </h1>
-        
         {subscription && (
           <div className="space-y-5">
-            <div className="p-4 rounded-xl bg-[#dbdac6] shadow flex flex-col items-center text-[#4A2C2A]">
-              <span className="text-xl font-bold">{subscription.subscription_model}</span>
-              
+            <div className="p-3 sm:p-4 rounded-xl bg-[#dbdac6] shadow flex flex-col items-center text-[#4A2C2A]">
+              <span className="text-4xl font-bold sm:text-5xl">{subscription.subscription_model}</span>
               {/* Display different info based on subscription type */}
-              {subscription.subscription_model.includes('συνδρομή') && subscription.subscription_expires && (
-               <span className="font-bold text-sm text-[#4A2C2A] mt-2">
+              {subscription.subscription_model.includes('\u03c3\u03c5\u03bd\u03b4\u03c1\u03bf\u03bc\u03ae') && subscription.subscription_expires && (
+                <span className="font-bold text-xs sm:text-sm text-[#4A2C2A] mt-2">
                   {t('started')}: {subscription.subscription_starts}
                 </span>
               )}
-              
-              {subscription.subscription_model.includes('πακέτο') && (
-                <div className="text-sm text-[#4A2C2A] mt-2 text-center">
+              {subscription.subscription_model.includes('\u03c0\u03b1\u03ba\u03ad\u03c4\u03bf') && (
+                <div className="text-xs sm:text-lg text-[#4A2C2A] mt-2 text-center">
                   {subscription.package_total && (
-                    <div>Total Classes: {subscription.package_total}</div>
+                    <div className='font-bold'><span className='text-lg'>Σύνολο Μαθημάτων:</span> {subscription.package_total}</div>
                   )}
                   {subscription.remaining_classes !== null && (
-                    <div className="mt-1 font-semibold">
+                    <div className="text-xs sm:text-lg text-[#4A2C2A] mt-2 text-center">
                       {t('remaining_lessons')}: {subscription.remaining_classes}
                     </div>
                   )}
                 </div>
               )}
-              
               {subscription.subscription_starts && (
-                <span className="font-bold text-sm text-[#4A2C2A] mt-2">
+                <span className="font-bold text-xs sm:text-sm text-[#4A2C2A] mt-2">
                   {t('expires')}: {subscription.subscription_expires}
                 </span>
               )}
             </div>
           </div>
         )}
-        
         {!subscription && (
           <p className="font-bold text-center text-[#4A2C2A]">No subscription found</p>
         )}
@@ -118,4 +113,3 @@ export default function SubscriptionsPage() {
     </div>
   );
 }
- 

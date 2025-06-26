@@ -6,6 +6,7 @@ import '../../i18n/i18n';
 import { useTranslation } from 'react-i18next';
 import useToast from '../hooks/useToast';
 import ToastContainer from '../components/ToastContainer';
+import { motion } from 'framer-motion';
 
 // Helper function to format date
 function formatDate(dateString) {
@@ -95,8 +96,8 @@ export default function BookingsPage() {
 
       if (response.ok) {
         showSuccess(t('cancel_successful'));
-        // Ανανέωσε τις κρατήσεις
-        setTimeout(() => window.location.reload(), 1500);
+        // Remove the cancelled booking from state immediately
+        setBookings(prev => prev.filter(b => b.booking_id !== bookingId));
       } else {
         const data = await response.json();
         showError(t('cancel_error') + (data.detail ? ': ' + data.detail : ''));
@@ -109,81 +110,108 @@ export default function BookingsPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen px-2 py-8">
-        <div className="bg-white/80 rounded-2xl shadow-2xl px-4 py-6 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md">
+      <div className="flex flex-col items-center justify-center min-h-screen px-2 py-8 sm:px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="bg-white/80 rounded-2xl shadow-2xl px-2 py-6 sm:px-4 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md"
+        >
           <div className="flex flex-col items-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4A2C2A] mb-4"></div>
             <p className="text-center text-[#4A2C2A] font-bold">{t('loading')}</p>
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen px-2 py-8">
-        <div className="bg-white/80 rounded-2xl shadow-2xl px-4 py-6 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md">
+      <div className="flex flex-col items-center justify-center min-h-screen px-2 py-8 sm:px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="bg-white/80 rounded-2xl shadow-2xl px-2 py-6 sm:px-4 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md"
+        >
           <p className="text-center text-red-600">Error: {error}</p>
-        </div>
+        </motion.div>
       </div>
     );
-  }  return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
-      <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl px-6 py-8 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-2xl">
-        <div className="flex items-center justify-center mb-6">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent tracking-tight drop-shadow text-center">
+  }
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen px-1 py-4 sm:px-4 sm:py-8">
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl px-1 py-2 sm:px-6 sm:py-8 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md sm:max-w-2xl flex flex-col items-center"
+      >
+        <div className="flex items-center justify-center w-full mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent tracking-tight drop-shadow text-center w-full">
             {t('my_bookings')}
           </h2>
         </div>
-          <div className="overflow-hidden shadow-lg rounded-2xl">
-          <table className="w-full text-sm">
+        <div className="flex justify-center w-full overflow-x-auto">
+          <motion.table
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2, ease: 'easeOut' }}
+            className="w-full max-w-xs mx-auto text-xs sm:max-w-full sm:text-sm"
+          >
             <thead>
-              <tr className="bg-[#dbdac6] text-[#4A2C2A] ">
-                <th className="px-4 py-4 font-extrabold text-center ">{t('date')}</th>
-                <th className="px-4 py-4 font-bold text-center">{t('name')}</th>
-                <th className="px-4 py-4 font-extrabold text-center">{t('time')}</th>
-                <th className="px-4 py-4 font-extrabold text-center"></th>
+              <tr className="bg-[#dbdac6] text-[#4A2C2A] text-center">
+                <th className="px-1 py-2 font-extrabold text-center sm:px-2 sm:py-3 whitespace-nowrap">{t('date')}</th>
+                <th className="px-1 py-2 font-extrabold text-center sm:px-2 sm:py-3 whitespace-nowrap">{t('name')}</th>
+                <th className="px-1 py-2 font-extrabold text-center sm:px-2 sm:py-3 whitespace-nowrap">{t('time')}</th>
+                <th className="px-1 py-2 font-extrabold text-center sm:px-2 sm:py-3 whitespace-nowrap"></th>
                 {user?.role === 'instructor' && (
-                  <th className="px-4 py-4 font-semibold text-center">{t('user')}</th>
+                  <th className="px-1 py-2 font-semibold text-center sm:px-2 sm:py-3 whitespace-nowrap">{t('user')}</th>
                 )}
               </tr>
             </thead>
             <tbody>
               {bookings.length === 0 ? (
                 <tr>
-                  <td colSpan={user?.role === 'instructor' ? 5 : 4} className="py-12 text-center text-[#4A2C2A] bg-white">
+                  <td colSpan={user?.role === 'instructor' ? 5 : 4} className="py-6 sm:py-10 text-center text-[#4A2C2A] bg-white">
                     <div className="flex flex-col items-center">
-                      <div className="mb-2 text-lg font-medium">{t('no_bookings_found')}</div>
-                      <div className="text-sm text-gray-500">{t('no_bookings_yet')}</div>
+                      <div className="mb-2 text-base font-medium sm:text-lg">{t('no_bookings_found')}</div>
+                      <div className="text-xs text-gray-500 sm:text-sm">{t('no_bookings_yet')}</div>
                     </div>
                   </td>
                 </tr>
               ) : (
                 bookings.map((b, index) => (
-                  <tr key={b.booking_id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-white'} border-b border-gray-200 transition-colors duration-150`}>
-                    <td className="py-4 px-4 text-[#4A2C2A] text-center font-semibold">{b.date}</td>
-                    <td className="py-4 px-4 text-[#4A2C2A]  text-center font-semibold">{b.name}</td>
-                    <td className="py-4 px-4 text-[#4A2C2A]  text-center font-semibold">
+                  <motion.tr
+                    key={b.booking_id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.1 * index, ease: 'easeOut' }}
+                    className="text-center transition-colors duration-150 border-b border-gray-200"
+                  >
+                    <td className="py-1 px-1 sm:py-2 sm:px-2 text-[#4A2C2A] font-semibold break-words max-w-[80px] align-middle">{b.date}</td>
+                    <td className="py-1 px-1 sm:py-2 sm:px-2 text-[#4A2C2A] font-semibold break-words max-w-[100px] align-middle">{b.name}</td>
+                    <td className="py-1 px-1 sm:py-2 sm:px-2 text-[#4A2C2A] font-semibold break-words max-w-[80px] align-middle">
                       {b.from}{b.to && ` - ${b.to}`}
                     </td>
-                    <td className="py-4 px-4 text-center">
+                    <td className="px-1 py-1 align-middle sm:py-2 sm:px-2">
                       <button
                         onClick={() => handleCancelBooking(b.booking_id)}
-                        className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded-full transition-colors">
+                        className="block px-2 py-1 mx-auto text-xs font-bold text-white transition-colors bg-red-600 rounded-full hover:bg-red-700">
                         {t('cancel')}
                       </button>
                     </td>
                     {user?.role === 'instructor' && (
-                      <td className="py-4 px-4 text-[#4A2C2A] font-medium text-center">{b.user}</td>
+                      <td className="py-1 px-1 sm:py-2 sm:px-2 text-[#4A2C2A] font-medium text-center break-words max-w-[80px] align-middle">{b.user}</td>
                     )}
-                  </tr>
+                  </motion.tr>
                 ))
               )}
             </tbody>
-          </table>
+          </motion.table>
         </div>
-      </div>
+      </motion.div>
       <ToastContainer toasts={toasts} hideToast={hideToast} />
     </div>
   );

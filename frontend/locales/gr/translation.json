@@ -60,5 +60,7 @@
   "cancel_successful": "Η κράτηση ακυρώθηκε επιτυχώς!",
   "cancel_error": "Σφάλμα κατά την ακύρωση της κράτησης",
   "cancel_connection_error": "Σφάλμα σύνδεσης κατά την ακύρωση!",
-  "failed_fetch_user_data": "Αποτυχία φόρτωσης δεδομένων χρήστη"
+  "failed_fetch_user_data": "Αποτυχία φόρτωσης δεδομένων χρήστη",
+  "subscription_package_total": "Σύνολο Μαθημάτων"
+
 }
