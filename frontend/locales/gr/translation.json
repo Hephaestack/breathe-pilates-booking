@@ -65,5 +65,6 @@
   "program_time": "{{time}} - {{className}}",
   "participants_count": "{{current}} / {{max}}",
   "total_lessons": "Σύνολο Μαθημάτων",
-  "manifest_description": "Διαχειριστείτε εύκολα τις κρατήσεις Pilates σας!"
+  "manifest_description": "Διαχειριστείτε εύκολα τις κρατήσεις Pilates σας!",
+  "booking_in_progress": "Η κράτηση βρίσκεται σε εξέλιξη..."
 }

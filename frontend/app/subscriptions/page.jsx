@@ -7,6 +7,13 @@ import useToast from '../hooks/useToast';
 import ToastContainer from '../components/ToastContainer';
 
 export default function SubscriptionsPage() {
+  function formatDate(dateString) {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
   const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -78,28 +85,28 @@ export default function SubscriptionsPage() {
         {subscription && (
           <div className="space-y-5">
             <div className="p-3 sm:p-4 rounded-xl bg-[#dbdac6] shadow flex flex-col items-center text-[#4A2C2A]">
-              <span className="text-4xl font-bold sm:text-5xl">{subscription.subscription_model}</span>
+              <span className="text-3xl font-bold sm:text-3xl">{subscription.subscription_model}</span>
               {/* Display different info based on subscription type */}
               {subscription.subscription_model.includes('\u03c3\u03c5\u03bd\u03b4\u03c1\u03bf\u03bc\u03ae') && subscription.subscription_expires && (
-                <span className="font-bold text-xs sm:text-sm text-[#4A2C2A] mt-2">
-                  {t('started')}: {subscription.subscription_starts}
+                <span className="font-bold text-lg text-[#4A2C2A] mt-2">
+                  {t('started')}: {formatDate(subscription.subscription_starts)}
                 </span>
               )}
               {subscription.subscription_model.includes('\u03c0\u03b1\u03ba\u03ad\u03c4\u03bf') && (
                 <div className="text-xs sm:text-lg text-[#4A2C2A] mt-2 text-center">
                   {subscription.package_total && (
-                    <div className='font-bold'><span className='text-lg'>{t('total_lessons')}:</span> {subscription.package_total}</div>
+                    <div className='font-bold'><span className='text-lg'>{t('total_lessons')}:</span> <span className='text-lg'>{subscription.package_total}</span></div>
                   )}
                   {subscription.remaining_classes !== null && (
-                    <div className="text-xs sm:text-lg text-[#4A2C2A] mt-2 text-center">
+                    <div className="text-lg text-[#4A2C2A] mt-2 text-center">
                       {t('remaining_lessons')}: {subscription.remaining_classes}
                     </div>
                   )}
                 </div>
               )}
               {subscription.subscription_starts && (
-                <span className="font-bold text-xs sm:text-sm text-[#4A2C2A] mt-2">
-                  {t('expires')}: {subscription.subscription_expires}
+                <span className="text-lg text-[#4A2C2A] mt-2">
+                  {t('expires')}: {formatDate(subscription.subscription_expires)}
                 </span>
               )}
             </div>

@@ -168,7 +168,9 @@ const handleBookProgram = async (program) => {
             className="flex flex-col items-center justify-center px-8 py-8 shadow-2xl bg-white/90 rounded-2xl"
           >
             <div className="animate-spin-pulse rounded-full h-12 w-12 border-b-4 border-[#b3b18f] mb-4"></div>
-            <div className="text-base text-[#4A2C2A]">Booking in progress...</div>
+            <div className="text-base text-[#4A2C2A]">
+              {t('booking_in_progress')}
+            </div>
           </motion.div>
         </motion.div>
       )}
