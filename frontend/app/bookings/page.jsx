@@ -108,6 +108,32 @@ export default function BookingsPage() {
     }
   };
 
+  useEffect(() => {
+    const hideScrollbar = () => {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.height = '100vh';
+      document.documentElement.style.height = '100vh';
+    };
+
+    const restoreScrollbar = () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      document.body.style.height = '';
+      document.documentElement.style.height = '';
+    };
+
+    if (loading) {
+      hideScrollbar();
+    } else {
+      restoreScrollbar();
+    }
+
+    return () => {
+      restoreScrollbar();
+    };
+  }, [loading]);
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen px-2 py-8 sm:px-4">
@@ -115,7 +141,7 @@ export default function BookingsPage() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="bg-white/80 rounded-2xl shadow-2xl px-2 py-6 sm:px-4 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md"
+          className="bg-white/70 rounded-2xl shadow-2xl px-2 py-6 sm:px-4 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md"
         >
           <div className="flex flex-col items-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4A2C2A] mb-4"></div>
@@ -153,31 +179,28 @@ export default function BookingsPage() {
             {t('my_bookings')}
           </h2>
         </div>
-        <div className="flex justify-center w-full overflow-x-auto">
+        <div className="flex justify-center w-full">
           <motion.table
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2, ease: 'easeOut' }}
-            className="w-full max-w-xs mx-auto text-xs sm:max-w-full sm:text-sm"
+            className="w-full max-w-xs mx-auto text-xs sm:max-w-full sm:text-sm border-collapse"
           >
             <thead>
               <tr className="bg-[#dbdac6] text-[#4A2C2A] text-center">
-                <th className="px-1 py-2 font-extrabold text-center sm:px-2 sm:py-3 whitespace-nowrap">{t('date')}</th>
-                <th className="px-1 py-2 font-extrabold text-center sm:px-2 sm:py-3 whitespace-nowrap">{t('name')}</th>
-                <th className="px-1 py-2 font-extrabold text-center sm:px-2 sm:py-3 whitespace-nowrap">{t('time')}</th>
-                <th className="px-1 py-2 font-extrabold text-center sm:px-2 sm:py-3 whitespace-nowrap"></th>
-                {user?.role === 'instructor' && (
-                  <th className="px-1 py-2 font-semibold text-center sm:px-2 sm:py-3 whitespace-nowrap">{t('user')}</th>
-                )}
+                <th className="px-2 py-3 font-bold text-center border-b border-[#dbdac6] rounded-tl-xl">{t('date')}</th>
+                <th className="px-2 py-3 font-bold text-center border-b border-[#dbdac6]">{t('name')}</th>
+                <th className="px-2 py-3 font-bold text-center border-b border-[#dbdac6]">{t('time')}</th>
+                <th className="px-2 py-3 font-bold text-center border-b border-[#dbdac6] rounded-tr-xl"></th>
               </tr>
             </thead>
             <tbody>
               {bookings.length === 0 ? (
                 <tr>
-                  <td colSpan={user?.role === 'instructor' ? 5 : 4} className="py-6 sm:py-10 text-center text-[#4A2C2A] bg-white">
+                  <td colSpan={4} className="py-6 text-center text-[#4A2C2A] bg-white border-b border-[#dbdac6] rounded-bl-xl rounded-br-xl">
                     <div className="flex flex-col items-center">
-                      <div className="mb-2 text-base font-medium sm:text-lg">{t('no_bookings_found')}</div>
-                      <div className="text-xs text-gray-500 sm:text-sm">{t('no_bookings_yet')}</div>
+                      <div className="mb-2 text-base font-bold">{t('no_bookings_found')}</div>
+                      <div className="text-xs text-gray-500">{t('no_bookings_yet')}</div>
                     </div>
                   </td>
                 </tr>
@@ -188,23 +211,21 @@ export default function BookingsPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.1 * index, ease: 'easeOut' }}
-                    className="text-center transition-colors duration-150 border-b border-gray-200"
+                    className={`text-center bg-white ${index < bookings.length - 1 ? 'border-b border-[#dbdac6]' : 'rounded-bl-xl rounded-br-xl'}`}
                   >
-                    <td className="py-1 px-1 sm:py-2 sm:px-2 text-[#4A2C2A] font-semibold break-words max-w-[80px] align-middle">{b.date}</td>
-                    <td className="py-1 px-1 sm:py-2 sm:px-2 text-[#4A2C2A] font-semibold break-words max-w-[100px] align-middle">{b.name}</td>
-                    <td className="py-1 px-1 sm:py-2 sm:px-2 text-[#4A2C2A] font-semibold break-words max-w-[80px] align-middle">
+                    <td className={`py-2 px-2 text-[#4A2C2A] font-bold ${index === bookings.length - 1 ? 'rounded-bl-xl' : ''}`}>{b.date}</td>
+                    <td className="py-2 px-2 text-[#4A2C2A] font-bold">{b.name}</td>
+                    <td className="py-2 px-2 text-[#4A2C2A] font-bold">
                       {b.from}{b.to && ` - ${b.to}`}
                     </td>
-                    <td className="px-1 py-1 align-middle sm:py-2 sm:px-2">
+                    <td className={`py-2 px-2 ${index === bookings.length - 1 ? 'rounded-br-xl' : ''}`}>
                       <button
                         onClick={() => handleCancelBooking(b.booking_id)}
-                        className="block px-2 py-1 mx-auto text-xs font-bold text-white transition-colors bg-red-600 rounded-full hover:bg-red-700">
+                        className="px-3 py-1 text-xs font-bold text-white bg-red-600 rounded-full hover:bg-red-700"
+                      >
                         {t('cancel')}
                       </button>
                     </td>
-                    {user?.role === 'instructor' && (
-                      <td className="py-1 px-1 sm:py-2 sm:px-2 text-[#4A2C2A] font-medium text-center break-words max-w-[80px] align-middle">{b.user}</td>
-                    )}
                   </motion.tr>
                 ))
               )}

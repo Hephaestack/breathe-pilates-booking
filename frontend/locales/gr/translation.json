@@ -61,6 +61,9 @@
   "cancel_error": "Σφάλμα κατά την ακύρωση της κράτησης",
   "cancel_connection_error": "Σφάλμα σύνδεσης κατά την ακύρωση!",
   "failed_fetch_user_data": "Αποτυχία φόρτωσης δεδομένων χρήστη",
-  "subscription_package_total": "Σύνολο Μαθημάτων"
-
+  "subscription_package_total": "Σύνολο Μαθημάτων",
+  "program_time": "{{time}} - {{className}}",
+  "participants_count": "{{current}} / {{max}}",
+  "total_lessons": "Σύνολο Μαθημάτων",
+  "manifest_description": "Διαχειριστείτε εύκολα τις κρατήσεις Pilates σας!"
 }

@@ -88,7 +88,7 @@ export default function SubscriptionsPage() {
               {subscription.subscription_model.includes('\u03c0\u03b1\u03ba\u03ad\u03c4\u03bf') && (
                 <div className="text-xs sm:text-lg text-[#4A2C2A] mt-2 text-center">
                   {subscription.package_total && (
-                    <div className='font-bold'><span className='text-lg'>Σύνολο Μαθημάτων:</span> {subscription.package_total}</div>
+                    <div className='font-bold'><span className='text-lg'>{t('total_lessons')}:</span> {subscription.package_total}</div>
                   )}
                   {subscription.remaining_classes !== null && (
                     <div className="text-xs sm:text-lg text-[#4A2C2A] mt-2 text-center">

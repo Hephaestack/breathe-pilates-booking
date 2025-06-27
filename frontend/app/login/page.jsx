@@ -96,24 +96,24 @@ export default function LoginPage() {
         className="flex flex-col items-center justify-center flex-1 w-full max-w-md "
       >
         {/* Glassmorphism Card */}
-        <div className="backdrop-blur-lg bg-white/80 shadow-[#3a2826] rounded-3xl shadow-2xl px-4 sm:px-8 py-6 sm:py-10 w-full flex flex-col items-center border border-[#a259ec]/30">
+        <div className="backdrop-blur-lg bg-white/80 shadow-[#3a2826] rounded-3xl shadow-2xl px-4 sm:px-8 py-6 sm:py-10 w-full flex flex-col items-center ">
           {/*Logo */}
-          <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full flex items-center justify-center shadow-lg mb-5 shadow-[#3a2826]">
+          <div className="w-32 h-32 rounded-full flex items-center justify-center shadow-lg mb-5 shadow-[#3a2826]">
             <img
               src="logo.svg"
               alt="Logo"
-              className="object-cover w-20 h-12 sm:w-28 sm:h-20"
+              className="object-cover w-32 h-24"
               style={{ background: 'none' }}
             />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-2 tracking-tight drop-shadow">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#4A2C2A]text-center mb-1 tracking-tight drop-shadow">
             Breath Pilates
           </h1>
-          <h1 className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-2 tracking-tight drop-shadow">
+          <h1 className="text-lg sm:text-lg font-bold text-[#4A2C2A] text-center tracking-tight drop-shadow">
             Efi Zikou
           </h1>
-          <p className="text-sm sm:text-base text-[#4A2C2A] text-center max-w-xs leading-relaxed mb-8">
-           
+          <p className="text-md sm:text-base text-[#4A2C2A] text-center max-w-xs leading-relaxed mb-5 mt-2">
+           move into happiness.
           </p>
           
           {/* Username/Phone Input */}

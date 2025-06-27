@@ -5,7 +5,7 @@
   "display": "standalone",
   "background_color": "#fffdd1",
   "theme_color": "#b3b18f",
-  "description": "Διαχειριστείτε εύκολα τις κρατήσεις Pilates σας!",
+  "description": "{t('manifest_description')}",
   "icons": [
     {
       "src": "/icon-192x192.png",

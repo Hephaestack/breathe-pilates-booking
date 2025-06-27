@@ -63,6 +63,10 @@
   "cancel_error": "Error cancelling booking",
   "cancel_connection_error": "Connection error while cancelling booking!",
   "failed_fetch_user_data": "Failed to fetch user data",
-  "subscription_package_total" : "Subscription Package Total"
+  "subscription_package_total" : "Subscription Package Total",
+  "program_time": "{{time}} - {{className}}",
+  "participants_count": "{{current}} / {{max}}",
+  "total_lessons": "Total Lessons",
+  "manifest_description": "Easily manage your Pilates bookings!"
 
 }
