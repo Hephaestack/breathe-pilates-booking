@@ -68,6 +68,7 @@
   "participants_count": "{{current}} / {{max}}",
   "total_lessons": "Total Lessons",
   "manifest_description": "Easily manage your Pilates bookings!",
-  "booking_in_progress": "Booking in progress..."
-
+  "booking_in_progress": "Booking in progress...",
+  "add_to_home_title": "Add Breathe Pilates to your home screen for quick access!",
+  "add_to_home_button": "Add to Home Screen"
 }
