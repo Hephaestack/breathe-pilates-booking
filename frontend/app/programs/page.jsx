@@ -49,7 +49,7 @@ export default function ProgramsPage() {
 
   useEffect(() => {
     setProgramsLoading(true);
-    fetch('http://localhost:8000/classes')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/classes`)
       .then(res => res.json())
       .then(data => {
         const grouped = {};
@@ -66,7 +66,7 @@ export default function ProgramsPage() {
     // Fetch user bookings if logged in
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (user.id) {
-      fetch(`http://localhost:8000/users/${user.id}`)
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`)
         .then(res => res.json())
         .then(data => {
           if (data && Array.isArray(data.bookings)) {
@@ -115,7 +115,7 @@ const handleBookProgram = async (program) => {
       status: 'confirmed'
     };
 
-    const response = await fetch(`http://localhost:8000/bookings?user_id=${user.id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings?user_id=${user.id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(bookingData)
