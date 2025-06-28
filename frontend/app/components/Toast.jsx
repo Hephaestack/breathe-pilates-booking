@@ -2,9 +2,25 @@
 
 import { useState, useEffect } from 'react';
 
-const Toast = ({ message, type = 'success', duration = 3000, onClose }) => {
+const Toast = ({ message, type = 'success', duration, onClose }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [isLeaving, setIsLeaving] = useState(false);
+
+  const getDuration = () => {
+    if (duration !== undefined) return duration;
+    switch (type) {
+      case 'error':
+        return 4000; // error stays for 4s
+      case 'success':
+        return 3000;
+      case 'warning':
+        return 4000;
+      case 'info':
+        return 3500;
+      default:
+        return 3000;
+    }
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -13,16 +29,16 @@ const Toast = ({ message, type = 'success', duration = 3000, onClose }) => {
         setIsVisible(false);
         onClose();
       }, 300); // Animation duration
-    }, duration);
+    }, getDuration());
 
     return () => clearTimeout(timer);
-  }, [duration, onClose]);
+  }, [onClose]);
 
   if (!isVisible) return null;
 
   const getToastStyles = () => {
-    // Remove max-w-xs and sm:max-w-sm to allow natural width, and reduce padding
-    const baseStyles = "relative flex items-center gap-2 px-4 py-2 rounded-xl shadow-2xl backdrop-blur-lg border font-semibold transition-all duration-300 transform w-auto min-w-[180px] max-w-[90vw]";
+    const baseStyles =
+      "relative flex items-center gap-2 px-4 py-2 rounded-xl shadow-2xl backdrop-blur-lg border font-semibold transition-all duration-300 transform w-auto min-w-[180px] max-w-[90vw]";
     switch (type) {
       case 'success':
         return `${baseStyles} bg-green-500/90 border-green-400/50 text-white ${isLeaving ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'}`;
