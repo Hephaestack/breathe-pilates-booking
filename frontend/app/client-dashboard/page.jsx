@@ -26,11 +26,11 @@ export default function Dashboard() {
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
     if (storedUser && storedUser.id) {
-      fetch('http://localhost:8000/users/' + storedUser.id)
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/` + storedUser.id)
         .then(res => res.json())
         .then(data => setUser({ ...storedUser, name: data.name }));
       // Fetch subscription info for dashboard
-      fetch(`http://localhost:8000/subscription?user_id=${storedUser.id}`, {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscription?user_id=${storedUser.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       })

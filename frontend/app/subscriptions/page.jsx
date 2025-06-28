@@ -31,7 +31,7 @@ export default function SubscriptionsPage() {
           setLoading(false);
           return;
         }        // Fetch subscription data from the backend
-        const response = await fetch(`http://localhost:8000/subscription?user_id=${storedUser.id}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscription?user_id=${storedUser.id}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

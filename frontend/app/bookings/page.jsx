@@ -48,7 +48,7 @@ export default function BookingsPage() {
         setUser(storedUser);
 
         // Fetch user data with bookings
-        const response = await fetch(`http://localhost:8000/users/${storedUser.id}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${storedUser.id}`);
         
         if (!response.ok) {
           throw new Error(t('failed_fetch_user_data'));
@@ -87,7 +87,7 @@ export default function BookingsPage() {
         return;
       }
 
-      const response = await fetch(`http://localhost:8000/bookings/${bookingId}?user_id=${storedUser.id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings/${bookingId}?user_id=${storedUser.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
