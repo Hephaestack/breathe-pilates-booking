@@ -1,7 +1,7 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import "../../i18n/i18n";
 
 export default function AddToHomeScreenPrompt() {
   const { t } = useTranslation();
@@ -64,7 +64,7 @@ export default function AddToHomeScreenPrompt() {
           }}
         >
           <button
-            className="absolute top-3 right-4 text-white text-2xl font-bold hover:text-[#b3b18f] focus:outline-none"
+            className="bg-white absolute top-3 right-4 text-white text-2xl font-bold hover:text-[#b3b18f] focus:outline-none"
             aria-label="Close"
             onClick={handleClose}
             style={{ background: "none", border: "none" }}
@@ -75,7 +75,7 @@ export default function AddToHomeScreenPrompt() {
             {t("add_to_home_title")}
           </p>
           <button
-            className="w-full px-4 py-3 text-base font-semibold shadow-md sm:text-lg btn-primary rounded-xl max-w-xs"
+            className=" bg-white hover:bg-[#d8d8d7] font-bold text-[#4A2C2A] w-full px-4 py-3 text-base  shadow-md sm:text-lg rounded-xl max-w-xs"
             onClick={handleInstallClick}
             style={{ minWidth: 0 }}
           >
