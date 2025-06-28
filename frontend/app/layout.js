@@ -1,6 +1,7 @@
 import "./globals.css";
 import ShowBackArrow from "./components/ShowBackArrow";
 import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
+import AddToHomeScreenPrompt from "./components/AddToHomeScreenPrompt";
 
 export const metadata = {
   title: "Breathe Pilates Efi Zikou",
@@ -18,6 +19,7 @@ export default function RootLayout({ children }) {
       <body className="antialiased">
         <ShowBackArrow />
         <ServiceWorkerRegister />
+        <AddToHomeScreenPrompt />
         {children}
       </body>
     </html>

@@ -66,5 +66,7 @@
   "participants_count": "{{current}} / {{max}}",
   "total_lessons": "Σύνολο Μαθημάτων",
   "manifest_description": "Διαχειριστείτε εύκολα τις κρατήσεις Pilates σας!",
-  "booking_in_progress": "Η κράτηση βρίσκεται σε εξέλιξη..."
+  "booking_in_progress": "Η κράτηση βρίσκεται σε εξέλιξη...",
+  "add_to_home_title": "Προσθέστε το Breathe Pilates στην αρχική σας οθόνη για γρήγορη πρόσβαση!",
+  "add_to_home_button": "Προσθήκη στην Αρχική Οθόνη"
 }
