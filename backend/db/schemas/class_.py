@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from uuid import UUID
 from datetime import date
-from typing import List
+from typing import List, Optional
 
 
 class ClassSummary(BaseModel):
@@ -30,7 +30,7 @@ class ClassCreate(ClassBase):
 
 class ClassOut(ClassBase):
     id: UUID
-    current_participants: int
+    current_participants: Optional[int] = 0
     max_participants: int
     users: List['UserSummary'] = []
 

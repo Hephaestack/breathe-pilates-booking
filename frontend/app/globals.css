@@ -25,6 +25,43 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   font-weight: bold;
+  margin: 0;
+  padding: 0;
+}
+
+/* Responsive base font size */
+html {
+  font-size: 16px;
+}
+@media (max-width: 640px) {
+  html {
+    font-size: 15px;
+  }
+  body {
+    padding: 0 0.5rem;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-size: 1.1em;
+    text-align: center;
+  }
+  .react-calendar {
+    padding: 0.5rem;
+    font-size: 1.05rem;
+  }
+  .btn-primary {
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  html {
+    font-size: 14px;
+  }
+  .react-calendar {
+    padding: 0.25rem;
+    font-size: 0.9rem;
+  }
 }
 
 /* --- React Calendar Custom Styles --- */
@@ -97,10 +134,6 @@ body {
   color: #4A2C2A !important;
   font-weight: bold;
 }
-.react-calendar__tile--now {
-  background: #3a383c!important;
-  color: #000 !important;
-}
 .react-calendar__month-view__days__day--weekend,
 .calendar-weekend {
   color: #A5957E !important;
@@ -116,7 +149,7 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-weight: 800; /* bold for headings */
   font-family: inherit;
-  background: linear-gradient(to right, #4A2C2A, #A5957E, #4A2C2A);
+  background: #4A2C2A;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -169,4 +202,48 @@ a:hover {
   }
   body.non-fixed-footer footer {
   position: static !important;
+}
+
+/* Remove the dot above the current date completely */
+.react-calendar__tile--now abbr::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Only style the current date when it is not active or has-program */
+.react-calendar__tile--now:not(.react-calendar__tile--active):not(.has-program) {
+  border: 3px solid #a5957e !important;
+  border-radius: 50% !important;
+  font-weight: 800 !important;
+}
+
+/* Remove border if current date is also active or has-program */
+.react-calendar__tile--now.react-calendar__tile--active,
+.react-calendar__tile--now.has-program {
+  border: none !important;
+}
+
+.react-calendar__tile.has-program,
+.react-calendar__tile--active,
+.react-calendar__tile--active.has-program {
+  border-radius: 50% !important;
+}
+
+h1 {
+  font-size: 2em;
+}
+h2 {
+  font-size: 1.6em;
+}
+h3 {
+  font-size: 1.3em;
+}
+h4 {
+  font-size: 1.15em;
+}
+h5 {
+  font-size: 1em;
+}
+h6 {
+  font-size: 0.95em;
 }

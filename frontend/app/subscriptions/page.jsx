@@ -3,58 +3,120 @@
 import { useState, useEffect } from 'react';
 import '../../i18n/i18n';
 import { useTranslation } from 'react-i18next';
-
-const mockSubscriptions = [
-  {
-    id: 1,
-    type: 'monthly',
-    name: 'Monthly Pilates',
-    expires: '2025-08-15',
-  },
-  {
-    id: 2,
-    type: 'package',
-    name: '10-Class Package',
-    remaining: 4,
-  },
-];
+import useToast from '../hooks/useToast';
+import ToastContainer from '../components/ToastContainer';
 
 export default function SubscriptionsPage() {
-  const [subscriptions] = useState(mockSubscriptions);
+  function formatDate(dateString) {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+  const [subscription, setSubscription] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { t } = useTranslation();
+  const { toasts, hideToast, showError } = useToast();
 
-  // Save the monthly subscription to localStorage for use in other pages
   useEffect(() => {
-    const monthly = subscriptions.find((sub) => sub.type === 'monthly');
-    if (monthly) {
-      localStorage.setItem('subscription', JSON.stringify(monthly));
-    }
-  }, [subscriptions]);
+    const fetchSubscription = async () => {
+      try {
+        // Get user from localStorage
+        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        
+        if (!storedUser.id) {
+          setError(t('user_not_found'));
+          setLoading(false);
+          return;
+        }        // Fetch subscription data from the backend
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscription?user_id=${storedUser.id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
+        if (!response.ok) {
+          throw new Error(t('failed_fetch_subscription'));
+        }
+
+        const data = await response.json();
+        setSubscription(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubscription();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
+        <div className="bg-white/80 rounded-2xl shadow-2xl px-4 py-6 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4A2C2A] mb-4"></div>
+            <p className="text-center text-[#4A2C2A] font-bold">{t('loading')}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
+        <div className="bg-white/80 rounded-2xl shadow-2xl px-4 py-6 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md">
+          <p className="text-center text-red-600">Error: {error}</p>
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
-      <div className="bg-white/80 rounded-2xl shadow-2xl px-4 py-6 border border-[#4A2C2A]/30  shadow-[#3a2826] w-full max-w-md">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-5 tracking-tight drop-shadow">
+    <div className="flex flex-col items-center justify-center min-h-screen px-2 py-8 sm:px-4">
+      <div className="bg-white/80 rounded-2xl shadow-2xl px-2 py-6 sm:px-4 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md">
+        <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-5 tracking-tight drop-shadow">
           {t('my_subscriptions')}
         </h1>
-        <ul className="space-y-5">
-          {subscriptions.map((sub) => (
-            <li key={sub.id} className="p-4 rounded-xl bg-[#dbdac6] shadow flex flex-col items-center text-[#4A2C2A]">
-              <span className="font-bold text-lg">{sub.name}</span>
-              {sub.type === 'monthly' && (
-                <span className="text-sm text-[#4A2C2A] mt-2">
-                  {t('expires')}: {sub.expires}
+        {subscription && (
+          <div className="space-y-5">
+            <div className="p-3 sm:p-4 rounded-xl bg-[#dbdac6] shadow flex flex-col items-center text-[#4A2C2A]">
+              <span className="text-3xl font-bold sm:text-3xl">{subscription.subscription_model}</span>
+              {/* Display different info based on subscription type */}
+              {subscription.subscription_model.includes('\u03c3\u03c5\u03bd\u03b4\u03c1\u03bf\u03bc\u03ae') && subscription.subscription_expires && (
+                <span className="font-bold text-lg text-[#4A2C2A] mt-2">
+                  {t('started')}: {formatDate(subscription.subscription_starts)}
                 </span>
               )}
-              {sub.type === 'package' && (
-                <span className="text-sm text-[#4A2C2A] mt-2">
-                  {t('remaining_lessons')}: {sub.remaining}
+              {subscription.subscription_model.includes('\u03c0\u03b1\u03ba\u03ad\u03c4\u03bf') && (
+                <div className="text-xs sm:text-lg text-[#4A2C2A] mt-2 text-center">
+                  {subscription.package_total && (
+                    <div className='font-bold'><span className='text-lg'>{t('total_lessons')}:</span> <span className='text-lg'>{subscription.package_total}</span></div>
+                  )}
+                  {subscription.remaining_classes !== null && (
+                    <div className="text-lg text-[#4A2C2A] mt-2 text-center">
+                      {t('remaining_lessons')}: {subscription.remaining_classes}
+                    </div>
+                  )}
+                </div>
+              )}
+              {subscription.subscription_starts && (
+                <span className="text-lg text-[#4A2C2A] mt-2">
+                  {t('expires')}: {formatDate(subscription.subscription_expires)}
                 </span>
               )}
-            </li>
-          ))}
-        </ul>
+            </div>
+          </div>
+        )}
+        {!subscription && (
+          <p className="font-bold text-center text-[#4A2C2A]">No subscription found</p>
+        )}
       </div>
+      <ToastContainer toasts={toasts} hideToast={hideToast} />
     </div>
   );
 }
