@@ -35,6 +35,7 @@ def create_booking(
         raise HTTPException(status_code=404, detail="Class not found")
 
     class_datetime_str = f"{class_obj.date} {class_obj.time}"
+    class_datetime_str = class_datetime_str[:16]
     class_datetime = datetime.strptime(class_datetime_str, "%Y-%m-%d %H:%M")
 
     if class_datetime - datetime.now() < timedelta(hours=1.5):
@@ -74,6 +75,7 @@ def cancel_booking(
         raise HTTPException(status_code=404, detail="Class not found")
     
     class_datetime_str = f"{class_obj.date} {class_obj.time}"
+    class_datetime_str = class_datetime_str[:16]
     class_datetime = datetime.strptime(class_datetime_str, "%Y-%m-%d %H:%M")
 
     if class_datetime - datetime.now() < timedelta(hours=2):
