@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import '../../i18n/i18n';
 import Footer from '../components/Footer';
+import useToast from '../hooks/useToast';
+import ToastContainer from '../components/ToastContainer';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,6 +19,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const { toasts, hideToast, showError } = useToast();
 
   // Load remembered username on mount (only in browser)
  useEffect(() => {
@@ -34,14 +37,13 @@ export default function LoginPage() {
   const handleLogin = async () => {
     setError('');
     if (!username || !password) {
-      setError(t('login_required'));
-      setShowToast(true);
+      showError(t('login_required'));
       return;
     }
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:8000/login', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: username, password: password }),
@@ -69,13 +71,11 @@ export default function LoginPage() {
           router.push('/client-dashboard');
         }
       } else {
-        setError(t('login_incorrect'));
-        setShowToast(true);
+        showError(t('login_incorrect'));
       }
     } catch (err) {
       setLoading(false);
-      setError(t('login_incorrect'));
-      setShowToast(true);
+      showError(t('login_incorrect'));
     }
   };
 
@@ -87,7 +87,7 @@ export default function LoginPage() {
   }, [showToast]);
 
   return (
-    <div className="flex flex-col items-center justify-center w-full min-h-screen px-4 py-8">
+    <div className="flex flex-col items-center justify-center w-full min-h-screen px-2 py-8 sm:px-4">
       <LanguageSwitcher />
       <motion.main
         initial={{ opacity: 0, y: 30 }}
@@ -96,27 +96,24 @@ export default function LoginPage() {
         className="flex flex-col items-center justify-center flex-1 w-full max-w-md "
       >
         {/* Glassmorphism Card */}
-        <div className="backdrop-blur-lg bg-white/80 shadow-[#3a2826]   rounded-3xl shadow-2xl px-8 py-10 w-full flex flex-col items-center border border-[#a259ec]/30">
-
+        <div className="backdrop-blur-lg bg-white/80 shadow-[#3a2826] rounded-3xl shadow-2xl px-4 sm:px-8 py-6 sm:py-10 w-full flex flex-col items-center ">
           {/*Logo */}
-        <div className="w-28 h-28  rounded-full  flex items-center justify-center shadow-lg mb-5 shadow-[#3a2826]  ">
-  <img
-    src="logo.svg"
-    alt="Logo"
-    className="w-50 h-30 object-cover "
-    style={{ background: 'none' }}
-  />
-</div>
-
-          <h1 className="text-3xl font-extrabold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-2 tracking-tight drop-shadow">
-            Breath Pilates 
+          <div className="w-32 h-32 rounded-full flex items-center justify-center shadow-lg mb-5 shadow-[#3a2826]">
+            <img
+              src="logo.svg"
+              alt="Logo"
+              className="object-cover w-32 h-24"
+              style={{ background: 'none' }}
+            />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#4A2C2A]text-center mb-1 tracking-tight drop-shadow">
+            Breath Pilates
           </h1>
-         <h1 className="text-2xl font-extrabold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-2 tracking-tight drop-shadow"
-         >
-          Efi Zikou
+          <h1 className="text-lg sm:text-lg font-bold text-[#4A2C2A] text-center tracking-tight drop-shadow">
+            Efi Zikou
           </h1>
-          <p className="text-base text-[#4A2C2A] text-center max-w-xs leading-relaxed mb-8">
-           Brand Phrase
+          <p className="text-md sm:text-base text-[#4A2C2A] text-center max-w-xs leading-relaxed mb-5 mt-2">
+           move into happiness.
           </p>
           
           {/* Username/Phone Input */}
@@ -167,6 +164,7 @@ export default function LoginPage() {
         </div>
       </motion.main>
       <Footer />
+      <ToastContainer toasts={toasts} hideToast={hideToast} />
     </div>
   );
 }

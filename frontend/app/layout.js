@@ -1,16 +1,7 @@
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ShowBackArrow from "./components/ShowBackArrow";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
+import AddToHomeScreenPrompt from "./components/AddToHomeScreenPrompt";
 
 export const metadata = {
   title: "Breathe Pilates Efi Zikou",
@@ -22,9 +13,13 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>
       <link rel="icon" type="image/png" href="/icon.png" />
+      <link rel="manifest" href="/manifest.json" />
+      <meta name="theme-color" content="#b3b18f" />
     </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className="antialiased">
         <ShowBackArrow />
+        <ServiceWorkerRegister />
+        <AddToHomeScreenPrompt />
         {children}
       </body>
     </html>

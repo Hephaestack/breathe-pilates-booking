@@ -30,7 +30,7 @@ class ClassCreate(ClassBase):
 
 class ClassOut(ClassBase):
     id: UUID
-    current_participants: int
+    current_participants: Optional[int] = 0
     max_participants: int
     users: List['UserSummary'] = []
 

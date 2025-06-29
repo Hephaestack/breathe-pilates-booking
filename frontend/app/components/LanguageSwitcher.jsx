@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import i18n from '../../i18n/i18n';
+import { useTranslation } from 'react-i18next';
 
 const languages = [
   { code: 'en', label: 'En', flag: '/gb.svg' },
@@ -8,6 +9,7 @@ const languages = [
 ];
 
 export default function LanguageSwitcher() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef();
 
@@ -55,7 +57,7 @@ export default function LanguageSwitcher() {
                 aria-selected={i18n.language === lang.code}
               >
                 <img src={lang.flag} alt={lang.label} className="w-5 h-6 rounded-full" />
-                <span>{lang.label}</span>
+                <span>{t(lang.label)}</span>
               </li>
             ))}
           </ul>

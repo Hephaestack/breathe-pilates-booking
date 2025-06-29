@@ -16,6 +16,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def root():
+    return {"message": "Breathe Pilates Booking API is running!"}
+
 app.include_router(users.router)
 app.include_router(classes.router)
 app.include_router(bookings.router)
