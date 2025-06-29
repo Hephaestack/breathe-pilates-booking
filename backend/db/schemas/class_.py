@@ -20,7 +20,7 @@ class ClassSummary(BaseModel):
 class ClassBase(BaseModel):
     class_name: str
     date: date
-    time: str
+    time: time
     max_participants: int
 
 
