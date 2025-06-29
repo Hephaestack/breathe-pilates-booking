@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from uuid import UUID
 from datetime import date, time
-from typing import List
+from typing import List, Optional
 
 
 class ClassSummary(BaseModel):
