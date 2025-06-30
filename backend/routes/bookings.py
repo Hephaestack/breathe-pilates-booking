@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from db.models import booking, class_
 from db.schemas.booking import BookingCreate, BookingOut
 from utils.db import get_db, get_current_user
+from utils.subscription import validate_booking_rules
 from db.models.user import User
 
 router = APIRouter()
@@ -40,6 +41,8 @@ def create_booking(
 
     if class_datetime - datetime.now() < timedelta(hours=1.5):
         raise HTTPException(status_code=400, detail="Booking cannot be booked")
+
+    validate_booking_rules(db=db, current_user=current_user, class_obj=class_obj)
 
     # creates new booking
     new_booking = booking.Booking(
