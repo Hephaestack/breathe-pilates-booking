@@ -25,17 +25,33 @@ export default function Dashboard() {
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
+    console.log('storedUser:', storedUser);
+    console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
     if (storedUser && storedUser.id) {
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/` + storedUser.id)
-        .then(res => res.json())
-        .then(data => setUser({ ...storedUser, name: data.name }));
+        .then(res => {
+          console.log('User fetch response:', res);
+          return res.json();
+        })
+        .then(data => {
+          console.log('User data:', data);
+          setUser({ ...storedUser, name: data.name });
+        })
+        .catch(err => console.error('User fetch error:', err));
       // Fetch subscription info for dashboard
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscription?user_id=${storedUser.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       })
-        .then(res => res.json())
-        .then(data => setSubscription(data));
+        .then(res => {
+          console.log('Subscription fetch response:', res);
+          return res.json();
+        })
+        .then(data => {
+          console.log('Subscription data:', data);
+          setSubscription(data);
+        })
+        .catch(err => console.error('Subscription fetch error:', err));
     }
   }, []);
 
@@ -76,9 +92,15 @@ export default function Dashboard() {
               {subscription.subscription_model?.includes('πακέτο') && subscription.remaining_classes !== null && (
                 <span>{t('remaining_lessons')}: {subscription.remaining_classes}</span>
               )}
-              {subscription.subscription_model?.includes('συνδρομή') && subscription.subscription_expires && (
-                <span>{t('expires')}: {formatDate(subscription.subscription_expires)}</span>
-              )}
+              {subscription.subscription_model?.includes('συνδρομή') && subscription.subscription_expires && (() => {
+                const expiry = new Date(subscription.subscription_expires);
+                const now = new Date();
+                if (expiry < now) {
+                  return <span className="text-red-600">{t('subscription_ended')}</span>;
+                } else {
+                  return <span>{t('subscription_ends')}: {formatDate(subscription.subscription_expires)}</span>;
+                }
+              })()}
             </div>
           )}
           <p className="text-xs sm:text-base text-[#8a7f7e] text-center max-w-xs leading-relaxed mb-8"></p>

@@ -70,5 +70,10 @@
   "manifest_description": "Easily manage your Pilates bookings!",
   "booking_in_progress": "Booking in progress...",
   "add_to_home_title": "Add Breathe Pilates to your home screen for quick access!",
-  "add_to_home_button": "Add to Home Screen"
+  "add_to_home_button": "Add to Home Screen",
+  "past_bookings": "Past Bookings",
+  "booking_due": "Due",
+   "status": "Status",
+  "subscription_ends": "The subscription ends",
+  "subscription_ended": "The subscription has ended"
 }

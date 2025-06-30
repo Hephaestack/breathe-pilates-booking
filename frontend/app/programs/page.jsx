@@ -24,6 +24,13 @@ function formatDateDisplay(date) {
   return `${day}/${month}/${year}`;
 }
 
+// Helper function to format time to HH:mm (removes seconds)
+function formatTime(timeString) {
+  if (!timeString) return '';
+  const [hour, minute] = timeString.split(':');
+  return `${hour}:${minute}`;
+}
+
 function getDatesInRange(start, end) {
   const dates = [];
   let current = new Date(start);
@@ -96,9 +103,20 @@ export default function ProgramsPage() {
   };
 
   // Get programs for the selected date
-  const programsForSelectedDate = selectedDate 
+  let programsForSelectedDate = selectedDate 
     ? programsByDate[formatDate(selectedDate)] || []
     : [];
+
+  // Sort programs by start time (earliest first)
+  programsForSelectedDate = programsForSelectedDate.slice().sort((a, b) => {
+    // Extract start time (handles 'HH:mm:ss' or 'HH:mm')
+    const getStart = (prog) => {
+      const time = prog.time.split('-')[0].trim();
+      const [h, m] = time.split(':');
+      return parseInt(h, 10) * 60 + parseInt(m, 10);
+    };
+    return getStart(a) - getStart(b);
+  });
 
 const handleBookProgram = async (program) => {
   try {
@@ -241,7 +259,7 @@ const handleBookProgram = async (program) => {
                     className="p-2 bg-white border-teal-300 rounded-2xl border-1 sm:p-4"
                   >
                     <div className="text-center">
-                      <div className="text-base sm:text-lg font-bold text-[#4A2C2A] mb-2">{prog.time} - {prog.class_name}</div>
+                      <div className="text-base sm:text-lg font-bold text-[#4A2C2A] mb-2">{formatTime(prog.time)} - {prog.class_name}</div>
                       <div className="text-xs sm:text-sm text-[#4A2C2A] mb-4">
                         {prog.current_participants} / {prog.max_participants}
                       </div>

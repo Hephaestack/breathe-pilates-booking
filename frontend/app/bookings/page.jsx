@@ -17,6 +17,14 @@ function formatDate(dateString) {
   return `${day}/${month}/${year}`;
 }
 
+// Helper function to format time to HH:mm (removes seconds)
+function formatTime(timeString) {
+  if (!timeString) return '';
+  // Handles both 'HH:mm:ss' and 'HH:mm' formats
+  const [hour, minute] = timeString.split(':');
+  return `${hour}:${minute}`;
+}
+
 // Get user from localStorage
 function getUser() {
   if (typeof window !== 'undefined') {
@@ -24,6 +32,15 @@ function getUser() {
     return user ? JSON.parse(user) : null;
   }
   return null;
+}
+
+// Helper to check if a booking is due (date+from time is in the past)
+function isBookingDue(dateStr, fromTime) {
+  if (!dateStr || !fromTime) return false;
+  const [day, month, year] = dateStr.split('/');
+  const [hour, minute] = fromTime.split(':');
+  const bookingDate = new Date(`${year}-${month}-${day}T${hour}:${minute}:00`);
+  return bookingDate < new Date();
 }
 
 export default function BookingsPage() {
@@ -57,17 +74,40 @@ export default function BookingsPage() {
         const userData = await response.json();
         
         // Transform bookings data to match the expected format
-        const transformedBookings = userData.bookings?.map(booking => ({
-          id: booking.id,
-          date: formatDate(booking.class_.date),
-          name: booking.class_.class_name,
-          from: booking.class_.time.split('-')[0]?.trim() || booking.class_.time,
-          to: booking.class_.time.split('-')[1]?.trim() || '',
-          user: userData.name,
-          status: booking.status,
-          class_id: booking.class_id,
-          booking_id: booking.id
-        })) || [];
+        let transformedBookings = userData.bookings?.map(booking => {
+          const [fromRaw, toRaw] = booking.class_.time.split('-').map(s => s.trim());
+          return {
+            id: booking.id,
+            date: formatDate(booking.class_.date),
+            name: booking.class_.class_name,
+            from: formatTime(fromRaw),
+            to: formatTime(toRaw),
+            user: userData.name,
+            status: booking.status,
+            class_id: booking.class_id,
+            booking_id: booking.id
+          };
+        }) || [];
+
+        // Sort bookings by date, then by 'from' time (earliest first)
+        transformedBookings = transformedBookings.slice().sort((a, b) => {
+          // Parse date as YYYY-MM-DD for comparison
+          const parseDate = (d) => {
+            const [day, month, year] = d.split('/');
+            return new Date(`${year}-${month}-${day}`);
+          };
+          const dateA = parseDate(a.date);
+          const dateB = parseDate(b.date);
+          if (dateA < dateB) return -1;
+          if (dateA > dateB) return 1;
+          // If same date, compare time
+          const getMinutes = (t) => {
+            if (!t) return 0;
+            const [h, m] = t.split(':');
+            return parseInt(h, 10) * 60 + parseInt(m, 10);
+          };
+          return getMinutes(a.from) - getMinutes(b.from);
+        });
 
         setBookings(transformedBookings);
       } catch (err) {
@@ -166,6 +206,11 @@ export default function BookingsPage() {
       </div>
     );
   }
+
+  // Split bookings into upcoming and due
+  const upcomingBookings = bookings.filter(b => !isBookingDue(b.date, b.from));
+  const dueBookings = bookings.filter(b => isBookingDue(b.date, b.from));
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-1 py-4 sm:px-4 sm:py-8">
       <motion.div
@@ -184,7 +229,7 @@ export default function BookingsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2, ease: 'easeOut' }}
-            className="w-full max-w-xs mx-auto text-xs sm:max-w-full sm:text-sm border-collapse"
+            className="w-full max-w-xs mx-auto text-xs border-collapse sm:max-w-full sm:text-sm"
           >
             <thead>
               <tr className="bg-[#dbdac6] text-[#4A2C2A] text-center">
@@ -195,7 +240,7 @@ export default function BookingsPage() {
               </tr>
             </thead>
             <tbody>
-              {bookings.length === 0 ? (
+              {upcomingBookings.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="py-6 text-center text-[#4A2C2A] bg-white border-b border-[#dbdac6] rounded-bl-xl rounded-br-xl">
                     <div className="flex flex-col items-center">
@@ -205,20 +250,20 @@ export default function BookingsPage() {
                   </td>
                 </tr>
               ) : (
-                bookings.map((b, index) => (
+                upcomingBookings.map((b, index) => (
                   <motion.tr
                     key={b.booking_id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.1 * index, ease: 'easeOut' }}
-                    className={`text-center bg-white ${index < bookings.length - 1 ? 'border-b border-[#dbdac6]' : 'rounded-bl-xl rounded-br-xl'}`}
+                    className={`text-center bg-white ${index < upcomingBookings.length - 1 ? 'border-b border-[#dbdac6]' : 'rounded-bl-xl rounded-br-xl'}`}
                   >
-                    <td className={`py-2 px-2 text-[#4A2C2A] font-bold ${index === bookings.length - 1 ? 'rounded-bl-xl' : ''}`}>{b.date}</td>
+                    <td className={`py-2 px-2 text-[#4A2C2A] font-bold ${index === upcomingBookings.length - 1 ? 'rounded-bl-xl' : ''}`}>{b.date}</td>
                     <td className="py-2 px-2 text-[#4A2C2A] font-bold">{b.name}</td>
                     <td className="py-2 px-2 text-[#4A2C2A] font-bold">
                       {b.from}{b.to && ` - ${b.to}`}
                     </td>
-                    <td className={`py-2 px-2 ${index === bookings.length - 1 ? 'rounded-br-xl' : ''}`}>
+                    <td className={`py-2 px-2 ${index === upcomingBookings.length - 1 ? 'rounded-br-xl' : ''}`}>
                       <button
                         onClick={() => handleCancelBooking(b.booking_id)}
                         className="px-3 py-1 text-xs font-bold text-white bg-red-600 rounded-full hover:bg-red-700"
@@ -233,6 +278,58 @@ export default function BookingsPage() {
           </motion.table>
         </div>
       </motion.div>
+      {/* Due Bookings Table */}
+      {dueBookings.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="bg-white/70 backdrop-blur-lg rounded-3xl shadow-2xl px-1 py-2 sm:px-6 sm:py-8 border border-[#4A2C2A]/30 shadow-[#3a2826] w-full max-w-md sm:max-w-2xl flex flex-col items-center mt-8"
+        >
+          <div className="flex items-center justify-center w-full mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-2xl font-bold text-gray-500 tracking-tight drop-shadow text-center w-full">
+              {t('past_bookings') || 'Past Bookings'}
+            </h2>
+          </div>
+          <div className="flex justify-center w-full">
+            <motion.table
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2, ease: 'easeOut' }}
+              className="w-full max-w-xs mx-auto text-xs border-collapse sm:max-w-full sm:text-sm"
+            >
+              <thead>
+                <tr className="bg-[#dbdac6] text-[#4A2C2A] text-center">
+                  <th className="px-2 py-3 font-bold text-center border-b border-[#dbdac6] rounded-tl-xl">{t('date')}</th>
+                  <th className="px-2 py-3 font-bold text-center border-b border-[#dbdac6]">{t('name')}</th>
+                  <th className="px-2 py-3 font-bold text-center border-b border-[#dbdac6]">{t('time')}</th>
+                  <th className="px-2 py-3 font-bold text-center border-b border-[#dbdac6] rounded-tr-xl">{t('status') || 'Status'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dueBookings.map((b, index) => (
+                  <motion.tr
+                    key={b.booking_id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.1 * index, ease: 'easeOut' }}
+                    className={`text-center bg-white opacity-60 line-through ${index < dueBookings.length - 1 ? 'border-b border-[#dbdac6]' : 'rounded-bl-xl rounded-br-xl'}`}
+                  >
+                    <td className={`py-2 px-2 text-[#4A2C2A] font-bold ${index === dueBookings.length - 1 ? 'rounded-bl-xl' : ''}`}>{b.date}</td>
+                    <td className="py-2 px-2 text-[#4A2C2A] font-bold">{b.name}</td>
+                    <td className="py-2 px-2 text-[#4A2C2A] font-bold">
+                      {b.from}{b.to && ` - ${b.to}`}
+                    </td>
+                    <td className={`py-2 px-2 ${index === dueBookings.length - 1 ? 'rounded-br-xl' : ''}`}>
+                      <span className="text-xs font-bold text-gray-400">{t('booking_due') || 'Due'}</span>
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </motion.table>
+          </div>
+        </motion.div>
+      )}
       <ToastContainer toasts={toasts} hideToast={hideToast} />
     </div>
   );
