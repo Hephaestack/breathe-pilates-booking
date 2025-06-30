@@ -68,5 +68,10 @@
   "manifest_description": "Διαχειριστείτε εύκολα τις κρατήσεις Pilates σας!",
   "booking_in_progress": "Η κράτηση βρίσκεται σε εξέλιξη...",
   "add_to_home_title": "Προσθέστε το Breathe Pilates στην αρχική σας οθόνη για γρήγορη πρόσβαση!",
-  "add_to_home_button": "Προσθήκη στην Αρχική Οθόνη"
+  "add_to_home_button": "Προσθήκη στην Αρχική Οθόνη",
+  "past_bookings": "Προηγούμενες Κρατήσεις",
+  "booking_due": "Έληξε",
+  "status": "Κατάσταση",
+  "subscription_ends": "Η συνδρομή λήγει",
+  "subscription_ended": "Η συνδρομή έχει λήξει"
 }
