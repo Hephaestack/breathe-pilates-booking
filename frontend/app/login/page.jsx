@@ -107,7 +107,7 @@ export default function LoginPage() {
             />
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#4A2C2A]text-center mb-1 tracking-tight drop-shadow">
-            Breath Pilates
+            Breathe Pilates
           </h1>
           <h1 className="text-lg sm:text-lg font-bold text-[#4A2C2A] text-center tracking-tight drop-shadow">
             Efi Zikou

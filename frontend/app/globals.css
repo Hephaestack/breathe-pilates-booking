@@ -69,7 +69,6 @@ html {
 .react-calendar {
   border: none !important;         /* Remove border */
   border-radius: 1.5rem;
-  box-shadow: 0 8px 32px 0 rgba(74,44,42,0.18); /* Add a stronger shadow */
   background: #fff;
   font-family: inherit;
   padding: 1rem;

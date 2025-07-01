@@ -303,7 +303,7 @@ export default function BookingsPage() {
                   <th className="px-2 py-3 font-bold text-center border-b border-[#dbdac6] rounded-tl-xl">{t('date')}</th>
                   <th className="px-2 py-3 font-bold text-center border-b border-[#dbdac6]">{t('name')}</th>
                   <th className="px-2 py-3 font-bold text-center border-b border-[#dbdac6]">{t('time')}</th>
-                  <th className="px-2 py-3 font-bold text-center border-b border-[#dbdac6] rounded-tr-xl">{t('status') || 'Status'}</th>
+                  <th className="px-2 py-3 font-bold text-center border-b border-[#dbdac6] rounded-tr-xl"></th>
                 </tr>
               </thead>
               <tbody>
@@ -313,7 +313,8 @@ export default function BookingsPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.1 * index, ease: 'easeOut' }}
-                    className={`text-center bg-white opacity-60 line-through ${index < dueBookings.length - 1 ? 'border-b border-[#dbdac6]' : 'rounded-bl-xl rounded-br-xl'}`}
+                    className={`text-center bg-white opacity-60 line-through ${index === dueBookings.length - 1 ? 'border-b-0' : ''}
+                    ${index < dueBookings.length - 1 ? 'border-b border-[#dbdac6]' : 'rounded-bl-xl rounded-br-xl'}`}
                   >
                     <td className={`py-2 px-2 text-[#4A2C2A] font-bold ${index === dueBookings.length - 1 ? 'rounded-bl-xl' : ''}`}>{b.date}</td>
                     <td className="py-2 px-2 text-[#4A2C2A] font-bold">{b.name}</td>
@@ -321,7 +322,6 @@ export default function BookingsPage() {
                       {b.from}{b.to && ` - ${b.to}`}
                     </td>
                     <td className={`py-2 px-2 ${index === dueBookings.length - 1 ? 'rounded-br-xl' : ''}`}>
-                      <span className="text-xs font-bold text-gray-400">{t('booking_due') || 'Due'}</span>
                     </td>
                   </motion.tr>
                 ))}

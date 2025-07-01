@@ -9,6 +9,7 @@ const withPwaConfig = withPWA({
 
 const nextConfig = {
   reactStrictMode: true,
+  output: 'export', 
   ...withPwaConfig,
 };
 
