@@ -113,7 +113,7 @@ export default function LoginPage() {
             Efi Zikou
           </h1>
           <p className="text-md sm:text-base text-[#4A2C2A] text-center max-w-xs leading-relaxed mb-5 mt-2">
-           move into happiness.
+           move into happiness
           </p>
           
           {/* Username/Phone Input */}
