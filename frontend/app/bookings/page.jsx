@@ -242,11 +242,10 @@ export default function BookingsPage() {
             <tbody>
               {upcomingBookings.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="py-6 text-center text-[#4A2C2A] bg-white border-b border-[#dbdac6] rounded-bl-xl rounded-br-xl">
+                  <td colSpan={4} className="py-6 text-center text-[#4A2C2A] bg-white   rounded-bl-xl rounded-br-xl">
                     <div className="flex flex-col items-center">
                       <div className="mb-2 text-base font-bold">{t('no_bookings_found')}</div>
-                      <div className="text-xs text-gray-500">{t('no_bookings_yet')}</div>
-                    </div>
+                     </div>
                   </td>
                 </tr>
               ) : (
@@ -313,7 +312,7 @@ export default function BookingsPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.1 * index, ease: 'easeOut' }}
-                    className={`text-center bg-white opacity-60 line-through ${index === dueBookings.length - 1 ? 'border-b-0' : ''}
+                    className={`text-center bg-white opacity-60  ${index === dueBookings.length - 1 ? 'border-b-0' : ''}
                     ${index < dueBookings.length - 1 ? 'border-b border-[#dbdac6]' : 'rounded-bl-xl rounded-br-xl'}`}
                   >
                     <td className={`py-2 px-2 text-[#4A2C2A] font-bold ${index === dueBookings.length - 1 ? 'rounded-bl-xl' : ''}`}>{b.date}</td>
