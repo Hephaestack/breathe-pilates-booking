@@ -9,10 +9,13 @@ from db.schemas.admin import AdminLogin
 router = APIRouter()
 
 @router.post("/admin/login", tags=["Admin"])
-def login_admin(login_data: AdminLogin, db: Session = Depends(get_db)):
+def login_admin(
+    login_data: AdminLogin,
+    db: Session = Depends(get_db)
+):
     admin = db.query(Admin).filter(Admin.username == login_data.username).first()
     if not admin or not verify_password(login_data.password, admin.password):
         raise HTTPException(status_code=401, detail="Μη έγκυρα στοιχεία σύνδεσης.")
     
-    access_token = create_access_token(data={"sub": str(admin.id)})
+    access_token = create_access_token(admin)
     return {"access_token": access_token, "token_type": "bearer"}
