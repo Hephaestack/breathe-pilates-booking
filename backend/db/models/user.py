@@ -6,7 +6,6 @@ from sqlalchemy.orm import relationship
 
 from db.database import Base
 
-
 class SubscriptionModel(str, enum.Enum):
     subscription_2 = "συνδρομή *2"
     subscription_3 = "συνδρομή 3"
@@ -18,12 +17,10 @@ class SubscriptionModel(str, enum.Enum):
     cadillac_package_10 = "πακέτο Cadillac 10"
     free = "ελεύθερη"
 
-
 class UserRole(str, enum.Enum):
     client = "client"
     instructor = "instructor"
     admin = "admin"
-
 
 class User(Base):
     __tablename__ = "users"
