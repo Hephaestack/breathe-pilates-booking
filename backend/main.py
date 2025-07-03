@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes import users, classes, bookings
+from routes import users, classes, bookings, admin_auth
 from db.database import engine, Base
 
 Base.metadata.create_all(bind=engine)
@@ -16,10 +16,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
+@app.get("/", tags=["Healtch Check"])
 def root():
     return {"message": "Breathe Pilates Booking API is running!"}
 
 app.include_router(users.router)
 app.include_router(classes.router)
 app.include_router(bookings.router)
+app.include_router(admin_auth.router)
