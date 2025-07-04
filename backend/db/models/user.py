@@ -34,7 +34,7 @@ class User(Base):
     password = Column(Integer, unique=True, index=True, nullable=False)
     name = Column(String, nullable=False)
     city = Column(String)
-    gender = Column(Enum(Gender))
+    gender = Column(Enum(Gender, name="gender"))
     role = Column(Enum(UserRole), nullable=False)
     subscription_model = Column(Enum(SubscriptionModel), nullable=False)
     package_total = Column(Integer, nullable=True)
