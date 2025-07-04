@@ -3,7 +3,7 @@ from uuid import UUID
 from typing import List, Optional
 from datetime import date
 
-from db.models.user import UserRole, SubscriptionModel
+from db.models.user import UserRole, SubscriptionModel, Gender
 
 class LoginRequest(BaseModel):
     phone: str
@@ -30,6 +30,8 @@ class UserBase(BaseModel):
     phone: str
     password: int
     name: str
+    city: str
+    gender: Gender
     role: UserRole
     subscription_model: Optional[SubscriptionModel] = None
     package_total: Optional[int] = None

@@ -6,6 +6,10 @@ from sqlalchemy.orm import relationship
 
 from db.database import Base
 
+class Gender(str, enum.Enum):
+    male = "Άνδρας"
+    female = "Γυναίκα"
+
 class SubscriptionModel(str, enum.Enum):
     subscription_2 = "συνδρομή *2"
     subscription_3 = "συνδρομή 3"
@@ -29,6 +33,8 @@ class User(Base):
     phone = Column(String, unique=True, nullable=False)
     password = Column(Integer, unique=True, index=True, nullable=False)
     name = Column(String, nullable=False)
+    city = Column(String)
+    gender = Column(Enum(Gender))
     role = Column(Enum(UserRole), nullable=False)
     subscription_model = Column(Enum(SubscriptionModel), nullable=False)
     package_total = Column(Integer, nullable=True)
