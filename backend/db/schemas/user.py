@@ -28,11 +28,11 @@ class UserSummary(BaseModel):
 
 class UserBase(BaseModel):
     phone: str
-    password: int
+    password: Optional[int] = None
     name: str
-    city: str
-    gender: Gender
-    role: UserRole
+    city: Optional[str] = None
+    gender: Optional[Gender] = "Γυναίκα"
+    role: Optional[UserRole] = None
     subscription_model: Optional[SubscriptionModel] = None
     package_total: Optional[int] = None
     subscription_starts: Optional[date] = None
