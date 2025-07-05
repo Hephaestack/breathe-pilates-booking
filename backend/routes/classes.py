@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
 from datetime import datetime, timedelta, date
 
-from backend.db.models import template_class
+from db.models import template_class
 from db.models import booking, class_
 from db.schemas.class_ import ClassOut
 from utils.db import get_db
