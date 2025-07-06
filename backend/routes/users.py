@@ -5,8 +5,10 @@ from sqlalchemy.orm import Session, joinedload
 
 from db.database import SessionLocal
 from db.models import booking, user as user_model
+from db.models.admin import Admin
 from db.schemas.user import UserCreate, UserOut, UserSummary, LoginRequest, LoginResponse, SubscriptionOut
 from utils.db import get_db
+from utils.auth import get_current_admin
 
 router = APIRouter()
 
@@ -23,7 +25,8 @@ def login(
 
 @router.get("/users", response_model=List[UserSummary], tags=["Users"])
 def get_users(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
 ):
     return db.query(user_model.User).all()
 
@@ -54,7 +57,8 @@ def get_user(
 @router.post("/users", response_model=UserOut, tags=["Users"])
 def create_user(
     user_data: UserCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
 ):
     existing = db.query(user_model.User).filter(user_model.User.phone == user_data.phone).first()
     if existing:
