@@ -58,7 +58,7 @@ def get_current_admin(
     db: Session = Depends(get_db)
 ) -> Admin:
     try:
-        payload = jwt.decode(token.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         admin_id = payload.get("sub")
         if not admin_id or admin_id == "None":
             raise HTTPException(status_code=401, detail="Δεν επιτρέπεται η πρόσβαση.")
