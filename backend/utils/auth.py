@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
@@ -41,8 +41,20 @@ def create_access_token(
     print("Final token payload: ", payload)
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
+def get_token_from_header_or_cookie(
+        request: Request,
+        authorization: HTTPAuthorizationCredentials = Depends(bearer_scheme)
+) -> str:
+    if authorization:
+        return authorization.credentials
+    
+    token = request.cookies.get("token")
+    if token:
+        return token
+    raise HTTPException(status_code=401, detail="Δεν βρήθεκε token.")
+
 def get_current_admin(
-    token: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    token: str = Depends(get_token_from_header_or_cookie),
     db: Session = Depends(get_db)
 ) -> Admin:
     try:
