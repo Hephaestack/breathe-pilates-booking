@@ -1,4 +1,5 @@
 import os
+import uuid
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -62,10 +63,13 @@ def get_current_admin(
         admin_id = payload.get("sub")
         if not admin_id or admin_id == "None":
             raise HTTPException(status_code=401, detail="Δεν επιτρέπεται η πρόσβαση.")
+    
+        admin_uuid = uuid.UUID(admin_id)
+
     except JWTError:
         raise HTTPException(status_code=401, detail="Μη έγκυρο token.")
 
-    admin = db.query(Admin).filter(Admin.id == admin_id).first()
+    admin = db.query(Admin).filter(Admin.id == admin_uuid).first()
     if not admin:
         raise HTTPException(status_code=401, detail="Ο διαχειριστής δεν βρέθηκε.")
 
