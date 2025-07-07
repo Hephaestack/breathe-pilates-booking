@@ -1,14 +1,16 @@
+from uuid import uuid4
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
-from datetime import datetime, time, timedelta
+from datetime import date, datetime, timedelta
 
 from db.models.admin import Admin
 from utils.db import get_db
 from utils.auth import get_current_admin, verify_password, create_access_token
 from db.schemas.admin import AdminLogin
 from db.schemas.class_ import ClassOut
-from db.models import class_ as class_model, booking as booking_model
+from db.models import template_class, class_ as class_model, booking as booking_model, user as user_model
+from db.schemas.user import UserOut, UserCreate, UserSummary
 
 router = APIRouter()
 
@@ -47,3 +49,85 @@ def get_classes_by_day(
         c.current_participants = len(c.users)
 
     return classes
+
+@router.post("/admin/users", response_model=UserOut, tags=["Admin"])
+def create_user(
+    user_data: UserCreate,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    existing = db.query(user_model.User).filter(user_model.User.phone == user_data.phone).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="User already exists")
+
+    user_dict = user_data.model_dump()
+    requested_password = user_dict.get("password")
+
+    if not requested_password:
+        latest = (
+            db.query(user_model.User)
+            .filter(user_model.User.password != None)
+            .order_by(user_model.User.password.desc())
+            .first()
+        )
+        next_password = (latest.password + 1) if latest and latest.password else 1
+        user_dict["password"] = next_password
+
+    new_user = user_model.User(**user_dict)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return new_user
+
+@router.get("/admin/users", response_model=List[UserSummary], tags=["Admin"])
+def get_users(
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    return db.query(user_model.User).all()
+
+@router.post("/admin/generater-schedule", tags=["Admin"])
+def generate_schedule(
+    start_date: date = Query(..., description="Start date (YYYY-MM-DD)"),
+    end_date: date = Query(..., description="End date (YYYY-MM-DD)"),
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    if start_date > end_date:
+        raise HTTPException(status_code=400, detail="Start date must be before end date.")
+    
+    templates = db.query(template_class.TemplateClass).filter(template_class.TemplateClass.is_active == True).all()
+    created_classes = []
+
+    days = (end_date - start_date).days + 1
+    for i in range(days):
+        current_date = start_date + timedelta(days=i)
+        weekday = current_date.weekday()
+
+        for template in templates:
+            if template.weekday == weekday:
+                exists = db.query(class_model.Class).filter(
+                    class_model.Class.date == current_date,
+                    class_model.Class.time == template.time,
+                    class_model.Class.class_name == template.class_name
+                ).first()
+
+                if not exists:
+                    new_class = class_model.Class(
+                        id=uuid4(),
+                        class_name = template.class_name,
+                        date=current_date,
+                        time=template.time,
+                        current_participants=0,
+                        max_participants=template.max_participants
+                    )
+                    db.add(new_class)
+                    created_classes.append(new_class)
+    
+    db.commit()
+
+    return {
+        "created": len(created_classes),
+        "message": f"{len(created_classes)} classes created from {start_date} to {end_date}"
+    }

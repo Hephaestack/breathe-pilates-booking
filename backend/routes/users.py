@@ -1,14 +1,10 @@
-from typing import List
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
-from db.database import SessionLocal
 from db.models import booking, user as user_model
-from db.models.admin import Admin
-from db.schemas.user import UserCreate, UserOut, UserSummary, LoginRequest, LoginResponse, SubscriptionOut
+from db.schemas.user import UserOut, LoginRequest, LoginResponse, SubscriptionOut
 from utils.db import get_db
-from utils.auth import get_current_admin
 
 router = APIRouter()
 
@@ -22,13 +18,6 @@ def login(
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     return {"id": db_user.id}
-
-@router.get("/users", response_model=List[UserSummary], tags=["Users"])
-def get_users(
-    db: Session = Depends(get_db),
-    admin: Admin = Depends(get_current_admin)
-):
-    return db.query(user_model.User).all()
 
 @router.get("/users/{user_id}", response_model=UserOut, tags=["Users"])
 def get_user(
@@ -53,36 +42,6 @@ def get_user(
             ])
 
     return user_obj
-
-@router.post("/users", response_model=UserOut, tags=["Users"])
-def create_user(
-    user_data: UserCreate,
-    db: Session = Depends(get_db),
-    admin: Admin = Depends(get_current_admin)
-):
-    existing = db.query(user_model.User).filter(user_model.User.phone == user_data.phone).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="User already exists")
-
-    user_dict = user_data.model_dump()
-    requested_password = user_dict.get("password")
-
-    if not requested_password:
-        latest = (
-            db.query(user_model.User)
-            .filter(user_model.User.password != None)
-            .order_by(user_model.User.password.desc())
-            .first()
-        )
-        next_password = (latest.password + 1) if latest and latest.password else 1
-        user_dict["password"] = next_password
-
-    new_user = user_model.User(**user_dict)
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    return new_user
 
 @router.post("/subscription", response_model=SubscriptionOut, tags=["Subscription"])
 def get_user_subscription(
