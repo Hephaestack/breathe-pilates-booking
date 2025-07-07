@@ -1,6 +1,7 @@
 from uuid import uuid4
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session, joinedload
 from datetime import date, datetime, timedelta
 
@@ -24,7 +25,22 @@ def login_admin(
         raise HTTPException(status_code=401, detail="Μη έγκυρα στοιχεία σύνδεσης.")
     
     access_token = create_access_token(admin)
-    return {"access_token": access_token, "token_type": "bearer"}
+
+    response = JSONResponse(
+        content={"message": "Επιτυχής σύνδεση"}
+    )
+
+    response.set_cookie(
+        key="token",
+        value=access_token,
+        httponly=True,
+        secure=True,         
+        samesite="lax",      
+        max_age=60 * 60,     
+        path="/"
+    )
+
+    return response
 
 @router.get("/admin/classes", response_model=List[ClassOut], tags=["Admin"])
 def get_classes_by_day(
