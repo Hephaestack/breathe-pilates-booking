@@ -22,6 +22,11 @@ class SubscriptionOut(BaseModel):
 class UserSummary(BaseModel):
     id: UUID
     name: str
+    city: Optional[str] = None
+    gender: Optional[Gender] = "Γυναίκα"
+    phone: str
+    subscription_model: Optional[SubscriptionModel] = None
+    subscription_expires: Optional[date] = None
 
     class Config:
         from_attributes = True

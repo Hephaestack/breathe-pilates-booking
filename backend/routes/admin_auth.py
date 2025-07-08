@@ -147,3 +147,10 @@ def generate_schedule(
         "created": len(created_classes),
         "message": f"{len(created_classes)} classes created from {start_date} to {end_date}"
     }
+
+@router.get("/admin/template_classes", tags=["Admin"])
+def get_template_classes(
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    return db.query(template_class.TemplateClass).all()
