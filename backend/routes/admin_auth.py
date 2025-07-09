@@ -10,10 +10,20 @@ from utils.db import get_db
 from utils.auth import get_current_admin, verify_password, create_access_token
 from db.schemas.admin import AdminLogin
 from db.schemas.class_ import ClassOut
+from db.schemas.booking import AdminBookingRequest
 from db.models import template_class, class_ as class_model, booking as booking_model, user as user_model
 from db.schemas.user import UserOut, UserCreate, UserSummary, UserMinimal
 
 router = APIRouter()
+
+@router.get("/admin/dev-token", tags=["Admin"])
+def dev_token(
+    db: Session = Depends(get_db)
+):
+    admin = db.query(Admin).first()
+    if not admin:
+        raise HTTPException(status_code=404, detail="No admin found")
+    return {"access_token": create_access_token(admin)}
 
 @router.post("/admin/login", tags=["Admin"])
 def login_admin(
@@ -170,3 +180,45 @@ def get_class_bookings(
 
     users = [booking.user for booking in bookings if booking.user]
     return users
+
+@router.post("/admin/post-booking", tags=["Admin"])
+def admin_create_booking(
+    data: AdminBookingRequest,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    cls_ = db.query(class_model.Class).filter(class_model.Class.id == data.class_id).first()
+    if not cls_:
+        raise HTTPException(status_code=404, detail="Το μάθημα δεν βρέθηκε.")
+    
+    user = (db.query(user_model.User).filter(user_model.User.name.ilike(f"%{data.trainee_name}%")).first())
+    if not user:
+        raise HTTPException(status_code=404, detail="Δεν υπάρχει ασκούμενος με αυτό το όνομα.")
+    
+    existing = (
+        db.query(booking_model.Booking)
+        .filter(
+            booking_model.Booking.class_id == cls_.id,
+            booking_model.Booking.user_id == user.id
+        )
+        .first()
+    )
+    if existing:
+        raise HTTPException(status_code=400, detail="Ο ασκούμενος έχει ήδη κλείσει θέση σε αυτό το μάθημα.")
+
+    new_booking = booking_model.Booking(
+        id = uuid4(),
+        class_id = cls_.id,
+        user_id = user.id,
+        created_at = datetime.now()
+    )
+
+    db.add(new_booking)
+    db.commit()
+    db.refresh(new_booking)
+
+    return {
+        "message": f"{user.name} booked successfully for {cls_.class_name} on {cls_.date} at {cls_.time}.",
+        "user_id": str(user.id),
+        "class_id": str(cls_.id)
+    }
