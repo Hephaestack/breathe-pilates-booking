@@ -1,4 +1,4 @@
-from uuid import uuid4
+from uuid import UUID, uuid4
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
@@ -11,7 +11,7 @@ from utils.auth import get_current_admin, verify_password, create_access_token
 from db.schemas.admin import AdminLogin
 from db.schemas.class_ import ClassOut
 from db.models import template_class, class_ as class_model, booking as booking_model, user as user_model
-from db.schemas.user import UserOut, UserCreate, UserSummary
+from db.schemas.user import UserOut, UserCreate, UserSummary, UserMinimal
 
 router = APIRouter()
 
@@ -154,3 +154,19 @@ def get_template_classes(
     admin: Admin = Depends(get_current_admin)
 ):
     return db.query(template_class.TemplateClass).all()
+
+@router.get("/admin/bookings/{class_id}", response_model=List[UserMinimal], tags=["Admin"])
+def get_class_bookings(
+    class_id: UUID,
+    db: Session = Depends(get_db),
+    # admin: Admin = Depends(get_current_admin)
+):
+    bookings = (
+        db.query(booking_model.Booking)
+        .filter(booking_model.Booking.class_id == class_id)
+        .join(booking_model.Booking.user)
+        .all()
+    )
+
+    users = [booking.user for booking in bookings if booking.user]
+    return users

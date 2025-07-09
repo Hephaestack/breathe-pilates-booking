@@ -54,5 +54,9 @@ class UserOut(UserBase):
     class Config:
         from_attributes = True
 
+class UserMinimal(BaseModel):
+    id: UUID
+    name: str
+
 from db.schemas.booking import BookingOut
 UserOut.model_rebuild()
