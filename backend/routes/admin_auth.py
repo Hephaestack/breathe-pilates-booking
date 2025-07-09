@@ -159,7 +159,7 @@ def get_template_classes(
 def get_class_bookings(
     class_id: UUID,
     db: Session = Depends(get_db),
-    # admin: Admin = Depends(get_current_admin)
+    admin: Admin = Depends(get_current_admin)
 ):
     bookings = (
         db.query(booking_model.Booking)
