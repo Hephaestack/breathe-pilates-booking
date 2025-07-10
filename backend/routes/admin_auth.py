@@ -1,6 +1,6 @@
 from uuid import UUID, uuid4
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session, joinedload
 from datetime import date, datetime, timedelta
@@ -222,3 +222,18 @@ def admin_create_booking(
         "user_id": str(user.id),
         "class_id": str(cls_.id)
     }
+
+@router.delete("/admin/users/{user_id}", tags=["Admin"])
+def delete_user(
+    user_id: UUID = Path(..., description="Το ID του χρήστη που θα διαγραφεί"),
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    user = db.query(user_model.User).filter(user_model.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Ο χρήστης δεν βρέθηκε.")
+    
+    db.delete(user)
+    db.commit()
+
+    return {"message": f"Ο χρήστης με ID {user_id} διαγράφτηκε επιτυχώς."}
