@@ -10,7 +10,7 @@ from utils.db import get_db
 from utils.auth import get_current_admin, verify_password, create_access_token
 from db.schemas.admin import AdminLogin
 from db.schemas.class_ import ClassOut
-from db.schemas.booking import AdminBookingRequest
+from db.schemas.booking import AdminBookingRequest, AdminBookingOut
 from db.models import template_class, class_ as class_model, booking as booking_model, user as user_model
 from db.schemas.user import UserOut, UserCreate, UserSummary, UserMinimal
 
@@ -237,3 +237,39 @@ def delete_user(
     db.commit()
 
     return {"message": f"Ο χρήστης με ID {user_id} διαγράφτηκε επιτυχώς."}
+
+@router.delete("/admin/bookings/{booking_id}", tags=["Admin"])
+def delete_booking(
+    booking_id: UUID = Path(..., description="Το ID της κράτησης."),
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    booking = db.query(booking_model.Booking).filter(booking_model.Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Η κράτηση δεν βρέθηκε.")
+    
+    db.delete(booking)
+    db.commit()
+
+    return {"message": f"Η κράτηση με ID {booking_id} διαγράφηκε επιτυχώς."}
+
+@router.get("/admin/bookings", response_model= List[AdminBookingOut], tags=["Admin"])
+def get_bookings(
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    bookings = (
+        db.query(booking_model.Booking)
+        .join(booking_model.Booking.user)
+        .join(booking_model.Booking.class_)
+        .all()
+    )
+
+    return [
+        AdminBookingOut(
+            booking_id = booking.id,
+            user_name = booking.user.name,
+            class_name = booking.class_.class_name,
+        )
+        for booking in bookings
+    ]
