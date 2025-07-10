@@ -25,7 +25,7 @@ class UserSummary(BaseModel):
     city: Optional[str] = None
     gender: Optional[Gender] = "Γυναίκα"
     phone: str
-    created_at: Optional[date]
+    created_at: Optional[datetime]
     subscription_model: Optional[SubscriptionModel] = None
     subscription_expires: Optional[date] = None
 
