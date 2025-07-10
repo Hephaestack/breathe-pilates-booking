@@ -1,8 +1,9 @@
 import uuid
 import enum
-from sqlalchemy import Column, String, Enum, Date, Integer
+from sqlalchemy import Column, DateTime, String, Enum, Date, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
+from datetime import datetime, timezone
 
 from db.database import Base
 
@@ -35,6 +36,7 @@ class User(Base):
     name = Column(String, nullable=False)
     city = Column(String)
     gender = Column(Enum(Gender, name="gender"))
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     role = Column(Enum(UserRole), nullable=True)
     subscription_model = Column(Enum(SubscriptionModel), nullable=True)
     package_total = Column(Integer, nullable=True)

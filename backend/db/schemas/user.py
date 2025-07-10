@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from uuid import UUID
 from typing import List, Optional
-from datetime import date
+from datetime import date, datetime
 
 from db.models.user import UserRole, SubscriptionModel, Gender
 
@@ -25,6 +25,7 @@ class UserSummary(BaseModel):
     city: Optional[str] = None
     gender: Optional[Gender] = "Γυναίκα"
     phone: str
+    created_at: Optional[date]
     subscription_model: Optional[SubscriptionModel] = None
     subscription_expires: Optional[date] = None
 
@@ -37,6 +38,7 @@ class UserBase(BaseModel):
     name: str
     city: Optional[str] = None
     gender: Optional[Gender] = "Γυναίκα"
+    created_at: Optional[datetime]
     role: Optional[UserRole] = None
     subscription_model: Optional[SubscriptionModel] = None
     package_total: Optional[int] = None
