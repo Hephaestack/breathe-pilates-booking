@@ -38,7 +38,7 @@ class UserBase(BaseModel):
     name: str
     city: Optional[str] = None
     gender: Optional[Gender] = "Γυναίκα"
-    created_at: Optional[datetime]
+    created_at: Optional[datetime] = None
     role: Optional[UserRole] = None
     subscription_model: Optional[SubscriptionModel] = None
     package_total: Optional[int] = None
@@ -59,6 +59,18 @@ class UserOut(UserBase):
 class UserMinimal(BaseModel):
     id: UUID
     name: str
+
+class UserUpdateRequest(BaseModel):
+    name: Optional[str]
+    phone: Optional[str]
+    city: Optional[str]
+    gender: Optional[Gender]
+    role: Optional[UserRole]
+    subscription_model: Optional[SubscriptionModel]
+    package_total: Optional[int]
+    subscription_starts: Optional[date]
+    subscription_expires: Optional[date]
+    remaining_classes: Optional[int]
 
 from db.schemas.booking import BookingOut
 UserOut.model_rebuild()

@@ -13,8 +13,12 @@ class Gender(str, enum.Enum):
 
 class SubscriptionModel(str, enum.Enum):
     subscription_2 = "συνδρομή *2"
-    subscription_3 = "συνδρομή 3"
-    subscription_5 = "συνδρομή 5"
+    subscription_3 = "συνδρομή *3"
+    subscription_5 = "συνδρομή *5"
+    family_2 = "family *2"
+    family_3 = "family *3"
+    family_3_cadillac = "family *3 + Cadillac"
+    yoga_4 = "πακέτο 4 YOGA"
     package_10 = "πακέτο 10"
     package_15 = "πακέτο 15"
     package_20 = "πακέτο 20"

@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session, joinedload
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 from db.models.admin import Admin
 from utils.db import get_db
@@ -12,7 +12,7 @@ from db.schemas.admin import AdminLogin
 from db.schemas.class_ import ClassOut
 from db.schemas.booking import AdminBookingRequest, AdminBookingOut
 from db.models import template_class, class_ as class_model, booking as booking_model, user as user_model
-from db.schemas.user import UserOut, UserCreate, UserSummary, UserMinimal
+from db.schemas.user import UserOut, UserCreate, UserSummary, UserMinimal, UserUpdateRequest
 
 router = APIRouter()
 
@@ -98,6 +98,9 @@ def create_user(
         )
         next_password = (latest.password + 1) if latest and latest.password else 1
         user_dict["password"] = next_password
+
+    if not user_dict.get("created_at"):
+        user_dict["created_at"] = datetime.now(timezone.utc)
 
     new_user = user_model.User(**user_dict)
     db.add(new_user)
@@ -187,6 +190,7 @@ def admin_create_booking(
     db: Session = Depends(get_db),
     admin: Admin = Depends(get_current_admin)
 ):
+    print("Searching for trainee name:", data.trainee_name)
     cls_ = db.query(class_model.Class).filter(class_model.Class.id == data.class_id).first()
     if not cls_:
         raise HTTPException(status_code=404, detail="Το μάθημα δεν βρέθηκε.")
@@ -273,3 +277,20 @@ def get_bookings(
         )
         for booking in bookings
     ]
+
+@router.put("/admin/users/{user_id}", tags=["Admin"])
+def update_user(
+    user_id: UUID,
+    data: UserUpdateRequest,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    user = db.query(user_model.User).filter(user_model.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Ο χρήστης δεν βρέθηκε.")
+    
+    for field, value in data.model_dump(exclude_unset=True).items():
+        setattr(user, field, value)
+
+    db.commit()
+    return {"detail": "Τα στοιχεία του χρήστη ανανεώθηκαν επιτυχώς."}
