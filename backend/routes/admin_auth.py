@@ -294,3 +294,27 @@ def update_user(
 
     db.commit()
     return {"detail": "Τα στοιχεία του χρήστη ανανεώθηκαν επιτυχώς."}
+
+@router.get("/admin/subscriptions", tags=["Admin"])
+def get_subscription_models(
+    admin: Admin = Depends(get_current_admin)
+):
+    return [model.value for model in user_model.SubscriptionModel]
+
+@router.get("/admin/subscription/{user_id}", tags=["Admin"])
+def get_user_subscription_model(
+    user_id: UUID,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    user = db.query(user_model.User).filter(user_model.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Ο χρήστης δεν βρέθηκε.")
+    
+    return {
+        "subscription_model": user.subscription_model,
+        "package_total": user.package_total,
+        "subscription_starts": user.subscription_starts,
+        "subscription_expires": user.subscription_expires,
+        "remaining_classes": user.remaining_classes
+    }
