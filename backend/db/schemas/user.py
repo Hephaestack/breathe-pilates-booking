@@ -67,10 +67,10 @@ class UserUpdateRequest(BaseModel):
     gender: Optional[Gender]
     role: Optional[UserRole] = None
     subscription_model: Optional[SubscriptionModel] = None
-    package_total: Optional[int] = None
+    package_total: Optional[int] = 0
     subscription_starts: Optional[date] = None
     subscription_expires: Optional[date] = None
-    remaining_classes: Optional[int] = None
+    remaining_classes: Optional[int] = 0
 
 from db.schemas.booking import BookingOut
 UserOut.model_rebuild()
