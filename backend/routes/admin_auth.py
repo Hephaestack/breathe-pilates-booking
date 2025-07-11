@@ -324,3 +324,24 @@ def get_user_subscription_model(
         "subscription_expires": user.subscription_expires,
         "remaining_classes": user.remaining_classes
     }
+
+@router.delete("/admin/classes/{class_id}", tags=["Admin"])
+def delete_class(
+    class_id: UUID,
+    db: Session = Depends(get_db),
+    # admin: Admin = Depends(get_current_admin)
+):
+    class_obj = db.query(class_model.Class).filter(class_model.Class.id == class_id).first()
+    if not class_obj:
+        raise HTTPException(status_code=404, detail="Το τμήμα δεν βρέθηκε.")
+    
+    active_bookings = db.query(booking_model.Booking).filter(booking_model.Booking.class_id == class_id).count()
+    print(active_bookings)
+
+    if active_bookings > 0:
+        raise HTTPException(status_code=404, detail="Το τμήμα έχει κρατήσεις.")
+    
+    db.delete(class_obj)
+    db.commit()
+    
+    return {"detail": "Το τμήμα διαγράφηκε επιτυχώς."}
