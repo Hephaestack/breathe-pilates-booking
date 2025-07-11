@@ -181,8 +181,14 @@ def get_class_bookings(
         .all()
     )
 
-    users = [booking.user for booking in bookings if booking.user]
-    return users
+    return [
+        UserMinimal(
+            user_id = booking.user.id,
+            name = booking.user.name,
+            booking_id = booking.id,
+        )
+        for booking in bookings if booking.user
+    ]
 
 @router.post("/admin/post-booking", tags=["Admin"])
 def admin_create_booking(

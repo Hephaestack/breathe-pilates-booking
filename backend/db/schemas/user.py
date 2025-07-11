@@ -57,8 +57,9 @@ class UserOut(UserBase):
         from_attributes = True
 
 class UserMinimal(BaseModel):
-    id: UUID
+    user_id: UUID
     name: str
+    booking_id: UUID
 
 class UserUpdateRequest(BaseModel):
     name: Optional[str]
