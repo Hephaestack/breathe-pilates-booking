@@ -1,9 +1,9 @@
 from pydantic import BaseModel
 from uuid import UUID
 from typing import List, Optional
-from datetime import date
+from datetime import date, datetime
 
-from db.models.user import UserRole, SubscriptionModel
+from db.models.user import UserRole, SubscriptionModel, Gender
 
 class LoginRequest(BaseModel):
     phone: str
@@ -22,15 +22,24 @@ class SubscriptionOut(BaseModel):
 class UserSummary(BaseModel):
     id: UUID
     name: str
+    city: Optional[str] = None
+    gender: Optional[Gender] = "Γυναίκα"
+    phone: str
+    created_at: Optional[datetime]
+    subscription_model: Optional[SubscriptionModel] = None
+    subscription_expires: Optional[date] = None
 
     class Config:
         from_attributes = True
 
 class UserBase(BaseModel):
     phone: str
-    password: int
+    password: Optional[int] = None
     name: str
-    role: UserRole
+    city: Optional[str] = None
+    gender: Optional[Gender] = "Γυναίκα"
+    created_at: Optional[datetime] = None
+    role: Optional[UserRole] = None
     subscription_model: Optional[SubscriptionModel] = None
     package_total: Optional[int] = None
     subscription_starts: Optional[date] = None
@@ -46,6 +55,23 @@ class UserOut(UserBase):
 
     class Config:
         from_attributes = True
+
+class UserMinimal(BaseModel):
+    user_id: UUID
+    name: str
+    booking_id: UUID
+
+class UserUpdateRequest(BaseModel):
+    name: Optional[str]
+    phone: Optional[str]
+    city: Optional[str]
+    gender: Optional[Gender]
+    role: Optional[UserRole] = None
+    subscription_model: Optional[SubscriptionModel] = None
+    package_total: Optional[int] = 0
+    subscription_starts: Optional[date] = None
+    subscription_expires: Optional[date] = None
+    remaining_classes: Optional[int] = 0
 
 from db.schemas.booking import BookingOut
 UserOut.model_rebuild()

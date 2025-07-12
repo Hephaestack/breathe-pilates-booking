@@ -23,3 +23,4 @@ def get_class(
         c.current_participants = len(c.users)
 
     return classes
+
