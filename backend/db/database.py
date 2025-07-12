@@ -5,20 +5,12 @@ from sqlalchemy.ext.declarative import declarative_base
 from dotenv import load_dotenv
 import os
 
-# Load environment variables from .env
 load_dotenv()
 
-# Fetch variables
-USER = os.getenv("USER")
-PASSWORD = os.getenv("PASSWORD")
-HOST = os.getenv("HOST")
-PORT = os.getenv("PORT")
-DBNAME = os.getenv("DB_NAME")
+DATABASE_URL = os.getenv("DB_URL")
+if not DATABASE_URL:
+    raise ValueError("DB_URL not found in .env")
 
-# Construct the SQLAlchemy connection string
-DATABASE_URL = f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}?sslmode=require"
-
-# Create the SQLAlchemy engine
 engine = create_engine(
     DATABASE_URL,
     poolclass=QueuePool,
@@ -28,7 +20,6 @@ engine = create_engine(
     pool_recycle=1800
 )
 
-# Test the connection
 try:
     with engine.connect() as connection:
         print("Connection successful!")
