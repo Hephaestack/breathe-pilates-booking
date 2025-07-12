@@ -12,7 +12,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://breathe-pilates-booking-frontned-static.onrender.com",
-        "https://breathe-pilates-admin-panel.onrender.com"
+        "https://breathe-pilates-admin-panel.onrender.com",
+        "https://admin.breathepilatesefizikou.com",
+        "https://app.breathepilatesefizikou.com"
     ],
     allow_credentials=True,
     allow_methods=["*"],
