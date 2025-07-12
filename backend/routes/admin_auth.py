@@ -8,6 +8,7 @@ from datetime import date, datetime, timedelta, timezone
 from db.models.admin import Admin
 from utils.db import get_db
 from utils.auth import get_current_admin, verify_password, create_access_token
+from utils.calc_class import calculate_remaining_classes
 from db.schemas.admin import AdminLogin
 from db.schemas.class_ import ClassOut
 from db.schemas.booking import AdminBookingRequest, AdminBookingOut
@@ -227,6 +228,8 @@ def admin_create_booking(
     db.commit()
     db.refresh(new_booking)
 
+    calculate_remaining_classes(user.id, db)
+
     return {
         "message": f"{user.name} booked successfully for {cls_.class_name} on {cls_.date} at {cls_.time}.",
         "user_id": str(user.id),
@@ -260,6 +263,8 @@ def delete_booking(
     
     db.delete(booking)
     db.commit()
+
+    calculate_remaining_classes(booking.user_id, db)
 
     return {"message": f"Η κράτηση με ID {booking_id} διαγράφηκε επιτυχώς."}
 

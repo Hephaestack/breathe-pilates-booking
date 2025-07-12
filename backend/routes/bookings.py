@@ -8,6 +8,7 @@ from db.models import booking, class_
 from db.schemas.booking import BookingCreate, BookingOut
 from utils.db import get_db, get_current_user
 from utils.subscription import validate_booking_rules
+from utils.calc_class import calculate_remaining_classes
 from db.models.user import User
 
 router = APIRouter()
@@ -22,7 +23,6 @@ def create_booking(
 ):
     user_id = current_user.id
     
-    # checking for existing booking of user in same class
     existing = (
         db.query(booking.Booking)
         .filter(
@@ -34,7 +34,7 @@ def create_booking(
     if existing:
         raise HTTPException(status_code=400, detail="Έχετε ήδη κάνει κράτηση σε αυτό το μάθημα.")
 
-    class_obj = db.query(class_.Class).get(booking_data.class_id)
+    class_obj = db.query(class_.Class).filter_by(id=booking_data.class_id).first()
     if not class_obj:
         raise HTTPException(status_code=404, detail="Το μάθημα δεν βρέθηκε.")
 
@@ -50,7 +50,6 @@ def create_booking(
 
     validate_booking_rules(db=db, current_user=current_user, class_obj=class_obj)
 
-    # creates new booking
     new_booking = booking.Booking(
         user_id = user_id,
         class_id = booking_data.class_id,
@@ -63,6 +62,8 @@ def create_booking(
 
     new_booking.class_ = class_obj
     class_obj.current_participants = len([b for b in class_obj.bookings if b.user])
+
+    calculate_remaining_classes(user_id, db)
 
     return new_booking
 
@@ -95,5 +96,7 @@ def cancel_booking(
 
     db.delete(booking_obj)
     db.commit()
+
+    calculate_remaining_classes(booking_obj.user_id, db)
 
     return
