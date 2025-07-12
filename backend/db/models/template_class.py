@@ -1,9 +1,8 @@
+from db.database import Base
 from sqlalchemy import Boolean, Column, String, Time, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
 import uuid
-
-Base = declarative_base()
 
 class TemplateClass(Base):
     __tablename__ = "template_classes"
