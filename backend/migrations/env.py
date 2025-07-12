@@ -13,7 +13,7 @@ from db.models.user import User
 from db.models.class_ import Class
 from db.models.booking import Booking
 
-load_dotenv()
+load_dotenv(override=True)
 
 database_url = os.getenv("DB_URL")
 if not database_url:

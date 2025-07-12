@@ -11,7 +11,7 @@ from jose import JWTError, jwt
 from utils import get_db
 from db.models.admin import Admin
 
-load_dotenv()
+load_dotenv(override=True)
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
