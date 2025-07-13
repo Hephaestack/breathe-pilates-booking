@@ -29,7 +29,7 @@ def validate_booking_rules(db: Session, current_user: user.User, class_obj: clas
         raise HTTPException(status_code=400, detail="Μπορείτε να κάνετε μόνο 1 κράτηση ανά ημέρα.")
 
     now = datetime.now()
-    start_of_week = now - timedelta(days=now.weekday())
+    start_of_week = class_obj.date - timedelta(days=class_obj.date.weekday())
     end_of_week = start_of_week + timedelta(days=6)
 
     # Weekly bookings
@@ -38,11 +38,16 @@ def validate_booking_rules(db: Session, current_user: user.User, class_obj: clas
         .join(class_.Class)
         .filter(
             booking.Booking.user_id == user_id,
-            class_.Class.date >= start_of_week.date(),
-            class_.Class.date <= end_of_week.date()
+            class_.Class.date >= start_of_week,
+            class_.Class.date <= end_of_week
         )
         .count()
     )
+
+    print("Start of week:", start_of_week)
+    print("End of week:", end_of_week)
+    print("Class date:", class_obj.date)
+    print(weekly_bookings)
 
     # Total bookings
     total_bookings = (
@@ -50,6 +55,8 @@ def validate_booking_rules(db: Session, current_user: user.User, class_obj: clas
         .filter(booking.Booking.user_id == user_id)
         .count()
     )
+
+    print(total_bookings)
 
     # Rules
     if subscription == SubscriptionModel.subscription_2 and weekly_bookings >= 2:

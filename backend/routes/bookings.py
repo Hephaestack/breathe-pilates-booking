@@ -63,7 +63,7 @@ def create_booking(
     new_booking.class_ = class_obj
     class_obj.current_participants = len([b for b in class_obj.bookings if b.user])
 
-    calculate_remaining_classes(user_id, db)
+    # calculate_remaining_classes(user_id, db)
 
     return new_booking
 
@@ -97,6 +97,6 @@ def cancel_booking(
     db.delete(booking_obj)
     db.commit()
 
-    calculate_remaining_classes(booking_obj.user_id, db)
+    # calculate_remaining_classes(booking_obj.user_id, db)
 
     return

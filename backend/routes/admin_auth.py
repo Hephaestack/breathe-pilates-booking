@@ -228,7 +228,7 @@ def admin_create_booking(
     db.commit()
     db.refresh(new_booking)
 
-    calculate_remaining_classes(user.id, db)
+    # calculate_remaining_classes(user.id, db)
 
     return {
         "message": f"{user.name} booked successfully for {cls_.class_name} on {cls_.date} at {cls_.time}.",
@@ -264,7 +264,7 @@ def delete_booking(
     db.delete(booking)
     db.commit()
 
-    calculate_remaining_classes(booking.user_id, db)
+    # calculate_remaining_classes(booking.user_id, db)
 
     return {"message": f"Η κράτηση με ID {booking_id} διαγράφηκε επιτυχώς."}
 
