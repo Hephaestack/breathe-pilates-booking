@@ -9,8 +9,9 @@ from db.models.user import SubscriptionModel
 def validate_booking_rules(db: Session, current_user: user.User, class_obj: class_.Class):
     subscription = current_user.subscription_model
     # Check subscription expiration
-    if current_user.subscription_expires and current_user.subscription_expires < datetime.now().date():
-        raise HTTPException(status_code=400, detail="Η συνδρομή σας έχει λήξει. Παρακαλώ ανανεώστε πριν κάνετε κράτηση.")
+    if current_user.subscription_expires and current_user.subscription_expires < class_obj.date:
+        raise HTTPException(
+            status_code=400, detail="Η συνδρομή σας θα έχει λήξει μέχρι την ημέρα του μαθήματος. Παρακαλώ ανανεώστε πριν κάνετε κράτηση.")
     
     user_id = current_user.id
     class_name = class_obj.class_name.lower()
