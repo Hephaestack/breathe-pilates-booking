@@ -14,7 +14,9 @@ app.add_middleware(
         "https://breathe-pilates-booking-frontned-static.onrender.com",
         "https://breathe-pilates-admin-panel.onrender.com",
         "https://admin.breathepilatesefizikou.com",
-        "https://app.breathepilatesefizikou.com"
+        "https://app.breathepilatesefizikou.com",
+        "https://breathe-pilates-admin-panel-dev.onrender.com",
+        "https://breathe-pilates-booking-frontend.onrender.com"
     ],
     allow_credentials=True,
     allow_methods=["*"],
