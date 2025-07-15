@@ -23,7 +23,7 @@ class UserSummary(BaseModel):
     id: UUID
     name: str
     city: Optional[str] = None
-    gender: Optional[Gender] = "Γυναίκα"
+    password: Optional[int]
     phone: str
     created_at: Optional[datetime]
     subscription_model: Optional[SubscriptionModel] = None
