@@ -9,8 +9,9 @@ from db.models.user import SubscriptionModel
 def validate_booking_rules(db: Session, current_user: user.User, class_obj: class_.Class):
     subscription = current_user.subscription_model
     # Check subscription expiration
-    if current_user.subscription_expires and current_user.subscription_expires < datetime.now().date():
-        raise HTTPException(status_code=400, detail="Η συνδρομή σας έχει λήξει. Παρακαλώ ανανεώστε πριν κάνετε κράτηση.")
+    if current_user.subscription_expires and current_user.subscription_expires < class_obj.date:
+        raise HTTPException(
+            status_code=400, detail="Η συνδρομή σας θα έχει λήξει μέχρι την ημέρα του μαθήματος. Παρακαλώ ανανεώστε πριν κάνετε κράτηση.")
     
     user_id = current_user.id
     class_name = class_obj.class_name.lower()
@@ -28,7 +29,6 @@ def validate_booking_rules(db: Session, current_user: user.User, class_obj: clas
     if same_day_bookings >= 1:
         raise HTTPException(status_code=400, detail="Μπορείτε να κάνετε μόνο 1 κράτηση ανά ημέρα.")
 
-    now = datetime.now()
     start_of_week = class_obj.date - timedelta(days=class_obj.date.weekday())
     end_of_week = start_of_week + timedelta(days=6)
 
