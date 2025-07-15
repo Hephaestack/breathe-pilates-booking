@@ -14,6 +14,7 @@ from db.schemas.class_ import ClassOut
 from db.schemas.booking import AdminBookingRequest, AdminBookingOut
 from db.models import template_class, class_ as class_model, booking as booking_model, user as user_model
 from db.schemas.user import UserOut, UserCreate, UserSummary, UserMinimal, UserUpdateRequest
+from db.schemas.template_class import TemplateClassCreate
 
 router = APIRouter()
 
@@ -350,3 +351,38 @@ def delete_class(
     db.commit()
     
     return {"detail": "Το τμήμα διαγράφηκε επιτυχώς."}
+
+@router.post("/admin/template_classes/", tags=["Admin"])
+def create_template_class(
+    data: TemplateClassCreate,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    new_template = template_class.TemplateClass(
+        class_name=data.class_name,
+        weekday=data.weekday,
+        time=data.time,
+        max_participants=data.max_participants,
+        is_active=True,
+    )
+    
+    db.add(new_template)
+    db.commit()
+    db.refresh(new_template)
+    
+    return new_template
+
+@router.delete("/admin/template_classes/{template_id}", tags=["Admin"])
+def delete_template_class(
+    template_id: UUID,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    template = db.query(template_class.TemplateClass).filter(template_class.TemplateClass.id == template_id).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="Το μάθημα δεν βρέθηκε.")
+    
+    db.delete(template)
+    db.commit()
+
+    return {"detail": "Το μάθημα διαγράφηκε με επιτυχία."}

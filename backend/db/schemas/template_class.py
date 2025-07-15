@@ -3,14 +3,18 @@ from uuid import UUID
 from datetime import time
 
 class TemplateClassBase(BaseModel):
+    id: UUID
     class_name: str
     weekday: int
     time: time
     max_participants: int
     is_active: bool
 
-class TemplateClassCreate(TemplateClassBase):
-    id: UUID
+class TemplateClassCreate(BaseModel):
+    class_name: str
+    weekday: int
+    time: time
+    max_participants: int
 
 class TemplateClassOut(TemplateClassBase):
     id: UUID
