@@ -118,7 +118,7 @@ def get_users(
 ):
     return db.query(user_model.User).all()
 
-@router.post("/admin/generater-schedule", tags=["Admin"])
+@router.post("/admin/generate_schedule", tags=["Admin Classes"])
 def generate_schedule(
     start_date: date = Query(..., description="Start date (YYYY-MM-DD)"),
     end_date: date = Query(..., description="End date (YYYY-MM-DD)"),
@@ -170,7 +170,7 @@ def get_template_classes(
 ):
     return db.query(template_class.TemplateClass).all()
 
-@router.get("/admin/bookings/{class_id}", response_model=List[UserMinimal], tags=["Admin"])
+@router.get("/admin/bookings/{class_id}", response_model=List[UserMinimal], tags=["Admin Bookings"])
 def get_class_bookings(
     class_id: UUID,
     db: Session = Depends(get_db),
@@ -192,7 +192,7 @@ def get_class_bookings(
         for booking in bookings if booking.user
     ]
 
-@router.post("/admin/post-booking", tags=["Admin Bookings"])
+@router.post("/admin/bookings", tags=["Admin Bookings"])
 def admin_create_booking(
     data: AdminBookingRequest,
     db: Session = Depends(get_db),
@@ -247,6 +247,8 @@ def delete_user(
     if not user:
         raise HTTPException(status_code=404, detail="Ο χρήστης δεν βρέθηκε.")
     
+    db.query(booking_model.Booking).filter(booking_model.Booking.user_id == user_id).delete()
+
     db.delete(user)
     db.commit()
 
@@ -313,7 +315,7 @@ def get_subscription_models(
 ):
     return [model.value for model in user_model.SubscriptionModel]
 
-@router.get("/admin/subscription/{user_id}", tags=["Admin Subscriptions"])
+@router.get("/admin/subscriptions/{user_id}", tags=["Admin Subscriptions"])
 def get_user_subscription_model(
     user_id: UUID,
     db: Session = Depends(get_db),
