@@ -14,10 +14,11 @@ from db.schemas.class_ import ClassOut
 from db.schemas.booking import AdminBookingRequest, AdminBookingOut
 from db.models import template_class, class_ as class_model, booking as booking_model, user as user_model
 from db.schemas.user import UserOut, UserCreate, UserSummary, UserMinimal, UserUpdateRequest
+from db.schemas.template_class import TemplateClassCreate
 
 router = APIRouter()
 
-@router.get("/admin/dev-token", tags=["Admin"])
+@router.get("/admin/dev-token", tags=["Admin Login"])
 def dev_token(
     db: Session = Depends(get_db)
 ):
@@ -26,7 +27,7 @@ def dev_token(
         raise HTTPException(status_code=404, detail="No admin found")
     return {"access_token": create_access_token(admin)}
 
-@router.post("/admin/login", tags=["Admin"])
+@router.post("/admin/login", tags=["Admin Login"])
 def login_admin(
     login_data: AdminLogin,
     db: Session = Depends(get_db)
@@ -45,7 +46,7 @@ def login_admin(
         key="token",
         value=access_token,
         httponly=True,
-        secure=True,         
+        secure=True,       
         samesite="none",
         max_age=60 * 60 * 24,     
         path="/"
@@ -53,7 +54,7 @@ def login_admin(
 
     return response
 
-@router.get("/admin/classes", response_model=List[ClassOut], tags=["Admin"])
+@router.get("/admin/classes", response_model=List[ClassOut], tags=["Admin Classes"])
 def get_classes_by_day(
     date: str = Query(..., description="Date in YYYY-MM-DD format"),
     db: Session = Depends(get_db),
@@ -77,7 +78,7 @@ def get_classes_by_day(
 
     return classes
 
-@router.post("/admin/users", response_model=UserOut, tags=["Admin"])
+@router.post("/admin/users", response_model=UserOut, tags=["Admin Users"])
 def create_user(
     user_data: UserCreate,
     db: Session = Depends(get_db),
@@ -110,14 +111,14 @@ def create_user(
 
     return new_user
 
-@router.get("/admin/users", response_model=List[UserSummary], tags=["Admin"])
+@router.get("/admin/users", response_model=List[UserSummary], tags=["Admin Users"])
 def get_users(
     db: Session = Depends(get_db),
     admin: Admin = Depends(get_current_admin)
 ):
     return db.query(user_model.User).all()
 
-@router.post("/admin/generater-schedule", tags=["Admin"])
+@router.post("/admin/generate_schedule", tags=["Admin Classes"])
 def generate_schedule(
     start_date: date = Query(..., description="Start date (YYYY-MM-DD)"),
     end_date: date = Query(..., description="End date (YYYY-MM-DD)"),
@@ -162,14 +163,14 @@ def generate_schedule(
         "message": f"{len(created_classes)} classes created from {start_date} to {end_date}"
     }
 
-@router.get("/admin/template_classes", tags=["Admin"])
+@router.get("/admin/template_classes", tags=["Admin Classes"])
 def get_template_classes(
     db: Session = Depends(get_db),
     admin: Admin = Depends(get_current_admin)
 ):
     return db.query(template_class.TemplateClass).all()
 
-@router.get("/admin/bookings/{class_id}", response_model=List[UserMinimal], tags=["Admin"])
+@router.get("/admin/bookings/{class_id}", response_model=List[UserMinimal], tags=["Admin Bookings"])
 def get_class_bookings(
     class_id: UUID,
     db: Session = Depends(get_db),
@@ -191,7 +192,7 @@ def get_class_bookings(
         for booking in bookings if booking.user
     ]
 
-@router.post("/admin/post-booking", tags=["Admin"])
+@router.post("/admin/bookings", tags=["Admin Bookings"])
 def admin_create_booking(
     data: AdminBookingRequest,
     db: Session = Depends(get_db),
@@ -236,7 +237,7 @@ def admin_create_booking(
         "class_id": str(cls_.id)
     }
 
-@router.delete("/admin/users/{user_id}", tags=["Admin"])
+@router.delete("/admin/users/{user_id}", tags=["Admin Users"])
 def delete_user(
     user_id: UUID = Path(..., description="Το ID του χρήστη που θα διαγραφεί"),
     db: Session = Depends(get_db),
@@ -246,12 +247,14 @@ def delete_user(
     if not user:
         raise HTTPException(status_code=404, detail="Ο χρήστης δεν βρέθηκε.")
     
+    db.query(booking_model.Booking).filter(booking_model.Booking.user_id == user_id).delete()
+
     db.delete(user)
     db.commit()
 
     return {"message": f"Ο χρήστης με ID {user_id} διαγράφτηκε επιτυχώς."}
 
-@router.delete("/admin/bookings/{booking_id}", tags=["Admin"])
+@router.delete("/admin/bookings/{booking_id}", tags=["Admin Bookings"])
 def delete_booking(
     booking_id: UUID = Path(..., description="Το ID της κράτησης."),
     db: Session = Depends(get_db),
@@ -268,7 +271,7 @@ def delete_booking(
 
     return {"message": f"Η κράτηση με ID {booking_id} διαγράφηκε επιτυχώς."}
 
-@router.get("/admin/bookings", response_model= List[AdminBookingOut], tags=["Admin"])
+@router.get("/admin/bookings", response_model= List[AdminBookingOut], tags=["Admin Bookings"])
 def get_bookings(
     db: Session = Depends(get_db),
     admin: Admin = Depends(get_current_admin)
@@ -289,7 +292,7 @@ def get_bookings(
         for booking in bookings
     ]
 
-@router.put("/admin/users/{user_id}", tags=["Admin"])
+@router.put("/admin/users/{user_id}", tags=["Admin Users"])
 def update_user(
     user_id: UUID,
     data: UserUpdateRequest,
@@ -306,13 +309,13 @@ def update_user(
     db.commit()
     return {"detail": "Τα στοιχεία του χρήστη ανανεώθηκαν επιτυχώς."}
 
-@router.get("/admin/subscriptions", tags=["Admin"])
+@router.get("/admin/subscriptions", tags=["Admin Subscriptions"])
 def get_subscription_models(
     admin: Admin = Depends(get_current_admin)
 ):
     return [model.value for model in user_model.SubscriptionModel]
 
-@router.get("/admin/subscription/{user_id}", tags=["Admin"])
+@router.get("/admin/subscriptions/{user_id}", tags=["Admin Subscriptions"])
 def get_user_subscription_model(
     user_id: UUID,
     db: Session = Depends(get_db),
@@ -330,7 +333,7 @@ def get_user_subscription_model(
         "remaining_classes": user.remaining_classes
     }
 
-@router.delete("/admin/classes/{class_id}", tags=["Admin"])
+@router.delete("/admin/classes/{class_id}", tags=["Admin Classes"])
 def delete_class(
     class_id: UUID,
     db: Session = Depends(get_db),
@@ -350,3 +353,38 @@ def delete_class(
     db.commit()
     
     return {"detail": "Το τμήμα διαγράφηκε επιτυχώς."}
+
+@router.post("/admin/template_classes/", tags=["Admin Classes"])
+def create_template_class(
+    data: TemplateClassCreate,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    new_template = template_class.TemplateClass(
+        class_name=data.class_name,
+        weekday=data.weekday,
+        time=data.time,
+        max_participants=data.max_participants,
+        is_active=True,
+    )
+    
+    db.add(new_template)
+    db.commit()
+    db.refresh(new_template)
+    
+    return new_template
+
+@router.delete("/admin/template_classes/{template_id}", tags=["Admin Classes"])
+def delete_template_class(
+    template_id: UUID,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    template = db.query(template_class.TemplateClass).filter(template_class.TemplateClass.id == template_id).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="Το μάθημα δεν βρέθηκε.")
+    
+    db.delete(template)
+    db.commit()
+
+    return {"detail": "Το μάθημα διαγράφηκε με επιτυχία."}
