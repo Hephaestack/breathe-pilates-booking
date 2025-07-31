@@ -4,8 +4,11 @@ from sqlalchemy import Column, DateTime, String, Enum, Date, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from db.database import Base
+
+GREECE_TZ = ZoneInfo("Europe/Athens")
 
 class Gender(str, enum.Enum):
     male = "Άνδρας"
@@ -40,7 +43,7 @@ class User(Base):
     name = Column(String, nullable=False)
     city = Column(String)
     gender = Column(Enum(Gender, name="gender"))
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(GREECE_TZ))
     role = Column(Enum(UserRole), nullable=True)
     subscription_model = Column(Enum(SubscriptionModel), nullable=True)
     package_total = Column(Integer, nullable=True)
