@@ -8,10 +8,13 @@ from db.models.user import SubscriptionModel
 
 def validate_booking_rules(db: Session, current_user: user.User, class_obj: class_.Class):
     subscription = current_user.subscription_model
+    # Check if subscription exist
+    if not subscription:
+        raise HTTPException(status_code=400, detail="Δεν έχετε ενεργή συνδρομή.")
+    
     # Check subscription expiration
     if current_user.subscription_expires and current_user.subscription_expires < class_obj.date:
-        raise HTTPException(
-            status_code=400, detail="Η συνδρομή σας θα έχει λήξει μέχρι την ημέρα του μαθήματος. Παρακαλώ ανανεώστε πριν κάνετε κράτηση.")
+        raise HTTPException(status_code=400, detail="Η συνδρομή σας θα έχει λήξει μέχρι την ημέρα του μαθήματος. Παρακαλώ ανανεώστε πριν κάνετε κράτηση.")
     
     user_id = current_user.id
     class_name = class_obj.class_name.lower()
@@ -56,7 +59,14 @@ def validate_booking_rules(db: Session, current_user: user.User, class_obj: clas
         .count()
     )
 
-    print(total_bookings)
+    # Cadillac class rules
+    is_cadillac_subscription = subscription in [
+        SubscriptionModel.family_3_cadillac,
+        SubscriptionModel.cadillac_package_5,
+        SubscriptionModel.cadillac_package_10
+    ]
+    if "cadillac" in class_name.lower() and not is_cadillac_subscription:
+        raise HTTPException(status_code=400, detail="Μόνο οι συνδρομές Cadillac μπορούν να κλείσουν Cadillac Flow μαθήματα.")
 
     # Rules
     if subscription == SubscriptionModel.subscription_2 and weekly_bookings >= 2:
