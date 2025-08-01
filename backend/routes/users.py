@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 from db.models import booking, user as user_model
 from db.schemas.user import UserOut, LoginRequest, LoginResponse, SubscriptionOut
 from utils.db import get_db
+from utils.calc_class import calculate_remaining_classes
 
 router = APIRouter()
 
@@ -45,7 +46,7 @@ def get_user(
 
 @router.post("/subscription", response_model=SubscriptionOut, tags=["Subscription"])
 def get_user_subscription(
-    user_id:UUID,
+    user_id: UUID,
     db: Session = Depends(get_db)
 ):
     user_obj = (
@@ -65,3 +66,15 @@ def get_user_subscription(
         "subscription_expires": user_obj.subscription_expires or None,
         "remaining_classes": user_obj.remaining_classes or 0,
     }
+
+@router.post("/users/{user_id}/remaining_classes", tags=["Users"])
+def get_remaining_classes(
+    user_id: UUID,
+    db: Session = Depends(get_db)
+):
+    user = db.query(user_model.User).filter(user_model.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Ο χρήστης δεν βρέθηκε.")
+    
+    remaining = calculate_remaining_classes(user_id=str(user_id), db=db)
+    return remaining

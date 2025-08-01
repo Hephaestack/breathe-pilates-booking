@@ -8,14 +8,16 @@ export const metadata = {
   description: "Booking system for Breathe Pilates by Efi Zikou",
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children, params }) {
+  const locale = params?.locale || 'el';
   return (
-    <html lang="en">
+    <html lang={locale === 'el' ? 'el' : 'en'} translate="no">
       <head>
-      <link rel="icon" type="image/png" href="/icon.png" />
-      <link rel="manifest" href="/manifest.json" />
-      <meta name="theme-color" content="#b3b18f" />
-    </head>
+        <meta name="google" content="notranslate" />
+        <link rel="icon" type="image/png" href="/icon.png" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#b3b18f" />
+      </head>
       <body className="antialiased">
         <ShowBackArrow />
         <ServiceWorkerRegister />
