@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session, joinedload
 from datetime import date, datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 from db.models.admin import Admin
 from utils.db import get_db
@@ -15,6 +16,8 @@ from db.schemas.booking import AdminBookingRequest, AdminBookingOut
 from db.models import template_class, class_ as class_model, booking as booking_model, user as user_model
 from db.schemas.user import UserOut, UserCreate, UserSummary, UserMinimal, UserUpdateRequest
 from db.schemas.template_class import TemplateClassCreate
+
+GREECE_TZ = ZoneInfo("Europe/Athens")
 
 router = APIRouter()
 
@@ -102,7 +105,7 @@ def create_user(
         user_dict["password"] = next_password
 
     if not user_dict.get("created_at"):
-        user_dict["created_at"] = datetime.now(timezone.utc)
+        user_dict["created_at"] = datetime.now(GREECE_TZ)
 
     new_user = user_model.User(**user_dict)
     db.add(new_user)
@@ -222,7 +225,7 @@ def admin_create_booking(
         id = uuid4(),
         class_id = cls_.id,
         user_id = user.id,
-        created_at = datetime.now()
+        created_at = datetime.now(GREECE_TZ)
     )
 
     db.add(new_booking)

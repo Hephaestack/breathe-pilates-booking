@@ -9,7 +9,6 @@ export const metadata = {
 };
 
 export default function RootLayout({ children, params }) {
-  // Get locale from params or fallback to 'en'
   const locale = params?.locale || 'el';
   return (
     <html lang={locale === 'el' ? 'el' : 'en'} translate="no">

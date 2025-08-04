@@ -7,9 +7,12 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from datetime import datetime, timezone, timedelta
 from jose import JWTError, jwt
+from zoneinfo import ZoneInfo
 
 from utils import get_db
 from db.models.admin import Admin
+
+GREECE_TZ = ZoneInfo("Europe/Athens")
 
 load_dotenv(override=True)
 
@@ -30,7 +33,7 @@ def create_access_token(
     admin: Admin,
     expires_delta: timedelta = None
 ):
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = datetime.now(GREECE_TZ) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     payload = {
         "sub": str(admin.id),
         "username": admin.username,
