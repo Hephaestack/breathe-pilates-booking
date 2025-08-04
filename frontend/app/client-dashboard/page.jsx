@@ -20,6 +20,7 @@ function formatDate(dateString) {
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [subscription, setSubscription] = useState(null);
+  const [remainingClasses, setRemainingClasses] = useState(null);
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -52,6 +53,23 @@ export default function Dashboard() {
           setSubscription(data);
         })
         .catch(err => console.error('Subscription fetch error:', err));
+
+      // Fetch remaining classes from new endpoint
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${storedUser.id}/remaining_classes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to fetch remaining classes');
+          return res.json();
+        })
+        .then(data => {
+          setRemainingClasses(data);
+        })
+        .catch(err => {
+          console.error('Remaining classes fetch error:', err);
+          setRemainingClasses(null);
+        });
     }
   }, []);
 
@@ -88,9 +106,10 @@ export default function Dashboard() {
           {/* Subscription info below name, dynamic based on model */}
           {subscription && (
             <div className="text-lg sm:text-xl font-bold text-[#4A2C2A] text-center mb-2 tracking-tight drop-shadow">
-              {/* If package model, show remaining classes. If timed, show expiry. */}
-              {subscription.subscription_model?.includes('πακέτο') && subscription.remaining_classes !== null && (
-                <span>{t('remaining_lessons')}: {subscription.remaining_classes}</span>
+              {subscription.subscription_model?.includes('πακέτο') && (
+                <span>
+                  {t('remaining_lessons')}: {typeof remainingClasses === 'number' && !isNaN(remainingClasses) ? remainingClasses : remainingClasses === null ? '0' : t('loading')}
+                </span>
               )}
               {subscription.subscription_model?.includes('συνδρομή') && subscription.subscription_expires && (() => {
                 const expiry = new Date(subscription.subscription_expires);
