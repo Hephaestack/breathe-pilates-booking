@@ -50,7 +50,7 @@ def login_admin(
         value=access_token,
         httponly=True,
         secure=False,         
-        samesite="none",
+        samesite="lax",
         max_age=60 * 60 * 24,     
         path="/"
     )
