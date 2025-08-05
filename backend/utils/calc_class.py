@@ -13,12 +13,20 @@ def calculate_remaining_classes(user_id: str, db: Session) -> int:
     results = []
 
     for sub in user.subscriptions:
-        if "package" in sub.subscription_model.name:
+        model = sub.subscription_model.name.lower()
+        if "package" in model:
+            
+            if "cadillac" in model:
+                class_filter = Class.class_name.ilike("%Cadillac%")
+            else:
+                class_filter = ~Class.class_name.ilike("%Cadillac")
+            
             booking_count = db.query(Booking).join(Class).filter(
                 Booking.user_id == user.id,
                 Booking.status == "confirmed",
                 Class.date >= sub.start_date,
-                Class.date <= sub.end_date
+                Class.date <= sub.end_date,
+                class_filter
             ).count()
 
             remaining = max(0, sub.package_total - booking_count)
