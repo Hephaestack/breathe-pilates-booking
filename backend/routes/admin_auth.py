@@ -16,6 +16,7 @@ from db.schemas.booking import AdminBookingRequest, AdminBookingOut
 from db.models import template_class, class_ as class_model, booking as booking_model, user as user_model, subscription as sub_model
 from db.schemas.user import UserOut, UserCreate, UserSummary, UserMinimal, UserUpdateRequest
 from db.schemas.template_class import TemplateClassCreate
+from db.schemas.subscription import SubscriptionCreate, SubscriptionOut, SubscriptionUpdate
 
 GREECE_TZ = ZoneInfo("Europe/Athens")
 
@@ -385,3 +386,56 @@ def delete_template_class(
     db.commit()
 
     return {"detail": "Το μάθημα διαγράφηκε με επιτυχία."}
+
+@router.post("/admin/subscriptions/{user_id}", response_model=SubscriptionOut, tags=["Admin Subscriptions"])
+def create_subscription(
+    user_id: UUID,
+    data: SubscriptionCreate,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    user = db.query(user_model.User).filter(user_model.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Ο χρήστης δεν βρέθηκε.")
+
+    new_subscription = sub_model.Subscription(
+        id = uuid4(),
+        user_id=user_id,
+        **data.model_dump()
+    )
+    db.add(new_subscription)
+    db.commit()
+    db.refresh(new_subscription)
+    return new_subscription
+
+@router.put("/admin/subscriptions/{subscription_id}", response_model=SubscriptionOut, tags=["Admin Subscriptions"])
+def update_subscription(
+    subscription_id: UUID,
+    data: SubscriptionUpdate,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    subscription = db.query(sub_model.Subscription).filter(sub_model.Subscription.id == subscription_id).first()
+    if not subscription:
+        raise HTTPException(status_code=404, detail="Η συνδρομή δεν βρέθηκε.")
+
+    for key, value in data.model_dump(exclude_unset=True).items():
+        setattr(subscription, key, value)
+
+    db.commit()
+    db.refresh(subscription)
+    return subscription
+
+@router.delete("/admin/subscriptions/{subscription_id}", tags=["Admin Subscriptions"])
+def delete_subscription(
+    subscription_id: UUID,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    subscription = db.query(sub_model.Subscription).filter(sub_model.Subscription.id == subscription_id).first()
+    if not subscription:
+        raise HTTPException(status_code=404, detail="Η συνδρομή δεν βρέθηκε.")
+
+    db.delete(subscription)
+    db.commit()
+    return {"detail": "Η συνδρομή διαγράφηκε επιτυχώς."}
