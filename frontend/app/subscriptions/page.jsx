@@ -14,36 +14,39 @@ export default function SubscriptionsPage() {
   const year = date.getFullYear();
   return `${day}/${month}/${year}`;
 }
-  const [subscription, setSubscription] = useState(null);
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [debugData, setDebugData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { t } = useTranslation();
   const { toasts, hideToast, showError } = useToast();
 
   useEffect(() => {
-    const fetchSubscription = async () => {
+    const fetchSubscriptions = async () => {
       try {
         // Get user from localStorage
         const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-        
         if (!storedUser.id) {
           setError(t('user_not_found'));
           setLoading(false);
           return;
-        }        // Fetch subscription data from the backend
+        }
+        // Fetch active subscriptions from the correct endpoint
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscription?user_id=${storedUser.id}`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
         });
-
         if (!response.ok) {
           throw new Error(t('failed_fetch_subscription'));
         }
-
         const data = await response.json();
-        setSubscription(data);
+        setDebugData(data); // Save raw response for debugging
+        // Handle response as an array of subscriptions
+        if (Array.isArray(data) && data.length > 0) {
+          setSubscriptions(data);
+        } else {
+          setSubscriptions([]);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -51,7 +54,7 @@ export default function SubscriptionsPage() {
       }
     };
 
-    fetchSubscription();
+    fetchSubscriptions();
   }, []);
 
   if (loading) {
@@ -82,38 +85,50 @@ export default function SubscriptionsPage() {
         <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-5 tracking-tight drop-shadow">
           {t('my_subscriptions')}
         </h1>
-        {subscription && (
+        {subscriptions.length > 0 ? (
           <div className="space-y-5">
-            <div className="p-3 sm:p-4 rounded-xl bg-[#dbdac6] shadow flex flex-col items-center text-[#4A2C2A]">
-              <span className="text-3xl font-bold sm:text-3xl">{subscription.subscription_model}</span>
-              {/* Display different info based on subscription type */}
-              {subscription.subscription_model.includes('\u03c3\u03c5\u03bd\u03b4\u03c1\u03bf\u03bc\u03ae') && subscription.subscription_expires && (
-                <span className="font-bold text-lg text-[#4A2C2A] mt-2">
-                  {t('started')}: {formatDate(subscription.subscription_starts)}
-                </span>
-              )}
-              {subscription.subscription_model.includes('\u03c0\u03b1\u03ba\u03ad\u03c4\u03bf') && (
-                <div className="text-xs sm:text-lg text-[#4A2C2A] mt-2 text-center">
-                  {subscription.package_total && (
-                    <div className='font-bold'><span className='text-lg'>{t('total_lessons')}:</span> <span className='text-lg'>{subscription.package_total}</span></div>
+            {subscriptions.map((subscription, idx) => {
+              const isPackage = String(subscription.subscription_model).toLowerCase().includes('πακέτο');
+              const isSubs = String(subscription.subscription_model).toLowerCase().includes('συνδρομή');
+              return (
+                <div key={subscription.id || idx} className="p-3 sm:p-4 rounded-xl bg-[#dbdac6] shadow flex flex-col items-center text-[#4A2C2A]">
+                  <span className="text-3xl font-bold sm:text-3xl">{subscription.subscription_model}</span>
+                  {/* Always show start and end dates if present */}
+                  {subscription.start_date && (
+                    <div className="mt-2 text-lg font-bold">{t('started')}: {formatDate(subscription.start_date)}</div>
                   )}
-                  {subscription.remaining_classes !== null && (
-                    <div className="text-lg text-[#4A2C2A] mt-2 text-center">
-                      {t('remaining_lessons')}: {subscription.remaining_classes}
-                    </div>
+                  {subscription.end_date && (
+                    <div className="mt-2 text-lg font-bold">{t('expires')}: {formatDate(subscription.end_date)}</div>
                   )}
+                  {isPackage && (
+                    <>
+                      {subscription.package_total !== undefined && (
+                        <div className="mt-2 text-lg font-bold">{t('total_lessons')}: {subscription.package_total}</div>
+                      )}
+                      {subscription.remaining_classes !== undefined && (
+                        <div className="mt-2 text-lg font-bold">{t('remaining_lessons')}: {subscription.remaining_classes}</div>
+                      )}
+                    </>
+                  )}
+                  {isSubs && (
+                    <>
+                      
+                    </>
+                  )}
+  
                 </div>
-              )}
-              {subscription.subscription_starts && (
-                <span className="text-lg text-[#4A2C2A] mt-2">
-                  {t('expires')}: {formatDate(subscription.subscription_expires)}
-                </span>
-              )}
-            </div>
+              );
+            })}
           </div>
-        )}
-        {!subscription && (
-          <p className="font-bold text-center text-[#4A2C2A]">No subscription found</p>
+        ) : (
+          <>
+            <p className="font-bold text-center text-[#4A2C2A]">No subscription found</p>
+            {debugData && (
+              <pre className="max-w-full p-2 mt-4 overflow-x-auto text-xs text-left bg-gray-100 rounded">
+                {JSON.stringify(debugData, null, 2)}
+              </pre>
+            )}
+          </>
         )}
       </div>
       <ToastContainer toasts={toasts} hideToast={hideToast} />
