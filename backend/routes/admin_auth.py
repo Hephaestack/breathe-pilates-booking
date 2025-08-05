@@ -319,11 +319,11 @@ def get_subscription_models(
 ):
     return [model.value for model in sub_model.SubscriptionModel]
 
-@router.get("/admin/subscriptions/{user_id}", tags=["Admin Subscriptions"])
+@router.get("/subscriptions/{user_id}", tags=["Admin Subscriptions"])
 def get_user_subscription_model(
     user_id: UUID,
     db: Session = Depends(get_db),
-    admin: Admin = Depends(get_current_admin)
+    # admin: Admin = Depends(get_current_admin)
 ):
     user = db.query(user_model.User).filter(user_model.User.id == user_id).first()
     if not user:
