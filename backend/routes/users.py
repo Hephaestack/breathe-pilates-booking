@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
@@ -59,9 +60,15 @@ def get_user_subscription(
     )
 
     if not user_obj:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="Ο χρήστης δεν βρέθηκε.")
     
-    return user_obj.subscriptions
+    now = datetime.now()
+    active_subs = [
+        sub for sub in user_obj.subscriptions
+        if sub.start_date <= now <= sub.end_date
+    ]
+
+    return active_subs
 
 @router.post("/users/{user_id}/remaining_classes", tags=["Users"])
 def get_remaining_classes(

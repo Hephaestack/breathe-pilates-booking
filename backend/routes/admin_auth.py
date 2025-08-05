@@ -9,7 +9,6 @@ from zoneinfo import ZoneInfo
 from db.models.admin import Admin
 from utils.db import get_db
 from utils.auth import get_current_admin, verify_password, create_access_token
-from utils.calc_class import calculate_remaining_classes
 from db.schemas.admin import AdminLogin
 from db.schemas.class_ import ClassOut
 from db.schemas.booking import AdminBookingRequest, AdminBookingOut
