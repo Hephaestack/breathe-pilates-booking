@@ -17,9 +17,9 @@ def calculate_remaining_classes(user_id: str, db: Session) -> int:
         if "package" in model:
             
             if "cadillac" in model:
-                class_filter = Class.class_name.ilike("%Cadillac%")
+                class_filter = Class.class_name.ilike("%cadillac%")
             else:
-                class_filter = ~Class.class_name.ilike("%Cadillac")
+                class_filter = ~Class.class_name.ilike("%cadillac%")
             
             booking_count = db.query(Booking).join(Class).filter(
                 Booking.user_id == user.id,
