@@ -318,8 +318,8 @@ def get_subscription_models(
 ):
     return [model.value for model in sub_model.SubscriptionModel]
 
-@router.get("/subscriptions/{user_id}", tags=["Admin Subscriptions"])
-def get_user_subscription_model(
+@router.get("/subscriptions/{user_id}", response_model=List[SubscriptionOut], tags=["Admin Subscriptions"])
+def get_user_subscriptions(
     user_id: UUID,
     db: Session = Depends(get_db),
     admin: Admin = Depends(get_current_admin)
