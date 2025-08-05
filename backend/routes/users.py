@@ -1,9 +1,11 @@
+from typing import List
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
 from db.models import booking, user as user_model
-from db.schemas.user import UserOut, LoginRequest, LoginResponse, SubscriptionOut
+from db.schemas.user import UserOut, LoginRequest, LoginResponse
+from db.schemas.subscription import SubscriptionOut
 from utils.db import get_db
 from utils.calc_class import calculate_remaining_classes
 
@@ -44,7 +46,7 @@ def get_user(
 
     return user_obj
 
-@router.post("/subscription", response_model=SubscriptionOut, tags=["Subscription"])
+@router.post("/subscription", response_model=List[SubscriptionOut], tags=["Subscription"])
 def get_user_subscription(
     user_id: UUID,
     db: Session = Depends(get_db)
@@ -59,13 +61,7 @@ def get_user_subscription(
     if not user_obj:
         raise HTTPException(status_code=404, detail="User not found")
     
-    return {
-        "subscription_model": user_obj.subscription_model,
-        "package_total": user_obj.package_total or 0,
-        "subscription_starts": user_obj.subscription_starts or None,
-        "subscription_expires": user_obj.subscription_expires or None,
-        "remaining_classes": user_obj.remaining_classes or 0,
-    }
+    return user_obj.subscriptions
 
 @router.post("/users/{user_id}/remaining_classes", tags=["Users"])
 def get_remaining_classes(
