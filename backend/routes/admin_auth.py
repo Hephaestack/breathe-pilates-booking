@@ -13,7 +13,7 @@ from utils.calc_class import calculate_remaining_classes
 from db.schemas.admin import AdminLogin
 from db.schemas.class_ import ClassOut
 from db.schemas.booking import AdminBookingRequest, AdminBookingOut
-from db.models import template_class, class_ as class_model, booking as booking_model, user as user_model
+from db.models import template_class, class_ as class_model, booking as booking_model, user as user_model, subscription as sub_model
 from db.schemas.user import UserOut, UserCreate, UserSummary, UserMinimal, UserUpdateRequest
 from db.schemas.template_class import TemplateClassCreate
 
@@ -316,7 +316,7 @@ def update_user(
 def get_subscription_models(
     admin: Admin = Depends(get_current_admin)
 ):
-    return [model.value for model in user_model.SubscriptionModel]
+    return [model.value for model in sub_model.SubscriptionModel]
 
 @router.get("/admin/subscriptions/{user_id}", tags=["Admin Subscriptions"])
 def get_user_subscription_model(
@@ -328,13 +328,7 @@ def get_user_subscription_model(
     if not user:
         raise HTTPException(status_code=404, detail="Ο χρήστης δεν βρέθηκε.")
     
-    return {
-        "subscription_model": user.subscription_model,
-        "package_total": user.package_total,
-        "subscription_starts": user.subscription_starts,
-        "subscription_expires": user.subscription_expires,
-        "remaining_classes": user.remaining_classes
-    }
+    return user.subscriptions
 
 @router.delete("/admin/classes/{class_id}", tags=["Admin Classes"])
 def delete_class(
