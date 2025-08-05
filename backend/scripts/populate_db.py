@@ -2,7 +2,8 @@ import csv
 from datetime import datetime
 from sqlalchemy.orm import Session
 from db.database import SessionLocal
-from db.models.user import User, UserRole, SubscriptionModel
+from db.models.user import User, UserRole
+from db.models.subscription import SubscriptionModel
 
 def parse_date(value: str):
     return datetime.strptime(value, "%Y-%m-%d").date() if value else None

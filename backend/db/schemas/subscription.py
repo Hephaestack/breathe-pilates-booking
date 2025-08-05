@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
 from typing import Optional
-from db.models.user import SubscriptionModel
+from db.models.subscription import SubscriptionModel
 
 
 class SubscriptionOut(BaseModel):

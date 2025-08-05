@@ -1,10 +1,9 @@
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from enum import Enum
 
 from db.models import booking, class_, user
-from db.models.user import SubscriptionModel
+from db.models.subscription import SubscriptionModel
 from utils.calc_class import calculate_remaining_classes
 
 def validate_booking_rules(db: Session, current_user: user.User, class_obj: class_.Class):

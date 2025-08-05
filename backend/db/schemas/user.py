@@ -3,7 +3,7 @@ from uuid import UUID
 from typing import List, Optional
 from datetime import date, datetime
 
-from db.models.user import UserRole, SubscriptionModel, Gender
+from db.models.user import UserRole, Gender
 
 class LoginRequest(BaseModel):
     phone: str
