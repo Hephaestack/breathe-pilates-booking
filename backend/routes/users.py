@@ -3,6 +3,7 @@ from typing import List
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
+from zoneinfo import ZoneInfo
 
 from db.models import booking, user as user_model
 from db.schemas.user import UserOut, LoginRequest, LoginResponse
@@ -11,6 +12,8 @@ from utils.db import get_db
 from utils.calc_class import calculate_remaining_classes
 
 router = APIRouter()
+
+GREECE_TZ = ZoneInfo("Europe/Athens")
 
 @router.post("/login", response_model=LoginResponse, tags=["Login"])
 def login(
@@ -62,7 +65,7 @@ def get_user_subscription(
     if not user_obj:
         raise HTTPException(status_code=404, detail="Ο χρήστης δεν βρέθηκε.")
     
-    now = datetime.now()
+    now = datetime.now(GREECE_TZ)
     active_subs = [
         sub for sub in user_obj.subscriptions
         if sub.start_date <= now <= sub.end_date

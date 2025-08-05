@@ -322,7 +322,7 @@ def get_subscription_models(
 def get_user_subscription_model(
     user_id: UUID,
     db: Session = Depends(get_db),
-    # admin: Admin = Depends(get_current_admin)
+    admin: Admin = Depends(get_current_admin)
 ):
     user = db.query(user_model.User).filter(user_model.User.id == user_id).first()
     if not user:
