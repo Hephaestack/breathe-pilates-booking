@@ -12,8 +12,9 @@ export default function TermsSignaturePage() {
   const router = useRouter();
   const [signaturePreview, setSignaturePreview] = useState(null);
   const [canvasHeight, setCanvasHeight] = useState('256px');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { markTermsAsSigned } = useTermsSignature();
-  const { toasts, hideToast, showError } = useToast();
+  const { toasts, hideToast, showError, showSuccess } = useToast();
 
   // Set canvas height based on screen size
   useEffect(() => {
@@ -95,33 +96,66 @@ Cadillac Flow / Clinical Pilates:
     setSignaturePreview(null);
   };
 
-  const saveSignature = () => {
+  const saveSignature = async () => {
     if (sigCanvas.current.isEmpty()) {
       showError('Παρακαλώ υπογράψτε πριν συνεχίσετε');
       return;
     }
 
+    setIsSubmitting(true);
     const dataURL = sigCanvas.current.toDataURL();
     setSignaturePreview(dataURL);
     
-    // Use the custom hook to save signature
-    markTermsAsSigned(dataURL);
-    
-    // Get user data to determine where to redirect
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      const user = JSON.parse(userData);
-      // Redirect based on user role
-      if (user.role === 'instructor') {
-        router.push('/instructor-dashboard');
-      } else if (user.role === 'Admin') {
-        router.push('/admin-dashboard');
-      } else {
-        router.push('/client-dashboard');
+    try {
+      // Get user data
+      const userData = localStorage.getItem('user');
+      if (!userData) {
+        showError('Δεν βρέθηκαν στοιχεία χρήστη. Παρακαλώ συνδεθείτε ξανά.');
+        router.push('/login');
+        return;
       }
-    } else {
-      // Fallback if no user data (shouldn't happen in normal flow)
-      router.push('/client-dashboard');
+
+      const user = JSON.parse(userData);
+      
+      // Call the backend API to accept terms
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}/accept_terms`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add authorization header if you're using tokens
+          // 'Authorization': `Bearer ${user.token}`,
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        
+        // Use the custom hook to save signature locally (for backup/display)
+        markTermsAsSigned(dataURL);
+        
+        // Show success message briefly
+        showSuccess('Οι όροι χρήσης αποδέχθηκαν επιτυχώς!');
+        
+        // Small delay to show success message before redirect
+        setTimeout(() => {
+          // Redirect based on user role
+          if (user.role === 'instructor') {
+            router.push('/instructor-dashboard');
+          } else if (user.role === 'Admin') {
+            router.push('/admin-dashboard');
+          } else {
+            router.push('/client-dashboard');
+          }
+        }, 1500);
+      } else {
+        const errorData = await response.json();
+        showError(errorData.detail || 'Σφάλμα κατά την αποδοχή των όρων. Παρακαλώ δοκιμάστε ξανά.');
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      console.error('Error accepting terms:', error);
+      showError('Σφάλμα σύνδεσης. Παρακαλώ ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.');
+      setIsSubmitting(false);
     }
   };
 
@@ -129,12 +163,12 @@ Cadillac Flow / Clinical Pilates:
     <>
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
+          width: 4px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
           background: transparent;
           border-radius: 10px;
-          margin: 8px 0;
+          margin: 4px 0;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
           background: #b3b18f;
@@ -153,6 +187,18 @@ Cadillac Flow / Clinical Pilates:
         .terms-container {
           scrollbar-width: thin;
           scrollbar-color: #b3b18f transparent;
+          padding-right: 8px;
+          margin-right: -8px;
+        }
+        /* Mobile specific scrollbar adjustments */
+        @media (max-width: 640px) {
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 3px;
+          }
+          .terms-container {
+            padding-right: 6px;
+            margin-right: -6px;
+          }
         }
       `}</style>
       <div className="flex flex-col items-center justify-center w-full min-h-screen px-2 py-4 sm:py-6 lg:py-8 sm:px-4 lg:px-6">
@@ -179,7 +225,7 @@ Cadillac Flow / Clinical Pilates:
         
           {/* Terms Text Box */}
           <div className="h-48 sm:h-64 md:h-72 lg:h-80 xl:h-96 overflow-y-scroll border-2 border-[#b3b18f] rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6 mb-4 sm:mb-6 bg-white/60 backdrop-blur-sm shadow-inner custom-scrollbar terms-container">
-            <div className="text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed whitespace-pre-line text-[#4A2C2A] font-semibold pr-1 mr-1">
+            <div className="text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed whitespace-pre-line text-[#4A2C2A] font-semibold">
               {termsText}
             </div>
           </div>
@@ -240,9 +286,20 @@ Cadillac Flow / Clinical Pilates:
             </button>
             <button
               onClick={saveSignature}
-              className="flex-1 bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] hover:from-[#A5957E] hover:to-[#b3b18f] text-white px-4 sm:px-6 py-2 sm:py-3 md:py-4 rounded-xl font-bold text-sm sm:text-base md:text-lg transition-all duration-300 shadow-md hover:shadow-lg"
+              disabled={isSubmitting}
+              className={`flex-1 px-4 sm:px-6 py-2 sm:py-3 md:py-4 rounded-xl font-bold text-sm sm:text-base md:text-lg transition-all duration-300 shadow-md hover:shadow-lg ${
+                isSubmitting
+                  ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] hover:from-[#A5957E] hover:to-[#b3b18f] text-white'
+              }`}
             >
-              Υπογραφή & Συνέχεια
+              {isSubmitting && (
+                <svg className="inline w-4 h-4 mr-2 -ml-1 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              )}
+              {isSubmitting ? 'Αποθήκευση...' : 'Υπογραφή & Συνέχεια'}
             </button>
           </div>
 
