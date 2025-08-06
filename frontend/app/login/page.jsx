@@ -62,13 +62,22 @@ export default function LoginPage() {
         } else {
           localStorage.removeItem('rememberedCredentials');
         }
-        // Redirect based on role if available, else to client-dashboard
-        if (data.role === 'instructor') {
-          router.push('/instructor-dashboard');
-        } else if (data.role === 'Admin') {
-          router.push('/admin-dashboard');
+        
+        // Check if user has signed terms before redirecting to dashboard
+        const hasSignedTerms = localStorage.getItem("hasSignedTerms");
+        
+        if (hasSignedTerms !== "true") {
+          // User hasn't signed terms - redirect to terms signature page
+          router.push('/terms-signature');
         } else {
-          router.push('/client-dashboard');
+          // User has signed terms - redirect based on role
+          if (data.role === 'instructor') {
+            router.push('/instructor-dashboard');
+          } else if (data.role === 'Admin') {
+            router.push('/admin-dashboard');
+          } else {
+            router.push('/client-dashboard');
+          }
         }
       } else {
         showError(t('login_incorrect'));
