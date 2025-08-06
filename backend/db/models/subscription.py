@@ -24,6 +24,10 @@ class SubscriptionModel(str, enum.Enum):
     cadillac_package_10 = "πακέτο Cadillac 10"
     free = "ελεύθερη"
 
+class PaymentStatus(str, enum.Enum):
+    pending = "εκκρεμεί"
+    paid = "πληρωμένη"
+
 class Subscription(Base):
     __tablename__ = "subscriptions"
 
@@ -35,7 +39,7 @@ class Subscription(Base):
     package_total = Column(Integer, nullable=True)
     remaining_classes = Column(Integer, nullable=True)
     price = Column(Float, nullable=True)
-    payment_status = Column(String, nullable=True)
+    payment_status = Column(Enum(PaymentStatus), nullable=False, default=PaymentStatus.pending)
     note = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(GREECE_TZ), nullable=False)
 

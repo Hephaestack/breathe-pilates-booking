@@ -16,6 +16,7 @@ from db.models import template_class, class_ as class_model, booking as booking_
 from db.schemas.user import UserOut, UserCreate, UserSummary, UserMinimal, UserUpdateRequest
 from db.schemas.template_class import TemplateClassCreate
 from db.schemas.subscription import SubscriptionCreate, SubscriptionOut, SubscriptionUpdate
+from db.models.subscription import PaymentStatus
 
 GREECE_TZ = ZoneInfo("Europe/Athens")
 
@@ -464,3 +465,9 @@ def delete_subscription(
     db.delete(subscription)
     db.commit()
     return {"detail": "Η συνδρομή διαγράφηκε επιτυχώς."}
+
+@router.get("/admin/payment-statuses", tags=["Admin Subscriptions"])
+def get_payment_statuses(
+    admin: Admin = Depends(get_current_admin)
+):
+    return [status.value for status in PaymentStatus]
