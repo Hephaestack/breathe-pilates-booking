@@ -1,6 +1,6 @@
 import uuid
 import enum
-from sqlalchemy import Column, DateTime, String, Enum, Integer
+from sqlalchemy import Column, DateTime, String, Enum, Integer, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -30,6 +30,7 @@ class User(Base):
     gender = Column(Enum(Gender, name="gender"))
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(GREECE_TZ), nullable=False)
     role = Column(Enum(UserRole), nullable=True)
+    has_accepted_terms = Column(Boolean, default=False, nullable=False)
 
     bookings = relationship("Booking", back_populates="user")
     subscriptions = relationship("Subscription", back_populates="user", cascade="all, delete-orphan")

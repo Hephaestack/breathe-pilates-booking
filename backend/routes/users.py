@@ -84,3 +84,19 @@ def get_remaining_classes(
     
     remaining = calculate_remaining_classes(user_id=str(user_id), db=db)
     return remaining
+
+@router.post("/users/{user_id}/accept_terms", tags=["Users"])
+def accept_terms(
+    user_id: UUID,
+    db: Session = Depends(get_db)
+):
+    user = db.query(user_model.User).filter(user_model.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Ο χρήστης δεν βρέθηκε.")
+
+    if user.has_accepted_terms:
+        return {"detail": "Ο χρήστης έχει ήδη αποδεχθεί τους όρους."}
+
+    user.has_accepted_terms = True
+    db.commit()
+    return {"detail": "Οι όροι χρήσης αποδέχθηκαν επιτυχώς."}
