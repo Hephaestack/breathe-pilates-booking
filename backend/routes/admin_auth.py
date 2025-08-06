@@ -295,6 +295,32 @@ def get_bookings(
         for booking in bookings
     ]
 
+@router.get("/admin/bookings/{user_id}", response_model=List[AdminBookingOut], tags=["Admin Bookings"])
+def get_user_bookings(
+    user_id: UUID,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    user = db.query(user_model.User).filter(user_model.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Ο χρήστης δεν βρέθηκε.")
+    
+    bookings = (
+        db.query(booking_model.Booking)
+        .join(class_model.Class)
+        .filter(booking_model.Booking.user_id == user_id)
+        .all()
+    )
+
+    return [
+        AdminBookingOut(
+            booking_id = booking.id,
+            user_name = user.name,
+            class_name = booking.class_.class_name,
+        )
+        for booking in bookings
+    ]
+
 @router.put("/admin/users/{user_id}", tags=["Admin Users"])
 def update_user(
     user_id: UUID,
