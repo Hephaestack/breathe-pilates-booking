@@ -25,7 +25,7 @@ class AdminBookingRequest(BaseModel):
 class AdminBookingOut(BaseModel):
     booking_id: UUID
     user_name: str
-    class_name: str
+    class_: 'AdminClassSummary'
 
-from db.schemas.class_ import ClassSummary
+from db.schemas.class_ import ClassSummary, AdminClassSummary
 BookingOut.model_rebuild()

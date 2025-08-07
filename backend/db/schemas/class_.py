@@ -14,6 +14,15 @@ class ClassSummary(BaseModel):
     class Config:
         from_attributes = True
 
+class AdminClassSummary(BaseModel):
+    id: UUID
+    class_name: str
+    date: date
+    time: time
+
+    class Config:
+        from_attributes = True
+
 class ClassBase(BaseModel):
     class_name: str
     date: date
