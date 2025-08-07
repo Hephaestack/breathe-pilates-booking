@@ -20,7 +20,7 @@ def validate_booking_rules(db: Session, current_user: user.User, class_obj: clas
     sub_model = subscription.subscription_model
 
     # Check subscription expiration
-    if subscription.end_date and subscription.end_date < class_obj.date:
+    if subscription.end_date and subscription.end_date.date() < class_obj.date:
         raise HTTPException(status_code=400, detail="Η συνδρομή σας θα έχει λήξει μέχρι την ημέρα του μαθήματος. Παρακαλώ ανανεώστε πριν κάνετε κράτηση.")
     
     user_id = current_user.id
