@@ -95,7 +95,7 @@ def find_eligible_subscription_for_class(user: user.User, class_obj: class_.Clas
             continue
 
         # Check subscription date validity
-        if not (sub.start_date <= class_obj.date <= sub.end_date):
+        if not (sub.start_date.date() <= class_obj.date <= sub.end_date.date()):
             continue
 
         # Cadillac logic
