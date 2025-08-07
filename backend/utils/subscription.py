@@ -10,15 +10,17 @@ def validate_booking_rules(db: Session, current_user: user.User, class_obj: clas
     subscription: Subscription | None = (
         db.query(Subscription)
         .filter(Subscription.user_id == current_user.id)
-        .order_by(Subscription.subscription_starts.desc())
+        .order_by(Subscription.start_date.desc())
         .first()
 )
     # Check if subscription exist
     if not subscription:
         raise HTTPException(status_code=400, detail="Δεν έχετε ενεργή συνδρομή.")
     
+    sub_model = subscription.subscription_model
+
     # Check subscription expiration
-    if current_user.subscription_expires and current_user.subscription_expires < class_obj.date:
+    if subscription.end_date and subscription.end_date < class_obj.date:
         raise HTTPException(status_code=400, detail="Η συνδρομή σας θα έχει λήξει μέχρι την ημέρα του μαθήματος. Παρακαλώ ανανεώστε πριν κάνετε κράτηση.")
     
     user_id = current_user.id
@@ -53,7 +55,7 @@ def validate_booking_rules(db: Session, current_user: user.User, class_obj: clas
     )
 
     # Cadillac class rules
-    is_cadillac_subscription = subscription in [
+    is_cadillac_subscription = sub_model in [
         SubscriptionModel.family_3_cadillac,
         SubscriptionModel.cadillac_package_5,
         SubscriptionModel.cadillac_package_10
@@ -63,15 +65,15 @@ def validate_booking_rules(db: Session, current_user: user.User, class_obj: clas
 
     # Rules
     # Weekly subs
-    if subscription == SubscriptionModel.subscription_2 and weekly_bookings >= 2:
+    if sub_model == SubscriptionModel.subscription_2 and weekly_bookings >= 2:
         raise HTTPException(status_code=400, detail="Η συνδρομή σας, σας επιτρέπει έως 2 κρατήσεις την εβδομάδα.")
-    elif subscription == SubscriptionModel.subscription_3 and weekly_bookings >= 3:
+    elif sub_model == SubscriptionModel.subscription_3 and weekly_bookings >= 3:
         raise HTTPException(status_code=400, detail="Η συνδρομή σας, σας επιτρέπει έως 3 κρατήσεις την εβδομάδα.")
-    elif subscription == SubscriptionModel.subscription_5 and weekly_bookings >= 5:
+    elif sub_model == SubscriptionModel.subscription_5 and weekly_bookings >= 5:
         raise HTTPException(status_code=400, detail="Η συνδρομή σας, σας επιτρέπει έως 5 κρατήσεις την εβδομάδα.")
     
     # Package subs
-    elif subscription in [
+    elif sub_model in [
         SubscriptionModel.package_10,
         SubscriptionModel.package_15,
         SubscriptionModel.package_20,
@@ -82,7 +84,7 @@ def validate_booking_rules(db: Session, current_user: user.User, class_obj: clas
         if remaining <= 0:
             raise HTTPException(status_code=400, detail="Έχετε ολοκληρώσει το πακέτο μαθημάτων.")
 
-        if subscription in [
+        if sub_model in [
             SubscriptionModel.cadillac_package_5,
             SubscriptionModel.cadillac_package_10
         ]:
