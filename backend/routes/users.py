@@ -9,7 +9,7 @@ from db.models import booking, user as user_model
 from db.schemas.user import UserOut, LoginRequest, LoginResponse
 from db.schemas.subscription import SubscriptionOut
 from utils.db import get_db
-from utils.calc_class import calculate_remaining_classes
+from utils.calc_class import calculate_remaining_classes, calculate_remaining_classes_for_subscription
 
 router = APIRouter()
 
@@ -84,6 +84,14 @@ def get_remaining_classes(
     
     remaining = calculate_remaining_classes(user_id=str(user_id), db=db)
     return remaining
+
+@router.get("/users/{user_id}/subscriptions/{subscription_id}/remaining_classes", tags=["Users"])
+def get_remaining_classes_for_subscription(
+    user_id: UUID,
+    subscription_id: UUID,
+    db: Session = Depends(get_db)
+):
+    return calculate_remaining_classes_for_subscription(str(user_id), str(subscription_id), db)
 
 @router.post("/users/{user_id}/accept_terms", tags=["Users"])
 def accept_terms(
