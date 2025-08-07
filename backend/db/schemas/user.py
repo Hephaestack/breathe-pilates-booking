@@ -11,6 +11,7 @@ class LoginRequest(BaseModel):
 
 class LoginResponse(BaseModel):
     id: UUID
+    has_accepted_terms: bool
 
 class UserSummary(BaseModel):
     id: UUID

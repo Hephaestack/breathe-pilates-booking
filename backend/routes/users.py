@@ -24,7 +24,10 @@ def login(
     if not db_user or db_user.password != data.password:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    return {"id": db_user.id}
+    return {
+        "id": db_user.id,
+        "has_accepted_terms": db_user.has_accepted_terms
+    }
 
 @router.get("/users/{user_id}", response_model=UserOut, tags=["Users"])
 def get_user(
