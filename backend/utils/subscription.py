@@ -3,11 +3,16 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
 from db.models import booking, class_, user
-from db.models.subscription import SubscriptionModel
+from db.models.subscription import SubscriptionModel, Subscription
 from utils.calc_class import calculate_remaining_classes
 
 def validate_booking_rules(db: Session, current_user: user.User, class_obj: class_.Class):
-    subscription = current_user.subscription_model
+    subscription: Subscription | None = (
+        db.query(Subscription)
+        .filter(Subscription.user_id == current_user.id)
+        .order_by(Subscription.subscription_starts.desc())
+        .first()
+)
     # Check if subscription exist
     if not subscription:
         raise HTTPException(status_code=400, detail="Δεν έχετε ενεργή συνδρομή.")
