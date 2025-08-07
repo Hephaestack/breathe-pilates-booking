@@ -9,13 +9,13 @@ from zoneinfo import ZoneInfo
 from db.models.admin import Admin
 from utils.db import get_db
 from utils.auth import get_current_admin, verify_password, create_access_token
-from utils.calc_class import calculate_remaining_classes
 from db.schemas.admin import AdminLogin
 from db.schemas.class_ import ClassOut
 from db.schemas.booking import AdminBookingRequest, AdminBookingOut
-from db.models import template_class, class_ as class_model, booking as booking_model, user as user_model
+from db.models import template_class, class_ as class_model, booking as booking_model, user as user_model, subscription as sub_model
 from db.schemas.user import UserOut, UserCreate, UserSummary, UserMinimal, UserUpdateRequest
 from db.schemas.template_class import TemplateClassCreate
+from db.schemas.subscription import SubscriptionCreate, SubscriptionOut, SubscriptionUpdate
 
 GREECE_TZ = ZoneInfo("Europe/Athens")
 
@@ -49,8 +49,8 @@ def login_admin(
         key="token",
         value=access_token,
         httponly=True,
-        secure=True,       
-        samesite="none",
+        secure=False,         
+        samesite="lax",
         max_age=60 * 60 * 24,     
         path="/"
     )
@@ -232,7 +232,7 @@ def admin_create_booking(
     db.commit()
     db.refresh(new_booking)
 
-    calculate_remaining_classes(user.id, db)
+    # calculate_remaining_classes(user.id, db)
 
     return {
         "message": f"{user.name} booked successfully for {cls_.class_name} on {cls_.date} at {cls_.time}.",
@@ -270,7 +270,7 @@ def delete_booking(
     db.delete(booking)
     db.commit()
 
-    calculate_remaining_classes(booking.user_id, db)
+    # calculate_remaining_classes(booking.user_id, db)
 
     return {"message": f"Η κράτηση με ID {booking_id} διαγράφηκε επιτυχώς."}
 
@@ -290,6 +290,32 @@ def get_bookings(
         AdminBookingOut(
             booking_id = booking.id,
             user_name = booking.user.name,
+            class_name = booking.class_.class_name,
+        )
+        for booking in bookings
+    ]
+
+@router.get("/admin/bookings/{user_id}", response_model=List[AdminBookingOut], tags=["Admin Bookings"])
+def get_user_bookings(
+    user_id: UUID,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    user = db.query(user_model.User).filter(user_model.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Ο χρήστης δεν βρέθηκε.")
+    
+    bookings = (
+        db.query(booking_model.Booking)
+        .join(class_model.Class)
+        .filter(booking_model.Booking.user_id == user_id)
+        .all()
+    )
+
+    return [
+        AdminBookingOut(
+            booking_id = booking.id,
+            user_name = user.name,
             class_name = booking.class_.class_name,
         )
         for booking in bookings
@@ -316,10 +342,10 @@ def update_user(
 def get_subscription_models(
     admin: Admin = Depends(get_current_admin)
 ):
-    return [model.value for model in user_model.SubscriptionModel]
+    return [model.value for model in sub_model.SubscriptionModel]
 
-@router.get("/admin/subscriptions/{user_id}", tags=["Admin Subscriptions"])
-def get_user_subscription_model(
+@router.get("/subscriptions/{user_id}", response_model=List[SubscriptionOut], tags=["Admin Subscriptions"])
+def get_user_subscriptions(
     user_id: UUID,
     db: Session = Depends(get_db),
     admin: Admin = Depends(get_current_admin)
@@ -328,13 +354,7 @@ def get_user_subscription_model(
     if not user:
         raise HTTPException(status_code=404, detail="Ο χρήστης δεν βρέθηκε.")
     
-    return {
-        "subscription_model": user.subscription_model,
-        "package_total": user.package_total,
-        "subscription_starts": user.subscription_starts,
-        "subscription_expires": user.subscription_expires,
-        "remaining_classes": user.remaining_classes
-    }
+    return user.subscriptions
 
 @router.delete("/admin/classes/{class_id}", tags=["Admin Classes"])
 def delete_class(
@@ -391,3 +411,56 @@ def delete_template_class(
     db.commit()
 
     return {"detail": "Το μάθημα διαγράφηκε με επιτυχία."}
+
+@router.post("/admin/subscriptions/{user_id}", response_model=SubscriptionOut, tags=["Admin Subscriptions"])
+def create_subscription(
+    user_id: UUID,
+    data: SubscriptionCreate,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    user = db.query(user_model.User).filter(user_model.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Ο χρήστης δεν βρέθηκε.")
+
+    new_subscription = sub_model.Subscription(
+        id = uuid4(),
+        user_id=user_id,
+        **data.model_dump()
+    )
+    db.add(new_subscription)
+    db.commit()
+    db.refresh(new_subscription)
+    return new_subscription
+
+@router.put("/admin/subscriptions/{subscription_id}", response_model=SubscriptionOut, tags=["Admin Subscriptions"])
+def update_subscription(
+    subscription_id: UUID,
+    data: SubscriptionUpdate,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    subscription = db.query(sub_model.Subscription).filter(sub_model.Subscription.id == subscription_id).first()
+    if not subscription:
+        raise HTTPException(status_code=404, detail="Η συνδρομή δεν βρέθηκε.")
+
+    for key, value in data.model_dump(exclude_unset=True).items():
+        setattr(subscription, key, value)
+
+    db.commit()
+    db.refresh(subscription)
+    return subscription
+
+@router.delete("/admin/subscriptions/{subscription_id}", tags=["Admin Subscriptions"])
+def delete_subscription(
+    subscription_id: UUID,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(get_current_admin)
+):
+    subscription = db.query(sub_model.Subscription).filter(sub_model.Subscription.id == subscription_id).first()
+    if not subscription:
+        raise HTTPException(status_code=404, detail="Η συνδρομή δεν βρέθηκε.")
+
+    db.delete(subscription)
+    db.commit()
+    return {"detail": "Η συνδρομή διαγράφηκε επιτυχώς."}

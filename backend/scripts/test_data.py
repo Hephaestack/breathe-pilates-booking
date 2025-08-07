@@ -2,7 +2,8 @@ from uuid import uuid4
 from datetime import date
 
 from db.database import Base, engine, SessionLocal
-from db.models.user import User, UserRole, SubscriptionModel
+from db.models.user import User, UserRole
+from db.models.subscription import SubscriptionModel
 from db.models.class_ import Class
 from db.models.booking import Booking
 

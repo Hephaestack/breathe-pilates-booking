@@ -19,42 +19,35 @@ function formatDate(dateString) {
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
-  const [subscription, setSubscription] = useState(null);
+  const [subscriptions, setSubscriptions] = useState([]);
   const [remainingClasses, setRemainingClasses] = useState(null);
   const router = useRouter();
   const { t } = useTranslation();
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
-    console.log('storedUser:', storedUser);
-    console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
     if (storedUser && storedUser.id) {
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/` + storedUser.id)
-        .then(res => {
-          console.log('User fetch response:', res);
-          return res.json();
-        })
-        .then(data => {
-          console.log('User data:', data);
-          setUser({ ...storedUser, name: data.name });
-        })
+        .then(res => res.json())
+        .then(data => setUser({ ...storedUser, name: data.name }))
         .catch(err => console.error('User fetch error:', err));
-      // Fetch subscription info for dashboard
+
+      // Fetch subscriptions using the same method as the subscriptions page
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscription?user_id=${storedUser.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       })
-        .then(res => {
-          console.log('Subscription fetch response:', res);
-          return res.json();
-        })
+        .then(res => res.json())
         .then(data => {
-          console.log('Subscription data:', data);
-          setSubscription(data);
+          if (Array.isArray(data) && data.length > 0) {
+            setSubscriptions(data);
+          } else {
+            setSubscriptions([]);
+          }
         })
-        .catch(err => console.error('Subscription fetch error:', err));
+        .catch(err => setSubscriptions([]));
 
-      // Fetch remaining classes from new endpoint
+      // Fetch remaining classes from new endpoint (optional, fallback)
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${storedUser.id}/remaining_classes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -67,7 +60,6 @@ export default function Dashboard() {
           setRemainingClasses(data);
         })
         .catch(err => {
-          console.error('Remaining classes fetch error:', err);
           setRemainingClasses(null);
         });
     }
@@ -91,6 +83,7 @@ export default function Dashboard() {
     );
   }
 
+  // Show all subscriptions below the name (same as subscriptions page)
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-2 py-8 sm:px-4">
       <main className="flex flex-col items-center justify-center flex-1 w-full max-w-md">
@@ -103,22 +96,43 @@ export default function Dashboard() {
           <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-[#b3b18f] via-[#A5957E] to-[#4A2C2A] bg-clip-text text-transparent text-center mb-4 tracking-tight drop-shadow">
             {t('hello', { name: user.name })}
           </h1>
-          {/* Subscription info below name, dynamic based on model */}
-          {subscription && (
-            <div className="text-lg sm:text-xl font-bold text-[#4A2C2A] text-center mb-2 tracking-tight drop-shadow">
-              {subscription.subscription_model?.includes('πακέτο') && (
-                <span>
-                  {t('remaining_lessons')}: {typeof remainingClasses === 'number' && !isNaN(remainingClasses) ? remainingClasses : remainingClasses === null ? '0' : t('loading')}
-                </span>
-              )}
-              {subscription.subscription_model?.includes('συνδρομή') && subscription.subscription_expires && (() => {
-                const expiry = new Date(subscription.subscription_expires);
-                const now = new Date();
-                if (expiry < now) {
-                  return <span className="text-red-600">{t('subscription_ended')}</span>;
-                } else {
-                  return <span>{t('subscription_ends')}: {formatDate(subscription.subscription_expires)}</span>;
-                }
+          {subscriptions.length > 0 && (
+            <div className="w-full mb-2 space-y-2">
+              {(() => {
+                // Find unique subscription model names
+                const uniqueNames = Array.from(new Set(subscriptions.map(s => s.subscription_model)));
+                const showNames = uniqueNames.length > 1;
+                return subscriptions.map((subscription, idx) => {
+                  const isPackage = String(subscription.subscription_model).toLowerCase().includes('πακέτο');
+                  const isSubs = String(subscription.subscription_model).toLowerCase().includes('συνδρομή');
+                  return (
+                    <div key={subscription.id || idx} className="text-lg sm:text-xl font-bold text-[#4A2C2A] text-center tracking-tight drop-shadow bg-white/60 rounded-xl py-2">
+                      {showNames && (
+                        <div className="mb-1 text-base sm:text-lg font-semibold text-[#7a6a5e]">{subscription.subscription_model}</div>
+                      )}
+                      {isPackage && (
+                        <span>
+                          {t('remaining_lessons')}: {typeof subscription.remaining_classes === 'number' && !isNaN(subscription.remaining_classes)
+                            ? subscription.remaining_classes
+                            : typeof remainingClasses === 'number' && !isNaN(remainingClasses)
+                              ? remainingClasses
+                              : t('loading')}
+                        </span>
+                      )}
+                      {isSubs && subscription.end_date && (
+                        (() => {
+                          const expiry = new Date(subscription.end_date);
+                          const now = new Date();
+                          if (expiry < now) {
+                            return <span className="text-red-600">{t('subscription_ended')}</span>;
+                          } else {
+                            return <span>{t('subscription_ends')}: {formatDate(subscription.end_date)}</span>;
+                          }
+                        })()
+                      )}
+                    </div>
+                  );
+                });
               })()}
             </div>
           )}

@@ -1,9 +1,9 @@
 import uuid
 import enum
-from sqlalchemy import Column, DateTime, String, Enum, Date, Integer
+from sqlalchemy import Column, DateTime, String, Enum, Integer, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from datetime import datetime, timezone
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from db.database import Base
@@ -13,21 +13,6 @@ GREECE_TZ = ZoneInfo("Europe/Athens")
 class Gender(str, enum.Enum):
     male = "Άνδρας"
     female = "Γυναίκα"
-
-class SubscriptionModel(str, enum.Enum):
-    subscription_2 = "συνδρομή *2"
-    subscription_3 = "συνδρομή *3"
-    subscription_5 = "συνδρομή *5"
-    family_2 = "family *2"
-    family_3 = "family *3"
-    family_3_cadillac = "family *3 + Cadillac"
-    yoga_4 = "πακέτο 4 YOGA"
-    package_10 = "πακέτο 10"
-    package_15 = "πακέτο 15"
-    package_20 = "πακέτο 20"
-    cadillac_package_5 = "πακέτο Cadillac 5"
-    cadillac_package_10 = "πακέτο Cadillac 10"
-    free = "ελεύθερη"
 
 class UserRole(str, enum.Enum):
     client = "client"
@@ -43,12 +28,9 @@ class User(Base):
     name = Column(String, nullable=False)
     city = Column(String)
     gender = Column(Enum(Gender, name="gender"))
-    created_at = Column(DateTime, default=lambda: datetime.now(GREECE_TZ))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(GREECE_TZ), nullable=False)
     role = Column(Enum(UserRole), nullable=True)
-    subscription_model = Column(Enum(SubscriptionModel), nullable=True)
-    package_total = Column(Integer, nullable=True)
-    subscription_starts = Column(Date, nullable=True)
-    subscription_expires = Column(Date, nullable=True)
-    remaining_classes = Column(Integer, nullable=True)
+    has_accepted_terms = Column(Boolean, default=False, nullable=False)
 
     bookings = relationship("Booking", back_populates="user")
+    subscriptions = relationship("Subscription", back_populates="user", cascade="all, delete-orphan")

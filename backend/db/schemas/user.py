@@ -3,7 +3,7 @@ from uuid import UUID
 from typing import List, Optional
 from datetime import date, datetime
 
-from db.models.user import UserRole, SubscriptionModel, Gender
+from db.models.user import UserRole, Gender
 
 class LoginRequest(BaseModel):
     phone: str
@@ -12,13 +12,6 @@ class LoginRequest(BaseModel):
 class LoginResponse(BaseModel):
     id: UUID
 
-class SubscriptionOut(BaseModel):
-    subscription_model: SubscriptionModel
-    package_total: Optional[int] = None
-    subscription_starts: Optional[date] = None
-    subscription_expires: Optional[date] = None
-    remaining_classes: Optional[int] = None
-
 class UserSummary(BaseModel):
     id: UUID
     name: str
@@ -26,8 +19,6 @@ class UserSummary(BaseModel):
     password: Optional[int]
     phone: str
     created_at: Optional[datetime]
-    subscription_model: Optional[SubscriptionModel] = None
-    subscription_expires: Optional[date] = None
 
     class Config:
         from_attributes = True
@@ -40,11 +31,6 @@ class UserBase(BaseModel):
     gender: Optional[Gender] = "Γυναίκα"
     created_at: Optional[datetime] = None
     role: Optional[UserRole] = None
-    subscription_model: Optional[SubscriptionModel] = None
-    package_total: Optional[int] = None
-    subscription_starts: Optional[date] = None
-    subscription_expires: Optional[date] = None
-    remaining_classes: Optional[int] = None
 
 class UserCreate(UserBase):
     pass
@@ -52,6 +38,7 @@ class UserCreate(UserBase):
 class UserOut(UserBase):
     id: UUID
     bookings: List['BookingOut'] = []
+    subscriptions: List['SubscriptionOut'] = []
 
     class Config:
         from_attributes = True
@@ -67,11 +54,7 @@ class UserUpdateRequest(BaseModel):
     city: Optional[str]
     gender: Optional[Gender]
     role: Optional[UserRole] = None
-    subscription_model: Optional[SubscriptionModel] = None
-    package_total: Optional[int] = 0
-    subscription_starts: Optional[date] = None
-    subscription_expires: Optional[date] = None
-    remaining_classes: Optional[int] = 0
 
 from db.schemas.booking import BookingOut
+from db.schemas.subscription import SubscriptionOut
 UserOut.model_rebuild()
