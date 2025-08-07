@@ -17,9 +17,6 @@ app.add_middleware(
         "https://app.breathepilatesefizikou.com",
         "https://breathe-pilates-admin-panel-dev.onrender.com",
         "https://breathe-pilates-booking-frontend.onrender.com",
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://localhost:6543"
     ],
     allow_credentials=True,
     allow_methods=["*"],
