@@ -63,10 +63,8 @@ export default function LoginPage() {
           localStorage.removeItem('rememberedCredentials');
         }
         
-        // Check if user has signed terms before redirecting to dashboard
-        const hasSignedTerms = localStorage.getItem("hasSignedTerms");
-        
-        if (hasSignedTerms !== "true") {
+        // Check if user has signed terms from backend response
+        if (!data.has_accepted_terms) {
           // User hasn't signed terms - redirect to terms signature page
           router.push('/terms-signature');
         } else {

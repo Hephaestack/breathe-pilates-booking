@@ -16,6 +16,28 @@ export default function TermsSignaturePage() {
   const { markTermsAsSigned } = useTermsSignature();
   const { toasts, hideToast, showError, showSuccess } = useToast();
 
+  // Check if user has already signed terms and redirect if so
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        if (user.has_accepted_terms) {
+          // User has already signed terms, redirect to appropriate dashboard
+          if (user.role === 'instructor') {
+            router.push('/instructor-dashboard');
+          } else if (user.role === 'Admin') {
+            router.push('/admin-dashboard');
+          } else {
+            router.push('/client-dashboard');
+          }
+        }
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
+    }
+  }, [router]);
+
   // Set canvas height based on screen size
   useEffect(() => {
     const handleResize = () => {
