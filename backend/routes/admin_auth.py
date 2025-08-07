@@ -10,7 +10,7 @@ from db.models.admin import Admin
 from utils.db import get_db
 from utils.auth import get_current_admin, verify_password, create_access_token
 from db.schemas.admin import AdminLogin
-from db.schemas.class_ import ClassOut
+from db.schemas.class_ import ClassOut, AdminClassSummary
 from db.schemas.booking import AdminBookingRequest, AdminBookingOut
 from db.models import template_class, class_ as class_model, booking as booking_model, user as user_model, subscription as sub_model
 from db.schemas.user import UserOut, UserCreate, UserSummary, UserMinimal, UserUpdateRequest
@@ -316,7 +316,12 @@ def get_user_bookings(
         AdminBookingOut(
             booking_id = booking.id,
             user_name = user.name,
-            class_name = booking.class_.class_name,
+            class_ = AdminClassSummary(
+                id = booking.class_.id,
+                class_name = booking.class_.class_name,
+                date = booking.class_.date,
+                time = booking.class_.time
+            )
         )
         for booking in bookings
     ]
