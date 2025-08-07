@@ -290,12 +290,17 @@ def get_bookings(
         AdminBookingOut(
             booking_id = booking.id,
             user_name = booking.user.name,
-            class_name = booking.class_.class_name,
+            class_ = AdminClassSummary(
+                id=booking.class_.id,
+                class_name=booking.class_.class_name,
+                date=booking.class_.date,
+                time=booking.class_.time
+            )
         )
         for booking in bookings
     ]
 
-@router.get("/admin/bookings/{user_id}", response_model=List[AdminBookingOut], tags=["Admin Bookings"])
+@router.get("/admin/users/{user_id}/bookings", response_model=List[AdminBookingOut], tags=["Admin Users"])
 def get_user_bookings(
     user_id: UUID,
     db: Session = Depends(get_db),
@@ -304,10 +309,10 @@ def get_user_bookings(
     user = db.query(user_model.User).filter(user_model.User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Ο χρήστης δεν βρέθηκε.")
-    
+
     bookings = (
         db.query(booking_model.Booking)
-        .join(class_model.Class)
+        .options(joinedload(booking_model.Booking.class_))
         .filter(booking_model.Booking.user_id == user_id)
         .all()
     )
