@@ -9,6 +9,10 @@ from db.database import Base
 
 GREECE_TZ = ZoneInfo("Europe/Athens")
 
+class PaymentStatus(str, enum.Enum):
+    pending = "Εκκρεμεί"
+    paid = "Πληρωμένη"
+
 class SubscriptionModel(str, enum.Enum):
     subscription_2 = "συνδρομή *2"
     subscription_3 = "συνδρομή *3"
@@ -35,7 +39,7 @@ class Subscription(Base):
     package_total = Column(Integer, nullable=True)
     remaining_classes = Column(Integer, nullable=True)
     price = Column(Float, nullable=True)
-    payment_status = Column(String, nullable=True)
+    payment_status = Column(Enum(PaymentStatus), nullable=True)
     note = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(GREECE_TZ), nullable=False)
 
