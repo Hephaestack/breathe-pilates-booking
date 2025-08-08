@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
 from typing import Optional
-from db.models.subscription import SubscriptionModel
+from db.models.subscription import SubscriptionModel, PaymentStatus
 
 class SubscriptionOut(BaseModel):
     id: UUID
@@ -12,7 +12,7 @@ class SubscriptionOut(BaseModel):
     package_total: Optional[int] = None
     remaining_classes: Optional[int] = None
     price: Optional[float] = None
-    payment_status: Optional[str] = None
+    payment_status: Optional[PaymentStatus] = PaymentStatus.pending
     note: Optional[str] = None
     created_at: datetime
 
@@ -26,7 +26,7 @@ class SubscriptionCreate(BaseModel):
     package_total: Optional[int] = None
     remaining_classes: Optional[int] = None
     price: Optional[float] = None
-    payment_status: Optional[str] = None
+    payment_status: Optional[PaymentStatus] = PaymentStatus.pending
     note: Optional[str] = None
 
 class SubscriptionUpdate(BaseModel):
@@ -36,5 +36,5 @@ class SubscriptionUpdate(BaseModel):
     package_total: Optional[int] = None
     remaining_classes: Optional[int] = None
     price: Optional[float] = None
-    payment_status: Optional[str] = None
+    payment_status: Optional[PaymentStatus] = PaymentStatus.pending
     note: Optional[str] = None
