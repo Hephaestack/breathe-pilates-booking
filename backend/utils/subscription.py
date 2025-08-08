@@ -9,6 +9,7 @@ from utils.calc_class import calculate_remaining_classes
 def validate_booking_rules(db: Session, current_user: user.User, class_obj: class_.Class):
     user_id = current_user.id
     class_name = class_obj.class_name.lower()
+    is_cadillac_class = "cadillac" in class_name
 
     # Check for weekly subscriptions
     active_sub = (
@@ -22,6 +23,14 @@ def validate_booking_rules(db: Session, current_user: user.User, class_obj: clas
     if not active_sub:
         raise HTTPException(status_code=400, detail="Δεν έχετε ενεργή συνδρομή.")
 
+    sub_model = active_sub.subscription_model
+    is_cadillac_sub = "cadillac" in sub_model.name.lower()
+
+    if is_cadillac_sub and not is_cadillac_class:
+        raise HTTPException(status_code=400, detail="Η συνδρομή αυτή ισχύει μόνο για Cadillac Flow μαθήματα.")
+    if not is_cadillac_sub and is_cadillac_class:
+        raise HTTPException(status_code=400, detail="Η συνδρομή αυτή δεν περιλαμβάνει Cadillac Flow μαθήματα.")
+
     # One booking per day
     same_day_bookings = (
         db.query(booking.Booking)
@@ -34,8 +43,6 @@ def validate_booking_rules(db: Session, current_user: user.User, class_obj: clas
     )
     if same_day_bookings >= 1:
         raise HTTPException(status_code=400, detail="Μπορείτε να κάνετε μόνο 1 κράτηση ανά ημέρα.")
-
-    sub_model = active_sub.subscription_model
 
     # Weekly subscriptions rules
     if sub_model in [
@@ -70,18 +77,11 @@ def validate_booking_rules(db: Session, current_user: user.User, class_obj: clas
         if weekly_bookings >= allowed:
             raise HTTPException(status_code=400, detail=f"Η συνδρομή σας, σας επιτρέπει έως {allowed} κρατήσεις την εβδομάδα.")
 
-    # Check for package subscriptions
-    eligible = find_eligible_subscription_for_class(current_user, class_obj, db)
-
     if "package" in sub_model.name.lower():
+        eligible = find_eligible_subscription_for_class(current_user, class_obj, db)
         if not eligible:
             raise HTTPException(status_code=400, detail="Δεν έχετε ενεργό πακέτο με διαθέσιμα μαθήματα.")
-        
-        # Extra Cadillac validation
-        if "cadillac" in eligible["subscription"].subscription_model.name.lower() and "cadillac" not in class_name:
-            raise HTTPException(status_code=400, detail="Το πακέτο αυτό ισχύει μόνο για Cadillac Flow μαθήματα.")
-        if "cadillac" not in eligible["subscription"].subscription_model.name.lower() and "cadillac" in class_name:
-            raise HTTPException(status_code=400, detail="Το πακέτο αυτό δεν περιλαμβάνει Cadillac Flow μαθήματα.")
+
 
 def find_eligible_subscription_for_class(user: user.User, class_obj: class_.Class, db: Session) -> dict | None:
     """Returns the first matching active subscription with available classes for a specific class_obj"""
