@@ -12,24 +12,38 @@ def validate_booking_rules(db: Session, current_user: user.User, class_obj: clas
     is_cadillac_class = "cadillac" in class_name
 
     # Check for weekly subscriptions
-    active_sub = (
+    active_subs = (
         db.query(Subscription)
         .filter(Subscription.user_id == user_id)
         .filter(Subscription.start_date <= class_obj.date, Subscription.end_date >= class_obj.date)
         .order_by(Subscription.start_date.desc())
-        .first()
+        .all()
     )
 
-    if not active_sub:
+    if not active_subs:
         raise HTTPException(status_code=400, detail="Δεν έχετε ενεργή συνδρομή.")
 
-    sub_model = active_sub.subscription_model
-    is_cadillac_sub = "cadillac" in sub_model.name.lower()
+    matching_sub = None
+    for sub in active_subs:
+        is_cadillac_sub = "cadillac" in sub.subscription_model.name.lower()
+
+        if is_cadillac_class and not is_cadillac_sub:
+            continue
+        if not is_cadillac_class and is_cadillac_sub:
+            continue
+
+        matching_sub = sub
+        break
+
+    if not matching_sub:
+        raise HTTPException(status_code=400, detail="Δεν έχετε ενεργή συνδρομή συμβατή με το συγκεκριμένο μάθημα.")
 
     if is_cadillac_sub and not is_cadillac_class:
         raise HTTPException(status_code=400, detail="Η συνδρομή αυτή ισχύει μόνο για Cadillac Flow μαθήματα.")
     if not is_cadillac_sub and is_cadillac_class:
         raise HTTPException(status_code=400, detail="Η συνδρομή αυτή δεν περιλαμβάνει Cadillac Flow μαθήματα.")
+
+    sub_model = matching_sub.subscription_model
 
     # One booking per day
     same_day_bookings = (
