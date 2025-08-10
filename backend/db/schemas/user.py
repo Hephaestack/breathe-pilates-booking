@@ -20,6 +20,7 @@ class UserSummary(BaseModel):
     password: Optional[int]
     phone: str
     created_at: Optional[datetime]
+    subscriptions: List['SubscriptionOut'] = []
 
     class Config:
         from_attributes = True
