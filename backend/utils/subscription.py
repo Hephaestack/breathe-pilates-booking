@@ -1,24 +1,49 @@
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from enum import Enum
 
 from db.models import booking, class_, user
-from db.models.user import SubscriptionModel
+from db.models.subscription import SubscriptionModel, Subscription
 from utils.calc_class import calculate_remaining_classes
 
 def validate_booking_rules(db: Session, current_user: user.User, class_obj: class_.Class):
-    subscription = current_user.subscription_model
-    # Check if subscription exist
-    if not subscription:
-        raise HTTPException(status_code=400, detail="Δεν έχετε ενεργή συνδρομή.")
-    
-    # Check subscription expiration
-    if current_user.subscription_expires and current_user.subscription_expires < class_obj.date:
-        raise HTTPException(status_code=400, detail="Η συνδρομή σας θα έχει λήξει μέχρι την ημέρα του μαθήματος. Παρακαλώ ανανεώστε πριν κάνετε κράτηση.")
-    
     user_id = current_user.id
     class_name = class_obj.class_name.lower()
+    is_cadillac_class = "cadillac" in class_name
+
+    # Check for weekly subscriptions
+    active_subs = (
+        db.query(Subscription)
+        .filter(Subscription.user_id == user_id)
+        .filter(Subscription.start_date <= class_obj.date, Subscription.end_date >= class_obj.date)
+        .order_by(Subscription.start_date.desc())
+        .all()
+    )
+
+    if not active_subs:
+        raise HTTPException(status_code=400, detail="Δεν έχετε ενεργή συνδρομή.")
+
+    matching_sub = None
+    for sub in active_subs:
+        is_cadillac_sub = "cadillac" in sub.subscription_model.name.lower()
+
+        if is_cadillac_class and not is_cadillac_sub:
+            continue
+        if not is_cadillac_class and is_cadillac_sub:
+            continue
+
+        matching_sub = sub
+        break
+
+    if not matching_sub:
+        raise HTTPException(status_code=400, detail="Δεν έχετε ενεργή συνδρομή συμβατή με το συγκεκριμένο μάθημα.")
+
+    if is_cadillac_sub and not is_cadillac_class:
+        raise HTTPException(status_code=400, detail="Η συνδρομή αυτή ισχύει μόνο για Cadillac Flow μαθήματα.")
+    if not is_cadillac_sub and is_cadillac_class:
+        raise HTTPException(status_code=400, detail="Η συνδρομή αυτή δεν περιλαμβάνει Cadillac Flow μαθήματα.")
+
+    sub_model = matching_sub.subscription_model
 
     # One booking per day
     same_day_bookings = (
@@ -33,54 +58,93 @@ def validate_booking_rules(db: Session, current_user: user.User, class_obj: clas
     if same_day_bookings >= 1:
         raise HTTPException(status_code=400, detail="Μπορείτε να κάνετε μόνο 1 κράτηση ανά ημέρα.")
 
-    start_of_week = class_obj.date - timedelta(days=class_obj.date.weekday())
-    end_of_week = start_of_week + timedelta(days=6)
-
-    # Weekly bookings
-    weekly_bookings = (
-        db.query(booking.Booking)
-        .join(class_.Class)
-        .filter(
-            booking.Booking.user_id == user_id,
-            class_.Class.date >= start_of_week,
-            class_.Class.date <= end_of_week
-        )
-        .count()
-    )
-
-    # Cadillac class rules
-    is_cadillac_subscription = subscription in [
-        SubscriptionModel.family_3_cadillac,
-        SubscriptionModel.cadillac_package_5,
-        SubscriptionModel.cadillac_package_10
-    ]
-    if "cadillac" in class_name.lower() and not is_cadillac_subscription:
-        raise HTTPException(status_code=400, detail="Μόνο οι συνδρομές Cadillac μπορούν να κλείσουν Cadillac Flow μαθήματα.")
-
-    # Rules
-    # Weekly subs
-    if subscription == SubscriptionModel.subscription_2 and weekly_bookings >= 2:
-        raise HTTPException(status_code=400, detail="Η συνδρομή σας, σας επιτρέπει έως 2 κρατήσεις την εβδομάδα.")
-    elif subscription == SubscriptionModel.subscription_3 and weekly_bookings >= 3:
-        raise HTTPException(status_code=400, detail="Η συνδρομή σας, σας επιτρέπει έως 3 κρατήσεις την εβδομάδα.")
-    elif subscription == SubscriptionModel.subscription_5 and weekly_bookings >= 5:
-        raise HTTPException(status_code=400, detail="Η συνδρομή σας, σας επιτρέπει έως 5 κρατήσεις την εβδομάδα.")
-    
-    # Package subs
-    elif subscription in [
-        SubscriptionModel.package_10,
-        SubscriptionModel.package_15,
-        SubscriptionModel.package_20,
-        SubscriptionModel.cadillac_package_5,
-        SubscriptionModel.cadillac_package_10
+    # Weekly subscriptions rules
+    if sub_model in [
+        SubscriptionModel.subscription_2,
+        SubscriptionModel.subscription_3,
+        SubscriptionModel.subscription_5,
+        SubscriptionModel.family_2,
+        SubscriptionModel.family_3,
     ]:
-        remaining = calculate_remaining_classes(user_id, db)
-        if remaining <= 0:
-            raise HTTPException(status_code=400, detail="Έχετε ολοκληρώσει το πακέτο μαθημάτων.")
+        start_of_week = class_obj.date - timedelta(days=class_obj.date.weekday())
+        end_of_week = start_of_week + timedelta(days=6)
 
-        if subscription in [
-            SubscriptionModel.cadillac_package_5,
-            SubscriptionModel.cadillac_package_10
-        ]:
-            if "cadillac" not in class_name:
-                raise HTTPException(status_code=400, detail="Το πακέτο αυτό ισχύει μόνο για Cadillac Flow μαθήματα.")
+        weekly_bookings = (
+            db.query(booking.Booking)
+            .join(class_.Class)
+            .filter(
+                booking.Booking.user_id == user_id,
+                class_.Class.date >= start_of_week,
+                class_.Class.date <= end_of_week
+            )
+            .count()
+        )
+
+        allowed = {
+            SubscriptionModel.subscription_2: 2,
+            SubscriptionModel.subscription_3: 3,
+            SubscriptionModel.subscription_5: 5,
+            SubscriptionModel.family_2: 2,
+            SubscriptionModel.family_3: 3,
+        }[sub_model]
+
+        if weekly_bookings >= allowed:
+            raise HTTPException(status_code=400, detail=f"Η συνδρομή σας, σας επιτρέπει έως {allowed} κρατήσεις την εβδομάδα.")
+
+    if "package" in sub_model.name.lower():
+        eligible = find_eligible_subscription_for_class(current_user, class_obj, db)
+        if not eligible:
+            raise HTTPException(status_code=400, detail="Δεν έχετε ενεργό πακέτο με διαθέσιμα μαθήματα.")
+
+
+def find_eligible_subscription_for_class(user: user.User, class_obj: class_.Class, db: Session) -> dict | None:
+    """Returns the first matching active subscription with available classes for a specific class_obj"""
+    eligible_subs = []
+
+    for sub in user.subscriptions:
+        model = sub.subscription_model.name.lower()
+
+        # Skip if not a package subscription
+        if "package" not in model:
+            continue
+
+        # Check subscription date validity
+        if not (sub.start_date.date() <= class_obj.date <= sub.end_date.date()):
+            continue
+
+        # Cadillac logic
+        if "cadillac" in model and "cadillac" not in class_obj.class_name.lower():
+            continue
+        if "cadillac" not in model and "cadillac" in class_obj.class_name.lower():
+            continue
+
+        # Define class filter
+        class_filter = (
+            class_.Class.class_name.ilike("%cadillac%")
+            if "cadillac" in model
+            else ~class_.Class.class_name.ilike("%cadillac%")
+        )
+
+        # Count bookings within subscription date and class type
+        booking_count = (
+            db.query(booking.Booking)
+            .join(class_.Class)
+            .filter(
+                booking.Booking.user_id == user.id,
+                booking.Booking.status == "confirmed",
+                class_.Class.date >= sub.start_date,
+                class_.Class.date <= sub.end_date,
+                class_filter
+            )
+            .count()
+        )
+
+        remaining = max(0, sub.package_total - booking_count)
+
+        if remaining > 0:
+            eligible_subs.append({
+                "subscription": sub,
+                "remaining": remaining
+            })
+
+    return eligible_subs[0] if eligible_subs else None
