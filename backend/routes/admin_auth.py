@@ -114,7 +114,7 @@ def create_user(
 
     return new_user
 
-@router.get("/admin/users", response_model=List[UserSummary], tags=["Admin Users"])
+@router.get("/admin/users", response_model=List[UserOut], tags=["Admin Users"])
 def get_users(
     db: Session = Depends(get_db),
     admin: Admin = Depends(get_current_admin)

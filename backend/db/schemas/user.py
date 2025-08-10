@@ -58,4 +58,5 @@ class UserUpdateRequest(BaseModel):
 
 from db.schemas.booking import BookingOut
 from db.schemas.subscription import SubscriptionOut
+
 UserOut.model_rebuild()
